@@ -198,6 +198,18 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
 
 /* EMPTY */
 .empty{text-align:center;padding:48px 20px;color:var(--text3)}
+/* Bulk select */
+.bulk-bar{display:none;align-items:center;gap:10px;background:var(--blue-dim);border:1px solid rgba(29,78,216,.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--blue);font-weight:500}
+.bulk-bar.active{display:flex}
+.bulk-bar button{margin-left:auto}
+.stub-item{position:relative}
+.stub-cb{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;cursor:pointer;accent-color:var(--green);opacity:0;transition:opacity .15s;z-index:2}
+.bulk-mode .stub-cb{opacity:1}
+.bulk-mode .stub-item{padding-left:38px}
+.bulk-mode .stub-item:active{border-color:var(--border2)}
+/* Sheet checkbox col */
+.hist-table th.cb-col,.hist-table td.cb-col{width:36px;text-align:center;padding:4px}
+.hist-table td.cb-col input{accent-color:var(--green);width:15px;height:15px;cursor:pointer}
 /* History spreadsheet view */
 .hist-table{width:100%;border-collapse:collapse;font-size:12px}
 .hist-table th{background:var(--bg3);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);border-bottom:1.5px solid var(--border2);white-space:nowrap;position:sticky;top:0;z-index:2}
@@ -406,8 +418,19 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Spreadsheet
               </button>
             </div>
+            <button id="histBulkToggle" class="btn btn-secondary btn-sm" onclick="toggleBulkMode()">Select</button>
             <button class="btn btn-secondary btn-sm" onclick="openLogModal()">+ Log paycheck</button>
           </div>
+        </div>
+        <!-- Bulk action bar (shown when items selected) -->
+        <div class="bulk-bar" id="bulkBar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <span id="bulkBarCount">0 selected</span>
+          <button class="btn btn-secondary btn-sm" onclick="selectAllHistory()" style="margin-left:4px">Select all</button>
+          <button class="btn btn-danger btn-sm" onclick="bulkDeleteSelected()" style="margin-left:auto">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+            Delete selected
+          </button>
         </div>
         <div id="historyList"></div>
       </div>
@@ -811,7 +834,9 @@ const fmt = n => '$' + (Math.abs(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))
 const fmtS = n => { const a = Math.abs(n||0); return a >= 1000 ? '$' + (a/1000).toFixed(1) + 'k' : '$' + a.toFixed(2); };
 const fmtH = n => parseFloat(n||0).toFixed(2);
 // Round each pay component individually (matches payroll rounding line-by-line)
-const payRound = n => Math.round(n * 100) / 100; // hours always 2 decimals
+const payRound = n => Math.round(n * 100) / 100;
+// Round rate to 4 decimal places like payroll systems display (17.1000, 25.6500)
+const rateRound = n => Math.round(n * 10000) / 10000; // hours always 2 decimals
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
 function setSyncDot(s, count=0) {
   const d = document.getElementById('syncDot');
@@ -835,6 +860,14 @@ function showToast(m='Saved', e=false) {
 
 // ===== API =====
 const hdrs = () => ({'Content-Type':'application/json','Authorization':'Bearer '+token});
+
+function sheetToggleAll(cb) {
+  const sorted = [...stubs].sort((a,b)=>b.date.localeCompare(a.date));
+  if(cb.checked) sorted.forEach(s=>selectedIds.add(s.id));
+  else selectedIds.clear();
+  updateBulkBar();
+  document.querySelectorAll('[id^="cb-"]').forEach(c=>c.checked=cb.checked);
+}
 
 // Enqueue an operation for offline sync, or execute immediately if online
 async function syncOp(path, method, body=null) {
@@ -1136,8 +1169,8 @@ function calc() {
   const den=parseFloat(document.getElementById('iDen').value)||0;
   const medI=parseFloat(document.getElementById('iMedI').value)||0;
   const vis=parseFloat(document.getElementById('iVis').value)||0;
-  const otRate=payRound(rate*1.5), dtRate=payRound(rate*2);
-  const regPay=payRound(rate*reg), otPay=payRound(otRate*ot), dtPay=payRound(dtRate*dt), holPay=payRound(rate*hol);
+  const regRate=rateRound(rate), otRate=rateRound(rate*1.5), dtRate=rateRound(rate*2), holRate=rateRound(rate);
+  const regPay=payRound(regRate*reg), otPay=payRound(otRate*ot), dtPay=payRound(dtRate*dt), holPay=payRound(holRate*hol);
   const premPay=premRate*premHrs;
   const gross=regPay+otPay+dtPay+holPay+premPay+addl;
   const fr=effFedRate(), fed=gross*fr, ss=gross*0.062, med=gross*0.0145;
@@ -1185,6 +1218,7 @@ function showPage(id, btn, source) {
   // Remember which page the user was on (restored on reload)
   sessionStorage.setItem('payday_page', id);
   if(id==='history') buildHistory();
+  if(id!=='history' && bulkMode) { bulkMode=false; selectedIds.clear(); const btn=document.getElementById('histBulkToggle'); if(btn) btn.textContent='Select'; updateBulkBar(); }
   if(id==='ytd') { buildYTDTabs(); buildYTD(); }
   if(id==='settings') { buildSettingsUI(); const el=document.getElementById('settingsWho'); if(el) el.textContent=currentUser?.username||''; }
   if(id==='admin') { if(currentUser?.role!=='admin'){showPage('calc',null,null);return;} buildAdminPage(); }
@@ -1193,6 +1227,73 @@ function showPage(id, btn, source) {
 
 // ===== HISTORY (live — always reads from stubs array) =====
 let histView = 'cards'; // 'cards' or 'sheet'
+let bulkMode = false;
+let selectedIds = new Set();
+
+function toggleBulkMode() {
+  bulkMode = !bulkMode;
+  selectedIds.clear();
+  const btn = document.getElementById('histBulkToggle');
+  if(btn) btn.textContent = bulkMode ? 'Cancel' : 'Select';
+  updateBulkBar();
+  buildHistory();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  const count = document.getElementById('bulkBarCount');
+  if(!bar) return;
+  if(bulkMode && selectedIds.size > 0) {
+    bar.classList.add('active');
+    count.textContent = selectedIds.size + ' selected';
+  } else {
+    bar.classList.remove('active');
+  }
+}
+
+function toggleSelect(id, e) {
+  e.stopPropagation(); // don't open detail modal
+  if(selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  updateBulkBar();
+  // Update checkbox visual without full rebuild
+  const cb = document.getElementById('cb-'+id);
+  if(cb) cb.checked = selectedIds.has(id);
+}
+
+function selectAllHistory() {
+  const sorted = [...stubs].sort((a,b)=>b.date.localeCompare(a.date));
+  sorted.forEach(s => selectedIds.add(s.id));
+  updateBulkBar();
+  // Update all checkboxes
+  document.querySelectorAll('[id^="cb-"]').forEach(cb => cb.checked = true);
+}
+
+async function bulkDeleteSelected() {
+  if(!selectedIds.size) return;
+  const count = selectedIds.size;
+  if(!confirm(`Delete ${count} paycheck${count>1?'s':''}? This cannot be undone.`)) return;
+  const toDelete = [...selectedIds];
+  // Remove from local state immediately
+  stubs = stubs.filter(s => !toDelete.includes(s.id));
+  selectedIds.clear();
+  bulkMode = false;
+  const btn = document.getElementById('histBulkToggle');
+  if(btn) btn.textContent = 'Select';
+  updateBulkBar();
+  buildHistory(); buildYTDTabs(); buildYTD();
+  showToast('Deleting ' + count + ' paychecks…');
+  setSyncDot('syncing');
+  let failed = 0;
+  for(const id of toDelete) {
+    try {
+      if(window._idb) window._idb.idbDeleteStub(id).catch(()=>{});
+      await syncOp('/api/stubs?id='+id, 'DELETE');
+    } catch { failed++; }
+  }
+  if(failed) { setSyncDot('err'); showToast(failed + ' deletions failed', true); }
+  else { setSyncDot('ok'); showToast('Deleted ' + count + ' paychecks'); }
+}
 function setHistView(v, btn) {
   histView = v;
   document.querySelectorAll('#histViewCards,#histViewSheet').forEach(b=>b.classList.remove('active'));
@@ -1219,12 +1320,15 @@ function buildHistory() {
     if(s.hol>0) badges+='<span class="badge badge-hol">HOL</span> ';
     if((s.premHrs||0)>0) badges+='<span class="badge" style="background:rgba(29,78,216,0.08);color:var(--blue)">PREM</span> ';
     if((s.addl||0)>0) badges+='<span class="badge" style="background:rgba(29,78,216,0.08);color:var(--blue)">+PAY</span>';
-    html+=`<div class="stub-item" onclick="openDetail('${s.id}')">
+    html+=`<div class="stub-item${bulkMode?' bulk-mode-item':''}" onclick="${bulkMode?`toggleSelect('${s.id}',event)`:`openDetail('${s.id}')`}">
+      ${bulkMode?`<input type="checkbox" id="cb-${s.id}" class="stub-cb" ${selectedIds.has(s.id)?'checked':''} onclick="toggleSelect('${s.id}',event)">`:''}
       <div class="stub-top"><span class="stub-date">${ds} ${badges}</span><span class="stub-net">${fmt(net)}</span></div>
       <div class="stub-bottom"><span class="stub-detail">${fmtH(totalHrs)}h &middot; ${fmt(s.gross)}</span><span class="rate-tag">$${parseFloat(s.rate).toFixed(2)}/hr</span><div class="stub-bar-wrap"><div class="stub-bar" style="width:${pct}%"></div></div></div>
     </div>`;
   });
-  list.innerHTML=html;
+  const wrapper = document.getElementById('historyList');
+  wrapper.className = bulkMode ? 'bulk-mode' : '';
+  wrapper.innerHTML=html;
 }
 
 function buildHistorySheet() {
@@ -1239,6 +1343,7 @@ function buildHistorySheet() {
   const hasHol  = sorted.some(s=>(s.hol||0)>0);
 
   let thead = `<tr>
+    ${bulkMode?'<th class=\"cb-col\"><input type=\"checkbox\" id=\"sheetSelAll\" style=\"accent-color:var(--green);cursor:pointer\" onclick=\"sheetToggleAll(this)\">':'' }
     <th>Date</th>
     <th class="num">Rate</th>
     <th class="num">Reg Hrs</th>
@@ -1260,7 +1365,7 @@ function buildHistorySheet() {
   sorted.forEach(s => {
     const yr = s.date.slice(0,4);
     if(yr !== lastYear) {
-      const cols = 9 + (hasDT?1:0) + (hasHol?1:0) + (hasPrem?2:0) + (hasAddl?1:0);
+      const cols = 9 + (hasDT?1:0) + (hasHol?1:0) + (hasPrem?2:0) + (hasAddl?1:0) + (bulkMode?1:0);
       rows += `<tr class="hist-yr-header"><td colspan="${cols}">${yr}</td></tr>`;
       lastYear = yr;
     }
@@ -1269,7 +1374,8 @@ function buildHistorySheet() {
     const benefits = s.den+s.medI+s.vis;
     const d = new Date(s.date+'T12:00:00');
     const ds = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    rows += `<tr onclick="openDetail('${s.id}')">
+    rows += `<tr onclick="${bulkMode?`toggleSelect('${s.id}',event)`:`openDetail('${s.id}')`}">
+      ${bulkMode?`<td class="cb-col" onclick="toggleSelect('${s.id}',event)"><input type="checkbox" id="cb-${s.id}" ${selectedIds.has(s.id)?'checked':''} style="accent-color:var(--green);cursor:pointer" onclick="toggleSelect('${s.id}',event)"></td>`:''}
       <td>${ds}</td>
       <td class="num muted">$${parseFloat(s.rate).toFixed(2)}</td>
       <td class="num">${fmtH(s.reg)}</td>
@@ -1297,6 +1403,7 @@ function buildHistorySheet() {
   const tNet   = tNets.reduce((a,v)=>a+v,0);
   const extraCols = (hasDT?1:0)+(hasHol?1:0)+(hasPrem?2:0)+(hasAddl?1:0);
   rows += `<tr style="background:var(--green-dim);font-weight:700;border-top:2px solid var(--green-border)">
+    ${bulkMode?"<td></td>":""}
     <td style="color:var(--text2)">Totals (${sorted.length})</td>
     <td></td><td></td><td></td>
     ${"<td></td>".repeat(extraCols)}
@@ -1308,6 +1415,7 @@ function buildHistorySheet() {
     <td class="num green">${fmt(tNet)}</td>
   </tr>`;
 
+  list.className = bulkMode ? "bulk-mode" : "";
   list.innerHTML = `<div class="hist-table-wrap"><table class="hist-table"><thead>${thead}</thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -1717,8 +1825,8 @@ async function saveLog() {
   const premRate=parseFloat(document.getElementById('lPremRate').value)||0;
   const premHrs=parseFloat(document.getElementById('lPremHrs').value)||0;
   const addl=parseFloat(document.getElementById('lAddl').value)||0;
-  const _otR=payRound(rate*1.5),_dtR=payRound(rate*2);
-  const gross=parseFloat((payRound(rate*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(rate*hol)+payRound(premRate*premHrs)+addl).toFixed(2));
+  const _regR=rateRound(rate),_otR=rateRound(rate*1.5),_dtR=rateRound(rate*2);
+  const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(premRate*premHrs)+addl).toFixed(2));
   const fedRaw=parseFloat(document.getElementById('lFed').value), fed=isNaN(fedRaw)?parseFloat((gross*effFedRate()).toFixed(2)):fedRaw;
   const ssRaw=parseFloat(document.getElementById('lSS').value), ss=isNaN(ssRaw)?parseFloat((gross*0.062).toFixed(2)):ssRaw;
   const medRaw=parseFloat(document.getElementById('lMed').value), med=isNaN(medRaw)?parseFloat((gross*0.0145).toFixed(2)):medRaw;
@@ -1762,10 +1870,10 @@ function renderReadView(s) {
   const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis, net=s.net||(s.gross-ded);
   return `<div class="card">
     <div class="card-row"><span class="card-label">Hourly rate</span><span class="card-value">$${parseFloat(s.rate).toFixed(2)}/hr</span></div>
-    <div class="card-row"><span class="card-label">Regular (${fmtH(s.reg)}h)</span><span class="card-value">${fmt(s.reg*s.rate)}</span></div>
+    <div class="card-row"><span class="card-label">Regular (${fmtH(s.reg)}h @ $${rateRound(s.rate).toFixed(4)}/hr)</span><span class="card-value">${fmt(payRound(rateRound(s.rate)*s.reg))}</span></div>
     ${(s.ot||0)>0?`<div class="card-row"><span class="card-label">Overtime (${fmtH(s.ot)}h × 1.5)</span><span class="card-value amber">${fmt(s.ot*s.rate*1.5)}</span></div>`:''}
     ${(s.dt||0)>0?`<div class="card-row"><span class="card-label">Double time (${fmtH(s.dt)}h × 2.0)</span><span class="card-value amber">${fmt(s.dt*s.rate*2)}</span></div>`:''}
-    ${(s.hol||0)>0?`<div class="card-row"><span class="card-label">Holiday (${fmtH(s.hol)}h)</span><span class="card-value">${fmt(s.hol*s.rate)}</span></div>`:''}
+    ${(s.hol||0)>0?`<div class="card-row"><span class="card-label">Holiday (${fmtH(s.hol)}h @ $${rateRound(s.rate).toFixed(4)}/hr)</span><span class="card-value">${fmt(payRound(rateRound(s.rate)*s.hol))}</span></div>`:''}
     ${(s.premHrs||0)>0?`<div class="card-row"><span class="card-label">Shift premium ($${parseFloat(s.premRate||0).toFixed(2)}/hr × ${fmtH(s.premHrs)}h)</span><span class="card-value">${fmt((s.premRate||0)*(s.premHrs||0))}</span></div>`:''}
     ${(s.addl||0)>0?`<div class="card-row"><span class="card-label">Additional pay</span><span class="card-value">${fmt(s.addl)}</span></div>`:''}
     <div class="card-row"><span class="card-label">Gross pay</span><span class="card-value">${fmt(s.gross)}</span></div>
@@ -1838,10 +1946,10 @@ async function saveEdit() {
     net:parseFloat(document.getElementById('eNet').value)||null,
   };
   Object.assign(s,updated);
-  const _eOtRate=payRound(updated.rate*1.5),_eDtRate=payRound(updated.rate*2);
+  const _eRegR=rateRound(updated.rate),_eOtRate=rateRound(updated.rate*1.5),_eDtRate=rateRound(updated.rate*2);
   s.gross=parseFloat((
-    payRound(updated.rate*updated.reg)+payRound(_eOtRate*updated.ot)+
-    payRound(_eDtRate*updated.dt)+payRound(updated.rate*updated.hol)+
+    payRound(_eRegR*updated.reg)+payRound(_eOtRate*updated.ot)+
+    payRound(_eDtRate*updated.dt)+payRound(_eRegR*updated.hol)+
     payRound((updated.premRate||0)*(updated.premHrs||0))+(updated.addl||0)
   ).toFixed(2));
   // Live update
@@ -1935,8 +2043,8 @@ async function bulkSave() {
     const premRate=parseFloat(document.getElementById('bpremr-'+i)?.value)||0;
     const premHrs=parseFloat(document.getElementById('bpremh-'+i)?.value)||0;
     const addl=parseFloat(document.getElementById('baddl-'+i)?.value)||0;
-    const _otR=payRound(rate*1.5),_dtR=payRound(rate*2);
-  const gross=parseFloat((payRound(rate*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(rate*hol)+payRound(premRate*premHrs)+addl).toFixed(2));
+    const _regR=rateRound(rate),_otR=rateRound(rate*1.5),_dtR=rateRound(rate*2);
+  const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(premRate*premHrs)+addl).toFixed(2));
     const fedRaw=parseFloat(document.getElementById('bfed-'+i)?.value);
     const ssRaw=parseFloat(document.getElementById('bss-'+i)?.value);
     const medRaw=parseFloat(document.getElementById('bmed-'+i)?.value);
