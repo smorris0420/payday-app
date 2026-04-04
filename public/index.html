@@ -674,8 +674,11 @@ const hdrs = () => ({'Content-Type':'application/json','Authorization':'Bearer '
 async function apiFetch(path, opts={}, asUserId=null) {
   const h = {...hdrs(), ...(opts.headers||{})};
   // Auto-inject X-View-As whenever admin is viewing as a user
-  const effectiveViewAs = asUserId || viewAsUser?.id || null;
-  if(effectiveViewAs) h['X-View-As'] = effectiveViewAs;
+  // Pass asUserId='self' to explicitly skip view-as (admin-only calls)
+  if(asUserId !== 'self') {
+    const effectiveViewAs = asUserId || viewAsUser?.id || null;
+    if(effectiveViewAs) h['X-View-As'] = effectiveViewAs;
+  }
   const r = await fetch(path, {...opts, headers:h});
   if(r.status===401) { logout(); throw new Error('Session expired'); }
   if(!r.ok) {
@@ -919,6 +922,8 @@ function showPage(id, btn, source) {
     if(source==='mb') { const sb=document.querySelectorAll('.sidebar-nav-btn'); if(sb[idx]) sb[idx].classList.add('active'); }
     else if(source==='sb') { const mb=document.querySelectorAll('.nav-btn'); if(mb[idx]) mb[idx].classList.add('active'); }
   }
+  // Keep the view-as banner visible on every page while in view-as mode
+  if(viewAsUser) showViewAsBanner(viewAsUser.displayName||viewAsUser.username||'');
   if(id==='history') buildHistory();
   if(id==='ytd') { buildYTDTabs(); buildYTD(); }
   if(id==='settings') { buildSettingsUI(); const el=document.getElementById('settingsWho'); if(el) el.textContent=currentUser?.username||''; }
@@ -1027,7 +1032,11 @@ function buildSettingsUI() {
 }
 async function buildAdminPage() {
   try {
+    // Fetch user list always as the real admin (bypass viewAsUser for this call)
+    const savedViewAs = viewAsUser;
+    viewAsUser = null;
     allUsers = await apiFetch('/api/users');
+    viewAsUser = savedViewAs;
     // Populate view-as dropdown
     const sel = document.getElementById('viewAsSelect');
     if(sel) sel.innerHTML = '<option value="">Select user…</option>' + allUsers.map(u=>`<option value="${u.id}">${u.displayName||u.username} (@${u.username})</option>`).join('');
@@ -1053,8 +1062,37 @@ async function buildAdminPage() {
     }).join('');
   } catch(e) { showToast('Could not load users', true); }
 }
-// Alias so existing callers (createUser, saveEditUser, deleteUser) still work
-async function buildUserList() { await buildAdminPage(); }
+// Refresh just the user list (used after create/edit/delete)
+async function buildUserList() {
+  // Always fetch as real admin, not as viewed user
+  const savedViewAs = viewAsUser;
+  viewAsUser = null;
+  try { allUsers = await apiFetch('/api/users'); } finally { viewAsUser = savedViewAs; }
+  // Update the view-as dropdown too
+  const sel = document.getElementById('viewAsSelect');
+  if(sel) sel.innerHTML = '<option value="">Select user…</option>' + allUsers.map(u=>`<option value="${u.id}">${u.displayName||u.username} (@${u.username})</option>`).join('');
+  // Re-render the user list
+  const c = document.getElementById('userList');
+  if(!c) return;
+  if(!allUsers.length) { c.innerHTML = '<div style="font-size:13px;color:var(--text3);padding:8px 0">No users yet.</div>'; return; }
+  c.innerHTML = allUsers.map(u => {
+    const initials = (u.displayName||u.username).slice(0,2).toUpperCase();
+    const isSelf = u.username === currentUser?.username;
+    const adminBadge = u.role==='admin' ? '<span class="user-badge user-badge-admin">Admin</span>' : '<span class="user-badge" style="background:var(--blue-dim);color:var(--blue)">User</span>';
+    const inactiveBadge = !u.active ? '<span class="user-badge user-badge-inactive">Inactive</span>' : '';
+    return `<div class="user-row">
+      <div class="user-avatar">${initials}</div>
+      <div class="user-info">
+        <div class="user-name">${u.displayName||u.username} ${adminBadge}${inactiveBadge}${isSelf?'<span style="font-size:10px;color:var(--green);background:var(--green-dim);padding:1px 7px;border-radius:5px;font-weight:700;margin-left:4px">you</span>':''}</div>
+        <div class="user-meta">@${u.username}${u.defaultRate?' &middot; $'+parseFloat(u.defaultRate).toFixed(2)+'/hr':''}</div>
+      </div>
+      <div class="user-actions">
+        ${!isSelf?`<button class="icon-btn view-as" onclick="viewAsFromList('${u.id}','${u.displayName||u.username}')">View As</button>`:''}
+        <button class="icon-btn" onclick="openEditUserModal('${u.id}')">Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 // Open edit user modal
 function openEditUserModal(userId) {
@@ -1152,7 +1190,6 @@ async function changePassword() {
 }
 
 async function saveSettings() {
-  if(viewAsUser){showToast('Exit View As to change settings',true);return;}
   const rateVal = parseFloat(document.getElementById('sRate').value);
   const s={
     den: parseFloat(document.getElementById('sDen').value)||2,
@@ -1216,7 +1253,6 @@ function openLogModal() {
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 async function saveLog() {
-  if(viewAsUser){showToast('Exit View As to log paychecks',true);closeModal('logModal');return;}
   const rate=parseFloat(document.getElementById('lRate').value)||appSettings.defaultRate||mostRecentRate()||21.90;
   const reg=parseFloat(document.getElementById('lReg').value)||0;
   const ot=parseFloat(document.getElementById('lOT').value)||0;
