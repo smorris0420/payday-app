@@ -669,7 +669,7 @@ async function login() {
     const data = await res.json();
     if(!res.ok) { err.textContent=data.error||'Invalid credentials'; return; }
     token=data.token;
-    currentUser={username:data.username,role:data.role,id:data.userId};
+    currentUser={username:data.username,displayName:data.displayName||data.username,role:data.role,id:data.userId};
     sessionStorage.setItem('payday_token',token);
     sessionStorage.setItem('payday_user',JSON.stringify(currentUser));
     document.getElementById('loginScreen').style.display='none';
@@ -691,9 +691,10 @@ function logout() {
 }
 function updateSidebarUser() {
   if(!currentUser) return;
-  const initials = (currentUser.username||'?').slice(0,2).toUpperCase();
+  const name = currentUser.displayName||currentUser.username||'?';
+  const initials = name.slice(0,2).toUpperCase();
   const a=document.getElementById('sidebarAvatar'); if(a) a.textContent=initials;
-  const u=document.getElementById('sidebarUsername'); if(u) u.textContent=currentUser.username;
+  const u=document.getElementById('sidebarUsername'); if(u) u.textContent=name;
   const r=document.getElementById('sidebarRole'); if(r) r.textContent=currentUser.role;
 }
 
@@ -1076,14 +1077,12 @@ async function changePassword() {
   if(np.length<8) { showToast('Password must be at least 8 characters',true); return; }
   try {
     setSyncDot('syncing');
-    const myUser=allUsers.find(u=>u.username===currentUser?.username);
-    const id=myUser?.id||currentUser?.id;
-    if(!id) { showToast('Could not find your user ID',true); return; }
-    await apiFetch('/api/users?id='+id,{method:'PATCH',body:JSON.stringify({password:np})});
+    // Use the /api/users/me endpoint — no need to look up user ID
+    await apiFetch('/api/users/me',{method:'PATCH',body:JSON.stringify({password:np})});
     setSyncDot('ok');
     document.getElementById('newPw').value=''; document.getElementById('confirmPw').value='';
     showToast('Password changed');
-  } catch { setSyncDot('err'); showToast('Error changing password',true); }
+  } catch(e) { setSyncDot('err'); showToast(e.message||'Error changing password',true); }
 }
 
 async function saveSettings() {
