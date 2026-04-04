@@ -169,16 +169,18 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
 
 /* SPREADSHEET BULK IMPORT */
 .sheet-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius-sm);border:1.5px solid var(--border2);margin-bottom:12px}
-.sheet-table{border-collapse:collapse;table-layout:fixed;width:1080px;background:var(--bg2);font-size:12px}
-.sheet-table th{background:var(--bg3);padding:7px 5px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);border-bottom:1.5px solid var(--border2);white-space:nowrap;overflow:hidden}
-.sheet-table td{border-bottom:1px solid var(--border);padding:2px}
+.sheet-table{border-collapse:collapse;table-layout:fixed;width:1260px;background:var(--bg2);font-size:13px}
+.sheet-table th{background:var(--bg3);padding:9px 8px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);border-bottom:1.5px solid var(--border2);white-space:nowrap;overflow:hidden}
+.sheet-table td{border-bottom:1px solid var(--border);padding:3px 2px}
 .sheet-table tr:last-child td{border-bottom:none}
-.sheet-table td input{display:block;width:100%;padding:7px 6px;font-family:var(--mono);font-size:12px;background:transparent;border:1.5px solid transparent;border-radius:5px;color:var(--text);outline:none;transition:border-color .1s;-moz-appearance:textfield}
+.sheet-table td input{display:block;width:100%;padding:8px 8px;font-family:var(--mono);font-size:13px;background:transparent;border:1.5px solid transparent;border-radius:5px;color:var(--text);outline:none;transition:border-color .1s;-moz-appearance:textfield}
+.sheet-table td input[type="date"]{font-family:var(--sans);font-size:12px}
 .sheet-table td input::-webkit-outer-spin-button,.sheet-table td input::-webkit-inner-spin-button{-webkit-appearance:none}
 .sheet-table td input:focus{border-color:var(--green-btn);background:var(--bg2)}
-.sheet-table td.row-num{color:var(--text3);font-size:10px;text-align:center;padding:0;width:30px;background:var(--bg3);border-right:1px solid var(--border2)}
-.sheet-table td.row-actions{padding:2px;width:30px;text-align:center}
-.sheet-table td.row-actions button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px 6px;line-height:1;border-radius:4px}
+.sheet-table td input::placeholder{color:var(--text3);opacity:.5}
+.sheet-table td.row-num{color:var(--text3);font-size:11px;text-align:center;padding:0;background:var(--bg3);border-right:1px solid var(--border2)}
+.sheet-table td.row-actions{padding:2px;text-align:center}
+.sheet-table td.row-actions button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:5px 7px;line-height:1;border-radius:4px}
 .sheet-table td.row-actions button:hover{color:var(--red);background:var(--red-dim)}
 .sheet-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 
@@ -393,20 +395,20 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         <div class="sheet-wrap">
           <table class="sheet-table" id="bulkTable">
             <colgroup>
-              <col style="width:30px">
-              <col style="width:120px">
-              <col style="width:72px">
-              <col style="width:72px">
-              <col style="width:72px">
-              <col style="width:72px">
-              <col style="width:78px">
-              <col style="width:78px">
-              <col style="width:90px">
-              <col style="width:72px">
-              <col style="width:78px">
-              <col style="width:68px">
-              <col style="width:78px">
-              <col style="width:30px">
+              <col style="width:36px">
+              <col style="width:140px">
+              <col style="width:84px">
+              <col style="width:84px">
+              <col style="width:84px">
+              <col style="width:84px">
+              <col style="width:88px">
+              <col style="width:84px">
+              <col style="width:104px">
+              <col style="width:84px">
+              <col style="width:96px">
+              <col style="width:80px">
+              <col style="width:84px">
+              <col style="width:36px">
             </colgroup>
             <thead><tr>
               <th>#</th>
@@ -604,8 +606,8 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
 <script>
   // Supabase public config — replace these with your actual project values
   // Get them from: Supabase Dashboard → Project Settings → API
-  window.SUPABASE_URL = 'htps://yodrzqgnqvhoktynqcty.supabase.co';       // e.g. https://abcxyz.supabase.co
-  window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvZHJ6cWducXZob2t0eW5xY3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjY1NzYsImV4cCI6MjA5MDkwMjU3Nn0.7XDLEcgKQKtnkIk3tPt-zqk52bVOYIWanIOXs1RCH-U'; // public anon key (safe to expose)
+  window.SUPABASE_URL = 'YOUR_SUPABASE_URL';       // e.g. https://abcxyz.supabase.co
+  window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // public anon key (safe to expose)
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -1283,20 +1285,19 @@ function initBulk() {
   bulkAddRows(5);
 }
 function bulkRowHTML(i) {
-  const today=new Date().toISOString().slice(0,10);
   return `<tr id="brow-${i}">
     <td class="row-num">${i+1}</td>
-    <td><input type="date" id="bd-${i}" value="${today}"></td>
-    <td><input type="number" id="br-${i}" placeholder="21.90" step="0.01" min="0"></td>
-    <td><input type="number" id="breg-${i}" placeholder="40.00" step="0.25" min="0"></td>
-    <td><input type="number" id="bot-${i}" placeholder="0.00" step="0.25" min="0"></td>
-    <td><input type="number" id="bhol-${i}" placeholder="0.00" step="0.25" min="0"></td>
+    <td><input type="date" id="bd-${i}"></td>
+    <td><input type="number" id="br-${i}" placeholder="Rate" step="0.01" min="0"></td>
+    <td><input type="number" id="breg-${i}" placeholder="Hrs" step="0.25" min="0"></td>
+    <td><input type="number" id="bot-${i}" placeholder="Hrs" step="0.25" min="0"></td>
+    <td><input type="number" id="bhol-${i}" placeholder="Hrs" step="0.25" min="0"></td>
     <td><input type="number" id="bfed-${i}" placeholder="auto" step="0.01" min="0"></td>
     <td><input type="number" id="bss-${i}" placeholder="auto" step="0.01" min="0"></td>
     <td><input type="number" id="bmed-${i}" placeholder="auto" step="0.01" min="0"></td>
-    <td><input type="number" id="bden-${i}" placeholder="${appSettings.den||2}" step="0.01" min="0"></td>
-    <td><input type="number" id="bmedI-${i}" placeholder="${appSettings.medI||17}" step="0.01" min="0"></td>
-    <td><input type="number" id="bvis-${i}" placeholder="${appSettings.vis||0.5}" step="0.01" min="0"></td>
+    <td><input type="number" id="bden-${i}" placeholder="auto" step="0.01" min="0"></td>
+    <td><input type="number" id="bmedI-${i}" placeholder="auto" step="0.01" min="0"></td>
+    <td><input type="number" id="bvis-${i}" placeholder="auto" step="0.01" min="0"></td>
     <td><input type="number" id="bnet-${i}" placeholder="opt." step="0.01" min="0"></td>
     <td class="row-actions"><button onclick="bulkDeleteRow(${i})" title="Remove">✕</button></td>
   </tr>`;
