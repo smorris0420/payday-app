@@ -782,6 +782,7 @@ function logout() {
   unsubscribeRealtime();
   sessionStorage.removeItem('payday_token');
   sessionStorage.removeItem('payday_user');
+  sessionStorage.removeItem('payday_page');
   token=''; currentUser=null; stubs=[]; appSettings={};
   document.getElementById('appShell').classList.remove('visible');
   document.getElementById('loginScreen').style.display='flex';
@@ -991,6 +992,8 @@ function showPage(id, btn, source) {
   }
   // Keep the view-as banner visible on every page while in view-as mode
   if(viewAsUser) showViewAsBanner(viewAsUser.displayName||viewAsUser.username||'');
+  // Remember which page the user was on (restored on reload)
+  sessionStorage.setItem('payday_page', id);
   if(id==='history') buildHistory();
   if(id==='ytd') { buildYTDTabs(); buildYTD(); }
   if(id==='settings') { buildSettingsUI(); const el=document.getElementById('settingsWho'); if(el) el.textContent=currentUser?.username||''; }
@@ -1601,6 +1604,19 @@ if(token&&currentUser) {
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').classList.add('visible');
   updateSidebarUser();
+  // Restore last visited page on reload (but guard admin page for non-admins)
+  const savedPage = sessionStorage.getItem('payday_page') || 'calc';
+  const safePage = (savedPage === 'admin' && currentUser.role !== 'admin') ? 'calc' : savedPage;
+  if(safePage !== 'calc') {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    const pageEl = document.getElementById('page-'+safePage);
+    if(pageEl) pageEl.classList.add('active');
+    const idx = pageOrder.indexOf(safePage);
+    const sbBtns = document.querySelectorAll('.sidebar-nav-btn');
+    const mbBtns = document.querySelectorAll('.nav-btn');
+    if(sbBtns[idx]) { document.querySelectorAll('.sidebar-nav-btn').forEach(b=>b.classList.remove('active')); sbBtns[idx].classList.add('active'); }
+    if(mbBtns[idx]) { document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); mbBtns[idx].classList.add('active'); }
+  }
   loadAll();
 }
 </script>
