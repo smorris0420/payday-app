@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     if (!valid) return res.status(401).json({ error: 'Invalid username or password' });
 
     const token = await signToken(user.id, user.username, user.role);
-    return res.status(200).json({ token, username: user.username, role: user.role });
+    return res.status(200).json({ token, username: user.username, role: user.role, userId: user.id });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Server error' });

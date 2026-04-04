@@ -26,8 +26,14 @@ export default async function handler(req, res) {
   const payload = await requireAuth(req, res);
   if (!payload) return;
 
-  const sql  = neon(process.env.DATABASE_URL);
-  const uid  = payload.userId;
+  const sql = neon(process.env.DATABASE_URL);
+
+  // Allow admin to view another user's data via X-View-As header (read-only)
+  let uid = payload.userId;
+  const viewAs = req.headers['x-view-as'];
+  if (viewAs && payload.role === 'admin' && req.method === 'GET') {
+    uid = viewAs;
+  }
 
   // GET — all stubs for this user
   if (req.method === 'GET') {
@@ -35,14 +41,15 @@ export default async function handler(req, res) {
     return res.status(200).json(rows.map(fromRow));
   }
 
-  // POST — insert new stub
+  // POST — insert new stub (always for own account)
   if (req.method === 'POST') {
     const s = req.body;
     if (!s?.id || !s?.date) return res.status(400).json({ error: 'Missing id or date' });
+    const ownUid = payload.userId;
     try {
       await sql`
         INSERT INTO stubs (id,user_id,date,period,rate,reg,ot,hol,gross,fed,ss,med,den,med_i,vis,net,seeded)
-        VALUES (${s.id},${uid},${s.date},${s.period||null},${s.rate},${s.reg},
+        VALUES (${s.id},${ownUid},${s.date},${s.period||null},${s.rate},${s.reg},
                 ${s.ot||0},${s.hol||0},${s.gross},${s.fed},${s.ss},${s.med},
                 ${s.den},${s.medI},${s.vis},${s.net||null},false)
       `;
@@ -52,15 +59,12 @@ export default async function handler(req, res) {
     }
   }
 
-  // PATCH — edit individual fields on an existing stub (rate, hours, deductions, net)
+  // PATCH — edit individual fields on an existing stub
   if (req.method === 'PATCH') {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: 'Missing id' });
     const s = req.body;
-
-    // Recalculate gross if hours or rate changed
     const gross = s.rate * s.reg + s.rate * 1.5 * (s.ot||0) + s.rate * (s.hol||0);
-
     try {
       await sql`
         UPDATE stubs SET
@@ -77,7 +81,7 @@ export default async function handler(req, res) {
           med_i   = ${s.medI},
           vis     = ${s.vis},
           net     = ${s.net||null}
-        WHERE id = ${id} AND user_id = ${uid}
+        WHERE id = ${id} AND user_id = ${payload.userId}
       `;
       return res.status(200).json({ ok: true });
     } catch (err) {
@@ -89,7 +93,7 @@ export default async function handler(req, res) {
   if (req.method === 'DELETE') {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: 'Missing id' });
-    await sql`DELETE FROM stubs WHERE id = ${id} AND user_id = ${uid}`;
+    await sql`DELETE FROM stubs WHERE id = ${id} AND user_id = ${payload.userId}`;
     return res.status(200).json({ ok: true });
   }
 
