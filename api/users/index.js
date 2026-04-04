@@ -15,8 +15,12 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const payload = await requireAdmin(req, res);
     if (!payload) return;
-    const { data } = await supabase.from('users').select('id,username,display_name,role,active,created_at').order('created_at');
-    return res.status(200).json((data || []).map(safeUser));
+    const { data: users } = await supabase.from('users').select('id,username,display_name,role,active,created_at').order('created_at');
+    // Fetch defaultRate from settings for each user
+    const { data: rates } = await supabase.from('settings').select('user_id,value').eq('key','defaultRate');
+    const rateMap = {};
+    (rates||[]).forEach(r => { try { rateMap[r.user_id] = JSON.parse(r.value); } catch {} });
+    return res.status(200).json((users||[]).map(u => ({...safeUser(u), defaultRate: rateMap[u.id] || null})));
   }
 
   if (req.method === 'POST') {
@@ -73,10 +77,16 @@ export default async function handler(req, res) {
   if (req.method === 'DELETE') {
     const payload = await requireAdmin(req, res);
     if (!payload) return;
-    const { id } = req.query;
+    const { id, permanent } = req.query;
     if (!id) return res.status(400).json({ error: 'Missing id' });
-    if (id === payload.userId) return res.status(400).json({ error: 'Cannot deactivate your own account' });
-    await supabase.from('users').update({ active: false }).eq('id', id);
+    if (id === payload.userId) return res.status(400).json({ error: 'Cannot delete your own account' });
+    if (permanent === 'true') {
+      // Hard delete — cascades to stubs and settings via FK
+      const { error } = await supabase.from('users').delete().eq('id', id);
+      if (error) return res.status(500).json({ error: error.message });
+    } else {
+      await supabase.from('users').update({ active: false }).eq('id', id);
+    }
     return res.status(200).json({ ok: true });
   }
 

@@ -230,7 +230,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
   <div class="login-mark">$</div>
   <div>
     <div class="login-title">Payday</div>
-    <div class="login-sub" style="margin-top:4px">DCL Terminal Ops - Airport / REsort Ops</div>
+    <div class="login-sub" style="margin-top:4px">Disney Worldwide Services</div>
   </div>
   <div class="login-form">
     <input type="text" id="unInput" placeholder="Username or Email" autocomplete="username" autocapitalize="none"
@@ -251,10 +251,10 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
       <div class="sidebar-logo-mark">$</div>
       <div>
         <div class="sidebar-logo-text">Payday</div>
-        <div class="sidebar-logo-sub">Term Ops. Ground Services</div>
+        <div class="sidebar-logo-sub">DWS Ground Services</div>
       </div>
     </div>
-    <div class="sidebar-nav">
+    <div class="sidebar-nav" id="sidebarNav">
       <button class="sidebar-nav-btn active" onclick="showPage('calc',this,'sb')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8M12 8v8"/></svg>Calculator
       </button>
@@ -270,6 +270,13 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
       <button class="sidebar-nav-btn" onclick="showPage('settings',this,'sb')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings
       </button>
+      <!-- Admin-only Users button injected by JS after login -->
+      <div id="adminNavItem" style="display:none">
+        <div style="height:1px;background:var(--border);margin:8px 4px"></div>
+        <button class="sidebar-nav-btn" onclick="showPage('admin',this,'sb')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Users
+        </button>
+      </div>
     </div>
     <div class="sidebar-footer">
       <div class="sidebar-user">
@@ -436,9 +443,10 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           <div class="page-title">Settings</div>
           <span id="settingsWho" class="page-sub"></span>
         </div>
-        <div class="section-title">Default deductions</div>
+        <div class="section-title">Default pay rate &amp; deductions</div>
         <div class="card card-pad">
-          <div class="input-row"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sDen" value="2.00" step="0.01" min="0"></div></div>
+          <div class="input-row"><label>Hourly rate</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sRate" step="0.01" min="0" placeholder="e.g. 21.90"></div></div>
+          <div class="input-row" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border)"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sDen" value="2.00" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sMedI" value="17.00" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sVis" value="0.50" step="0.01" min="0"></div></div>
         </div>
@@ -449,20 +457,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           <div class="input-row"><label>Override (%)</label><div class="input-wrap"><input type="number" id="sFedRate" placeholder="auto" step="0.1" min="0" max="50" class="no-prefix"></div></div>
         </div>
         <button class="btn btn-secondary" style="margin-bottom:16px" onclick="saveFedRate()">Apply override</button>
-        <div id="adminSection" style="display:none">
-          <div class="section-title">User management</div>
-          <div id="viewAsSelector" style="margin-bottom:12px;display:none">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <label style="font-size:13px;color:var(--text2);font-weight:500">View app as:</label>
-              <select id="viewAsSelect" style="flex:1;min-width:160px;padding:8px 10px;font-family:var(--sans);font-size:13px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);outline:none">
-                <option value="">Select user…</option>
-              </select>
-              <button class="btn btn-secondary btn-sm" onclick="applyViewAs()">View As</button>
-            </div>
-          </div>
-          <div id="userList"></div>
-          <button class="btn btn-secondary" style="margin-bottom:16px" onclick="openNewUserModal()">+ Add user</button>
-        </div>
+
         <div class="section-title">My account</div>
         <div class="card card-pad" style="margin-bottom:8px">
           <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Change your password. You'll stay signed in after saving.</p>
@@ -473,6 +468,30 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         <div class="section-title">Data</div>
         <button class="btn btn-secondary" style="margin-bottom:8px" onclick="exportData()">Export paychecks (JSON)</button>
         <button class="btn btn-danger" onclick="confirmClear()">Delete all paycheck history</button>
+      </div>
+    </div>
+
+    <!-- ADMIN PAGE (injected into DOM only for admins) -->
+    <div id="page-admin" class="page">
+      <div class="page-inner">
+        <div class="page-header">
+          <div>
+            <div class="page-title">User Management</div>
+            <div class="page-sub">Admin only</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewUserModal()">+ Add user</button>
+        </div>
+        <div id="viewAsSelector" style="margin-bottom:16px">
+          <div class="card card-pad" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3);flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <label style="font-size:13px;color:var(--text2);font-weight:500;flex-shrink:0">View app as:</label>
+            <select id="viewAsSelect" style="flex:1;min-width:160px;padding:9px 10px;font-family:var(--sans);font-size:13px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);outline:none">
+              <option value="">Select user…</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="applyViewAs()">View As</button>
+          </div>
+        </div>
+        <div id="userList"></div>
       </div>
     </div>
 
@@ -600,6 +619,12 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
       <button class="btn btn-secondary" style="flex:1" onclick="resetUserPassword()">Reset to Password1</button>
       <button class="btn btn-primary" style="flex:1" onclick="saveEditUser()">Save changes</button>
     </div>
+    <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:12px">
+      <button class="btn btn-danger" onclick="deleteUser()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Permanently delete user &amp; all their data
+      </button>
+    </div>
   </div>
 </div>
 
@@ -696,6 +721,9 @@ function updateSidebarUser() {
   const a=document.getElementById('sidebarAvatar'); if(a) a.textContent=initials;
   const u=document.getElementById('sidebarUsername'); if(u) u.textContent=name;
   const r=document.getElementById('sidebarRole'); if(r) r.textContent=(currentUser.role||'').charAt(0).toUpperCase()+(currentUser.role||'').slice(1);
+  // Show/hide admin nav item
+  const adminNav=document.getElementById('adminNavItem');
+  if(adminNav) adminNav.style.display=currentUser?.role==='admin'?'block':'none';
 }
 
 // ===== VIEW AS =====
@@ -862,7 +890,7 @@ function calc() {
 ['iRate','iReg','iOT','iHol','iDen','iMedI','iVis'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 
 // ===== NAVIGATION =====
-const pageOrder = ['calc','history','ytd','bulk','settings'];
+const pageOrder = ['calc','history','ytd','bulk','settings','admin'];
 function showPage(id, btn, source) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
@@ -877,6 +905,7 @@ function showPage(id, btn, source) {
   if(id==='history') buildHistory();
   if(id==='ytd') { buildYTDTabs(); buildYTD(); }
   if(id==='settings') { buildSettingsUI(); const el=document.getElementById('settingsWho'); if(el) el.textContent=currentUser?.username||''; }
+  if(id==='admin') { if(currentUser?.role!=='admin'){showPage('calc',null,null);return;} buildAdminPage(); }
   if(id==='bulk') initBulk();
 }
 
@@ -969,35 +998,35 @@ function buildYTD() {
 
 // ===== SETTINGS =====
 function buildSettingsUI() {
+  if(appSettings.defaultRate) document.getElementById('sRate').value=appSettings.defaultRate;
   if(appSettings.den) document.getElementById('sDen').value=appSettings.den;
   if(appSettings.medI) document.getElementById('sMedI').value=appSettings.medI;
   if(appSettings.vis) document.getElementById('sVis').value=appSettings.vis;
   if(appSettings.fedOverride) document.getElementById('sFedRate').value=appSettings.fedOverride;
   document.getElementById('sEffRate').textContent=(effFedRate()*100).toFixed(2)+'%';
-  const isAdmin=currentUser?.role==='admin';
-  document.getElementById('adminSection').style.display=isAdmin?'block':'none';
-  if(isAdmin) {
-    buildUserList();
-    const wrap=document.getElementById('viewAsSelector'); if(wrap) wrap.style.display='block';
-    const sel=document.getElementById('viewAsSelect');
-    sel.innerHTML='<option value="">Select user…</option>'+allUsers.map(u=>`<option value="${u.id}">${u.displayName||u.username} (@${u.username})</option>`).join('');
-  }
+  // Show admin nav item in sidebar
+  const adminNav=document.getElementById('adminNavItem');
+  if(adminNav) adminNav.style.display=currentUser?.role==='admin'?'block':'none';
 }
-async function buildUserList() {
+async function buildAdminPage() {
   try {
-    allUsers=await apiFetch('/api/users');
-    const c=document.getElementById('userList');
-    if(!allUsers.length) { c.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0">No users yet.</div>'; return; }
-    c.innerHTML=allUsers.map(u=>{
-      const initials=(u.displayName||u.username).slice(0,2).toUpperCase();
-      const isSelf=u.username===currentUser?.username;
-      const adminBadge=u.role==='admin'?'<span class="user-badge user-badge-admin">admin</span>':'';
-      const inactiveBadge=!u.active?'<span class="user-badge user-badge-inactive">inactive</span>':'';
+    allUsers = await apiFetch('/api/users');
+    // Populate view-as dropdown
+    const sel = document.getElementById('viewAsSelect');
+    if(sel) sel.innerHTML = '<option value="">Select user…</option>' + allUsers.map(u=>`<option value="${u.id}">${u.displayName||u.username} (@${u.username})</option>`).join('');
+    // Render user list
+    const c = document.getElementById('userList');
+    if(!allUsers.length) { c.innerHTML = '<div style="font-size:13px;color:var(--text3);padding:8px 0">No users yet.</div>'; return; }
+    c.innerHTML = allUsers.map(u => {
+      const initials = (u.displayName||u.username).slice(0,2).toUpperCase();
+      const isSelf = u.username === currentUser?.username;
+      const adminBadge = u.role==='admin' ? '<span class="user-badge user-badge-admin">Admin</span>' : '<span class="user-badge" style="background:var(--blue-dim);color:var(--blue)">User</span>';
+      const inactiveBadge = !u.active ? '<span class="user-badge user-badge-inactive">Inactive</span>' : '';
       return `<div class="user-row">
         <div class="user-avatar">${initials}</div>
         <div class="user-info">
           <div class="user-name">${u.displayName||u.username} ${adminBadge}${inactiveBadge}${isSelf?'<span style="font-size:10px;color:var(--green);background:var(--green-dim);padding:1px 7px;border-radius:5px;font-weight:700;margin-left:4px">you</span>':''}</div>
-          <div class="user-meta">@${u.username}</div>
+          <div class="user-meta">@${u.username}${u.defaultRate?' &middot; $'+parseFloat(u.defaultRate).toFixed(2)+'/hr':''}</div>
         </div>
         <div class="user-actions">
           ${!isSelf?`<button class="icon-btn view-as" onclick="viewAsFromList('${u.id}','${u.displayName||u.username}')">View As</button>`:''}
@@ -1005,8 +1034,10 @@ async function buildUserList() {
         </div>
       </div>`;
     }).join('');
-  } catch(e) { showToast('Could not load users',true); }
+  } catch(e) { showToast('Could not load users', true); }
 }
+// Alias so existing callers (createUser, saveEditUser, deleteUser) still work
+async function buildUserList() { await buildAdminPage(); }
 
 // Open edit user modal
 function openEditUserModal(userId) {
@@ -1044,6 +1075,24 @@ async function resetUserPassword() {
     setSyncDot('ok');
     showToast('Password reset to Password1');
   } catch(e) { setSyncDot('err'); showToast(e.message||'Reset failed',true); }
+}
+
+async function deleteUser() {
+  const id=document.getElementById('euId').value;
+  const username=document.getElementById('euUsername').value;
+  const display=document.getElementById('euDisplay').value||username;
+  if(!confirm(`Permanently delete "${display}" (@${username})?
+
+This will delete their account AND all their paycheck history. This cannot be undone.`)) return;
+  if(!confirm(`Are you sure? All data for @${username} will be gone forever.`)) return;
+  try {
+    setSyncDot('syncing');
+    await apiFetch('/api/users?id='+id+'&permanent=true',{method:'DELETE'});
+    setSyncDot('ok');
+    closeModal('editUserModal');
+    await buildUserList();
+    showToast('@'+username+' deleted');
+  } catch(e) { setSyncDot('err'); showToast(e.message||'Delete failed',true); }
 }
 
 function openNewUserModal() {
@@ -1086,11 +1135,18 @@ async function changePassword() {
 }
 
 async function saveSettings() {
-  const s={den:parseFloat(document.getElementById('sDen').value)||2,medI:parseFloat(document.getElementById('sMedI').value)||17,vis:parseFloat(document.getElementById('sVis').value)||0.5};
-  Object.assign(appSettings,s);
+  const rateVal = parseFloat(document.getElementById('sRate').value);
+  const s={
+    den: parseFloat(document.getElementById('sDen').value)||2,
+    medI: parseFloat(document.getElementById('sMedI').value)||17,
+    vis: parseFloat(document.getElementById('sVis').value)||0.5,
+  };
+  if(rateVal > 0) s.defaultRate = rateVal;
+  Object.assign(appSettings, s);
   document.getElementById('iDen').value=s.den;
   document.getElementById('iMedI').value=s.medI;
   document.getElementById('iVis').value=s.vis;
+  if(rateVal > 0) document.getElementById('iRate').value=rateVal;
   calc();
   try { setSyncDot('syncing'); await apiFetch('/api/settings',{method:'POST',body:JSON.stringify(s)}); setSyncDot('ok'); showToast('Defaults saved'); }
   catch { setSyncDot('err'); showToast('Save failed',true); }
