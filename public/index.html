@@ -525,27 +525,30 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           <table class="sheet-table" id="bulkTable">
             <colgroup>
               <col style="width:2%">
-              <col style="width:10%">
-              <col style="width:6%">
-              <col style="width:6%">
-              <col style="width:6%">
-              <col style="width:6%">
-              <col style="width:6%">
-              <col style="width:6%">
-              <col style="width:6%">
-              <col style="width:6%">
-              <col style="width:6%">
+              <col style="width:8%">
               <col style="width:5%">
-              <col style="width:6%">
               <col style="width:5%">
-              <col style="width:6%">
               <col style="width:5%">
-              <col style="width:6%">
+              <col style="width:5%">
+              <col style="width:5%">
+              <col style="width:5%">
+              <col style="width:5%">
+              <col style="width:5%">
+              <col style="width:5%">
+              <col style="width:5%">
+              <col style="width:5%">
+              <col style="width:4%">
+              <col style="width:4%">
+              <col style="width:5%">
+              <col style="width:4%">
+              <col style="width:5%">
+              <col style="width:4%">
+              <col style="width:5%">
               <col style="width:2%">
             </colgroup>
             <thead><tr>
               <th>#</th>
-              <th>Pay Date</th><th>Rate $</th><th>Reg Hrs</th><th>OT Hrs</th><th>DT Hrs</th><th>Hol Hrs</th>
+              <th>Pay Date</th><th>Rate $</th><th>Reg Hrs</th><th>OT Hrs</th><th>DT Hrs</th><th>Hol Hrs</th><th>Sick Hrs</th><th>Vac Hrs</th><th>FltHol Hrs</th>
               <th>Prem $/hr</th><th>Prem Hrs</th><th>Addl $</th>
               <th>Fed $</th><th>SS $</th><th>Medicare $</th>
               <th>Dental $</th><th>Medical $</th><th>Vision $</th><th>Net $</th>
@@ -1904,7 +1907,7 @@ function renderReadView(s) {
   return `<div class="card">
     <div class="card-row"><span class="card-label">Hourly rate</span><span class="card-value">$${parseFloat(s.rate).toFixed(2)}/hr</span></div>
     <div class="card-row"><span class="card-label">Regular (${fmtH(s.reg)}h @ $${rateRound(s.rate).toFixed(4)}/hr)</span><span class="card-value">${fmt(payRound(rateRound(s.rate)*s.reg))}</span></div>
-    ${(s.ot||0)>0?`<div class="card-row"><span class="card-label">Overtime (${fmtH(s.ot)}h × 1.5)</span><span class="card-value amber">${fmt(s.ot*s.rate*1.5)}</span></div>`:''}
+    ${(s.ot||0)>0?`<div class="card-row"><span class="card-label">Overtime (${fmtH(s.ot)}h × 1.5 @ $${rateRound(s.rate*1.5).toFixed(4)}/hr)</span><span class="card-value amber">${fmt(payRound(rateRound(s.rate*1.5)*(s.ot||0)))}</span></div>`:''}
     ${(s.dt||0)>0?`<div class="card-row"><span class="card-label">Double time (${fmtH(s.dt)}h × 2.0)</span><span class="card-value amber">${fmt(s.dt*s.rate*2)}</span></div>`:''}
     ${(s.hol||0)>0?`<div class="card-row"><span class="card-label">Holiday (${fmtH(s.hol)}h @ $${rateRound(s.rate).toFixed(4)}/hr)</span><span class="card-value">${fmt(payRound(rateRound(s.rate)*s.hol))}</span></div>`:''}
     ${(s.sick||0)>0?`<div class="card-row"><span class="card-label">Sick / Care (${fmtH(s.sick)}h @ $${rateRound(s.rate).toFixed(4)}/hr)</span><span class="card-value">${fmt(payRound(rateRound(s.rate)*s.sick))}</span></div>`:''}
@@ -2046,6 +2049,9 @@ function bulkRowHTML(i) {
     <td><input type="number" id="bot-${i}" placeholder="0" step="0.25" min="0"></td>
     <td><input type="number" id="bdt-${i}" placeholder="0" step="0.25" min="0"></td>
     <td><input type="number" id="bhol-${i}" placeholder="0" step="0.25" min="0"></td>
+    <td><input type="number" id="bsick-${i}" placeholder="0" step="0.25" min="0"></td>
+    <td><input type="number" id="bvac-${i}" placeholder="0" step="0.25" min="0"></td>
+    <td><input type="number" id="bflthol-${i}" placeholder="0" step="0.25" min="0"></td>
     <td><input type="number" id="bpremr-${i}" placeholder="0" step="0.01" min="0"></td>
     <td><input type="number" id="bpremh-${i}" placeholder="0" step="0.25" min="0"></td>
     <td><input type="number" id="baddl-${i}" placeholder="0" step="0.01" min="0"></td>
@@ -2083,11 +2089,14 @@ async function bulkSave() {
     const ot=parseFloat(document.getElementById('bot-'+i)?.value)||0;
     const dt=parseFloat(document.getElementById('bdt-'+i)?.value)||0;
     const hol=parseFloat(document.getElementById('bhol-'+i)?.value)||0;
+    const sick=parseFloat(document.getElementById('bsick-'+i)?.value)||0;
+    const vac=parseFloat(document.getElementById('bvac-'+i)?.value)||0;
+    const fltHol=parseFloat(document.getElementById('bflthol-'+i)?.value)||0;
     const premRate=parseFloat(document.getElementById('bpremr-'+i)?.value)||0;
     const premHrs=parseFloat(document.getElementById('bpremh-'+i)?.value)||0;
     const addl=parseFloat(document.getElementById('baddl-'+i)?.value)||0;
     const _regR=rateRound(rate),_otR=rateRound(rate*1.5),_dtR=rateRound(rate*2);
-  const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
+    const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
     const fedRaw=parseFloat(document.getElementById('bfed-'+i)?.value);
     const ssRaw=parseFloat(document.getElementById('bss-'+i)?.value);
     const medRaw=parseFloat(document.getElementById('bmed-'+i)?.value);
@@ -2102,7 +2111,7 @@ async function bulkSave() {
     const medI=(_medIRaw!==''&&_medIRaw!==null&&_medIRaw!==undefined)?parseFloat(_medIRaw):parseFloat(appSettings.medI)||17;
     const vis=(_visRaw!==''&&_visRaw!==null&&_visRaw!==undefined)?parseFloat(_visRaw):parseFloat(appSettings.vis)||0.5;
     const netRaw=parseFloat(document.getElementById('bnet-'+i)?.value);
-    toSave.push({id:uid(),date,rate,reg,ot,dt,hol,sick:0,vac:0,fltHol:0,premRate,premHrs,addl,gross,fed,ss,med,den,medI,vis,net:isNaN(netRaw)?null:netRaw,seeded:false});
+    toSave.push({id:uid(),date,rate,reg,ot,dt,hol,sick,vac,fltHol,premRate,premHrs,addl,gross,fed,ss,med,den,medI,vis,net:isNaN(netRaw)?null:netRaw,seeded:false});
   }
   if(!toSave.length) { showToast('No valid rows to save',true); return; }
   document.getElementById('bulkStatus').textContent='Saving '+toSave.length+' paychecks…';
