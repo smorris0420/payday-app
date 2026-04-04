@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: 'Missing id' });
     const s = req.body;
-    const payRound = n => Math.round(n * 100) / 100;
+    const payRound = n => Math.round(n * 10000) / 10000;
     const rateRound = n => Math.round(n * 10000) / 10000;
     const regRate = rateRound(s.rate);
     const otRate  = rateRound(s.rate * 1.5);
