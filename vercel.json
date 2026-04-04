@@ -1,23 +1,17 @@
 {
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/public/$1" }
-  ],
-  "headers": [
-    {
-      "source": "/sw.js",
-      "headers": [
-        { "key": "Service-Worker-Allowed", "value": "/" },
-        { "key": "Cache-Control", "value": "no-cache" }
-      ]
-    },
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
-      ]
-    }
-  ]
+  "name": "payday-app",
+  "version": "4.0.0",
+  "description": "Personal paycheck calculator — multi-user, realtime via Supabase",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.43.0",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.3.0"
+  },
+  "devDependencies": {
+    "vercel": "^34.0.0"
+  }
 }
