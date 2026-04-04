@@ -8,7 +8,11 @@ function fromRow(r) {
     rate:  parseFloat(r.rate),
     reg:   parseFloat(r.reg),
     ot:    parseFloat(r.ot),
+    dt:    parseFloat(r.dt   || 0),
     hol:   parseFloat(r.hol),
+    premHrs:  parseFloat(r.prem_hrs  || 0),
+    premRate: parseFloat(r.prem_rate || 0),
+    addl:  parseFloat(r.addl || 0),
     gross: parseFloat(r.gross),
     fed:   parseFloat(r.fed),
     ss:    parseFloat(r.ss),
@@ -27,9 +31,6 @@ export default async function handler(req, res) {
 
   const supabase = db();
   const viewAs = req.headers['x-view-as'];
-
-  // Admins can read/write another user's stubs via X-View-As header
-  // For reads: use viewAs user. For writes: only allow if admin AND viewAs is set.
   const isAdmin = payload.role === 'admin';
   const targetUserId = (isAdmin && viewAs) ? viewAs : payload.userId;
 
@@ -48,9 +49,10 @@ export default async function handler(req, res) {
     if (!s?.id || !s?.date) return res.status(400).json({ error: 'Missing id or date' });
     const { error } = await supabase.from('stubs').insert({
       id: s.id, user_id: targetUserId, date: s.date, period: s.period || null,
-      rate: s.rate, reg: s.reg, ot: s.ot || 0, hol: s.hol || 0, gross: s.gross,
-      fed: s.fed, ss: s.ss, med: s.med, den: s.den, med_i: s.medI, vis: s.vis,
-      net: s.net || null, seeded: false,
+      rate: s.rate, reg: s.reg, ot: s.ot || 0, dt: s.dt || 0, hol: s.hol || 0,
+      prem_hrs: s.premHrs || 0, prem_rate: s.premRate || 0, addl: s.addl || 0,
+      gross: s.gross, fed: s.fed, ss: s.ss, med: s.med,
+      den: s.den, med_i: s.medI, vis: s.vis, net: s.net || null, seeded: false,
     });
     if (error) return res.status(500).json({ error: error.message });
     return res.status(201).json({ ok: true });
@@ -60,11 +62,20 @@ export default async function handler(req, res) {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: 'Missing id' });
     const s = req.body;
-    const gross = parseFloat((s.rate * s.reg + s.rate * 1.5 * (s.ot || 0) + s.rate * (s.hol || 0)).toFixed(2));
+    const gross = parseFloat((
+      s.rate * s.reg +
+      s.rate * 1.5 * (s.ot || 0) +
+      s.rate * 2   * (s.dt || 0) +
+      s.rate * (s.hol || 0) +
+      (s.premHrs || 0) * (s.premRate || 0) +
+      (s.addl || 0)
+    ).toFixed(2));
     const { error } = await supabase.from('stubs').update({
-      date: s.date, rate: s.rate, reg: s.reg, ot: s.ot || 0, hol: s.hol || 0,
-      gross, fed: s.fed, ss: s.ss, med: s.med, den: s.den, med_i: s.medI,
-      vis: s.vis, net: s.net || null,
+      date: s.date, rate: s.rate, reg: s.reg,
+      ot: s.ot || 0, dt: s.dt || 0, hol: s.hol || 0,
+      prem_hrs: s.premHrs || 0, prem_rate: s.premRate || 0, addl: s.addl || 0,
+      gross, fed: s.fed, ss: s.ss, med: s.med,
+      den: s.den, med_i: s.medI, vis: s.vis, net: s.net || null,
     }).eq('id', id).eq('user_id', targetUserId);
     if (error) return res.status(500).json({ error: error.message });
     return res.status(200).json({ ok: true });
@@ -74,9 +85,7 @@ export default async function handler(req, res) {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: 'Missing id' });
     const { error } = await supabase.from('stubs')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', targetUserId);
+      .delete().eq('id', id).eq('user_id', targetUserId);
     if (error) return res.status(500).json({ error: error.message });
     return res.status(200).json({ ok: true });
   }
