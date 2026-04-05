@@ -420,15 +420,15 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         <div class="card card-pad">
           <div class="input-row"><label>Hourly rate</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iRate" value="21.90" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Regular hours</label><div class="input-wrap"><input type="number" id="iReg" value="40" step="0.25" min="0" class="no-prefix"></div></div>
-          <div class="input-row"><label>Overtime hours (1.5×)</label><div class="input-wrap"><input type="number" id="iOT" value="0" step="0.25" min="0" class="no-prefix"></div></div>
-          <div class="input-row"><label>Double time hours (2×)</label><div class="input-wrap"><input type="number" id="iDT" value="0" step="0.25" min="0" class="no-prefix"></div></div>
+          <div class="input-row"><label>Overtime hours (1.5×)</label><div class="input-wrap"><input type="number" id="iOT" value="0" step="0.25" class="no-prefix"></div></div>
+          <div class="input-row"><label>Double time hours (2×)</label><div class="input-wrap"><input type="number" id="iDT" value="0" step="0.25" class="no-prefix"></div></div>
           <div class="input-row"><label>Holiday hours</label><div class="input-wrap"><input type="number" id="iHol" value="0" step="0.25" min="0" class="no-prefix"></div></div>
           <div class="input-row"><label>Sick / Care hours</label><div class="input-wrap"><input type="number" id="iSick" value="0" step="0.25" min="0" class="no-prefix"></div></div>
           <div class="input-row"><label>Vacation hours</label><div class="input-wrap"><input type="number" id="iVac" value="0" step="0.25" min="0" class="no-prefix"></div></div>
           <div class="input-row"><label>Float Holiday hours</label><div class="input-wrap"><input type="number" id="iFltHol" value="0" step="0.25" min="0" class="no-prefix"></div></div>
           <div class="input-row"><label>Shift premium ($/hr)</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iPremRate" value="0" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Premium hours</label><div class="input-wrap"><input type="number" id="iPremHrs" value="0" step="0.25" min="0" class="no-prefix"></div></div>
-          <div class="input-row"><label>Additional pay</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iAddl" value="0" step="0.01" min="0"></div></div>
+          <div class="input-row"><label>Additional pay</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iAddl" value="0" step="0.01"></div></div>
         </div>
         <div class="section-title">Benefits deductions</div>
         <div class="card card-pad">
@@ -700,8 +700,8 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
       </div>
       <div class="form-grid">
         <div class="form-field"><label>Regular hrs</label><input type="number" id="lReg" step="0.25" min="0"></div>
-        <div class="form-field"><label>OT hrs (1.5×)</label><input type="number" id="lOT" value="0" step="0.25" min="0"></div>
-        <div class="form-field"><label>Double time hrs (2×)</label><input type="number" id="lDT" value="0" step="0.25" min="0"></div>
+        <div class="form-field"><label>OT hrs (1.5×)</label><input type="number" id="lOT" value="0" step="0.25"></div>
+        <div class="form-field"><label>Double time hrs (2×)</label><input type="number" id="lDT" value="0" step="0.25"></div>
         <div class="form-field"><label>Holiday hrs</label><input type="number" id="lHol" value="0" step="0.25" min="0"></div>
         <div class="form-field"><label>Sick / Care hrs</label><input type="number" id="lSick" value="0" step="0.25" min="0"></div>
         <div class="form-field"><label>Vacation hrs</label><input type="number" id="lVac" value="0" step="0.25" min="0"></div>
@@ -717,7 +717,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
       <div class="form-grid">
         <div class="form-field"><label>Shift premium ($/hr)</label><input type="number" id="lPremRate" value="0" step="0.01" min="0"></div>
         <div class="form-field"><label>Premium hrs</label><input type="number" id="lPremHrs" value="0" step="0.25" min="0"></div>
-        <div class="form-field"><label>Additional pay ($)</label><input type="number" id="lAddl" value="0" step="0.01" min="0"></div>
+        <div class="form-field"><label>Additional pay ($)</label><input type="number" id="lAddl" value="0" step="0.01"></div>
       </div>
     </div>
 
@@ -744,7 +744,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
       </div>
       <div class="form-grid">
         <div class="form-field"><label>Regular pay ($)</label><input type="number" id="lRegPay" step="0.01" min="0" placeholder="optional"></div>
-        <div class="form-field"><label>OT pay ($)</label><input type="number" id="lOTPay" step="0.01" min="0" placeholder="optional"></div>
+        <div class="form-field"><label>OT pay ($)</label><input type="number" id="lOTPay" step="0.01" placeholder="optional"></div>
         <div class="form-field"><label>Actual gross ($)</label><input type="number" id="lGross" step="0.01" min="0" placeholder="optional"></div>
         <div class="form-field"><label>Actual net ($)</label><input type="number" id="lNet" step="0.01" min="0" placeholder="optional"></div>
       </div>
@@ -785,8 +785,8 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         </div>
         <div class="form-grid">
           <div class="form-field"><label>Regular hrs</label><input type="number" id="eReg" step="0.25" min="0"></div>
-          <div class="form-field"><label>OT hrs (1.5×)</label><input type="number" id="eOT" step="0.25" min="0"></div>
-          <div class="form-field"><label>Double time hrs (2×)</label><input type="number" id="eDT" step="0.25" min="0"></div>
+          <div class="form-field"><label>OT hrs (1.5×)</label><input type="number" id="eOT" step="0.25"></div>
+          <div class="form-field"><label>Double time hrs (2×)</label><input type="number" id="eDT" step="0.25"></div>
           <div class="form-field"><label>Holiday hrs</label><input type="number" id="eHol" step="0.25" min="0"></div>
           <div class="form-field"><label>Sick / Care hrs</label><input type="number" id="eSick" step="0.25" min="0"></div>
           <div class="form-field"><label>Vacation hrs</label><input type="number" id="eVac" step="0.25" min="0"></div>
@@ -802,7 +802,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         <div class="form-grid">
           <div class="form-field"><label>Shift premium ($/hr)</label><input type="number" id="ePremRate" step="0.01" min="0"></div>
           <div class="form-field"><label>Premium hrs</label><input type="number" id="ePremHrs" step="0.25" min="0"></div>
-          <div class="form-field"><label>Additional pay ($)</label><input type="number" id="eAddl" step="0.01" min="0"></div>
+          <div class="form-field"><label>Additional pay ($)</label><input type="number" id="eAddl" step="0.01"></div>
         </div>
       </div>
 
@@ -829,7 +829,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         </div>
         <div class="form-grid">
           <div class="form-field"><label>Regular pay ($)</label><input type="number" id="eRegPay" step="0.01" min="0" placeholder="optional"></div>
-          <div class="form-field"><label>OT pay ($)</label><input type="number" id="eOTPay" step="0.01" min="0" placeholder="optional"></div>
+          <div class="form-field"><label>OT pay ($)</label><input type="number" id="eOTPay" step="0.01" placeholder="optional"></div>
           <div class="form-field"><label>Actual gross ($)</label><input type="number" id="eGross" step="0.01" min="0" placeholder="optional"></div>
           <div class="form-field"><label>Actual net ($)</label><input type="number" id="eNet" step="0.01" min="0" placeholder="optional"></div>
         </div>
@@ -1666,11 +1666,12 @@ function buildYTD() {
   const tRetire  = filtered.reduce((a,s)=>a+(s.retire||0), 0);
   // OT+DT: use stored otPay directly when available, derive from gross otherwise
   // OT: use stored otPay directly when available, otherwise calculate from hours
+  // Allow negatives — correction paychecks can have negative OT/DT hours
   const tOT = filtered.reduce((a,s)=>{
-    if(s.otPay!=null&&s.otPay>0) return a+s.otPay;
+    if(s.otPay!=null) return a+s.otPay; // stored value (can be negative)
     return a+payRound(rateRound(s.rate*1.5)*(s.ot||0));
   }, 0);
-  // DT: always calculate from hours (no stored dtPay field)
+  // DT: always calculate from hours
   const tDT = filtered.reduce((a,s)=>a+payRound(rateRound(s.rate*2)*(s.dt||0)), 0);
   const tHrs  = filtered.reduce((a,s)=>a+s.reg+(s.ot||0)+(s.dt||0)+(s.hol||0)+(s.sick||0)+(s.vac||0)+(s.fltHol||0), 0);
   const tOTHrs= filtered.reduce((a,s)=>a+(s.ot||0), 0);
@@ -2174,8 +2175,8 @@ function renderReadView(s) {
   return `<div class="card">
     <div class="card-row"><span class="card-label">Hourly rate</span><span class="card-value">$${parseFloat(s.rate).toFixed(2)}/hr</span></div>
     <div class="card-row"><span class="card-label">Regular (${fmtH(s.reg)}h @ $${_rr.toFixed(4)}/hr)</span><span class="card-value">${fmt(regPay)}</span></div>
-    ${(s.ot||0)>0?`<div class="card-row"><span class="card-label">Overtime (${fmtH(s.ot)}h × 1.5 @ $${_otR.toFixed(4)}/hr)</span><span class="card-value amber">${fmt(showOT)}</span></div>`:''}
-    ${(s.dt||0)>0?`<div class="card-row"><span class="card-label">Double time (${fmtH(s.dt)}h × 2.0 @ $${_dtR.toFixed(4)}/hr)</span><span class="card-value amber">${fmt(showDT)}</span></div>`:''}
+    ${(s.ot||0)!==0?`<div class="card-row"><span class="card-label">Overtime (${fmtH(s.ot)}h × 1.5 @ $${_otR.toFixed(4)}/hr)</span><span class="card-value amber">${fmt(showOT)}</span></div>`:''}
+    ${(s.dt||0)!==0?`<div class="card-row"><span class="card-label">Double time (${fmtH(s.dt)}h × 2.0 @ $${_dtR.toFixed(4)}/hr)</span><span class="card-value amber">${fmt(showDT)}</span></div>`:''}
     ${(s.hol||0)>0?`<div class="card-row"><span class="card-label">Holiday (${fmtH(s.hol)}h @ $${_rr.toFixed(4)}/hr)</span><span class="card-value">${fmt(holPay)}</span></div>`:''}
     ${(s.sick||0)>0?`<div class="card-row"><span class="card-label">Sick / Care (${fmtH(s.sick)}h @ $${_rr.toFixed(4)}/hr)</span><span class="card-value">${fmt(sickPay)}</span></div>`:''}
     ${(s.vac||0)>0?`<div class="card-row"><span class="card-label">Vacation (${fmtH(s.vac)}h @ $${_rr.toFixed(4)}/hr)</span><span class="card-value">${fmt(vacPay)}</span></div>`:''}
@@ -2396,7 +2397,7 @@ function bulkCardHTML(i) {
       </div>
       <div class="bulk-cell" style="flex:1">
         <label>OT Hrs (1.5×)</label>
-        <input type="number" id="bc-ot-${i}" step="0.25" min="0" placeholder="0" oninput="bulkCardPreview(${i})">
+        <input type="number" id="bc-ot-${i}" step="0.25" placeholder="0" oninput="bulkCardPreview(${i})">
       </div>
       <div class="bulk-cell" style="flex:1">
         <label>Sick/Care Hrs</label>
@@ -2420,7 +2421,7 @@ function bulkCardHTML(i) {
       </div>
       <div class="bulk-cell" style="flex:1">
         <label>OT Pay ($)</label>
-        <input type="number" id="bc-otpay-${i}" step="0.01" min="0" placeholder="opt.">
+        <input type="number" id="bc-otpay-${i}" step="0.01" placeholder="opt.">
       </div>
       <div class="bulk-cell cell-money" style="flex:1">
         <label>Fed ($)</label>
@@ -2472,7 +2473,7 @@ function bulkCardHTML(i) {
         <div class="bulk-cell cell-num"></div>
         <div class="bulk-cell" style="flex:1">
           <label>DT Hrs (2×)</label>
-          <input type="number" id="bc-dt-${i}" step="0.25" min="0" placeholder="0" oninput="bulkCardPreview(${i})">
+          <input type="number" id="bc-dt-${i}" step="0.25" placeholder="0" oninput="bulkCardPreview(${i})">
         </div>
         <div class="bulk-cell" style="flex:1">
           <label>Holiday Hrs</label>
@@ -2492,7 +2493,7 @@ function bulkCardHTML(i) {
         </div>
         <div class="bulk-cell" style="flex:1">
           <label>Additional ($)</label>
-          <input type="number" id="bc-addl-${i}" step="0.01" min="0" placeholder="0" oninput="bulkCardPreview(${i})">
+          <input type="number" id="bc-addl-${i}" step="0.01" placeholder="0" oninput="bulkCardPreview(${i})">
         </div>
       </div>
     </div>
