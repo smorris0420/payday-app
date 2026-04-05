@@ -1198,6 +1198,12 @@ async function flushOutbox() {
 }
 
 // ===== REALTIME =====
+// Track stub IDs recently saved by this device to suppress echo overwrites
+const _recentlySaved = new Set();
+function markRecentlySaved(id) {
+  _recentlySaved.add(id);
+  setTimeout(() => _recentlySaved.delete(id), 5000); // clear after 5s
+}
 function fromRealtimeRow(r) {
   return {
     id: r.id, date: r.date,
@@ -1257,6 +1263,9 @@ function handleRealtimeEvent(payload) {
   } else if (eventType === 'UPDATE') {
     const idx = stubs.findIndex(s => s.id === newRow.id);
     if (idx !== -1) {
+      // Skip if this device just saved it — our local copy is authoritative
+      // and the realtime payload may be missing newly added columns
+      if (_recentlySaved.has(newRow.id)) return;
       stubs[idx] = fromRealtimeRow(newRow);
       stubs.sort((a,b) => b.date.localeCompare(a.date));
       buildHistory(); buildYTDTabs(); buildYTD();
@@ -2116,6 +2125,7 @@ async function saveLog() {
   // Sync to server (or queue if offline)
   try {
     setSyncDot('syncing');
+    markRecentlySaved(stub.id);
     await Promise.all([
       syncOp('/api/stubs','POST',stub),
       syncOp('/api/settings','POST',{defaultRate:rate})
@@ -2285,6 +2295,7 @@ async function saveEdit() {
   try {
     setSyncDot('syncing');
     // Send the computed gross so API doesn't recalculate from hours
+    markRecentlySaved(s.id);
     await syncOp('/api/stubs?id='+s.id,'PATCH',{...updated, gross: s.gross});
     if(isOnline) { setSyncDot('ok'); showToast('Paycheck updated'); }
     else showToast('Saved offline — will sync when reconnected');
@@ -2300,6 +2311,7 @@ async function deleteStub() {
   if(window._idb) window._idb.idbDeleteStub(id).catch(()=>{});
   try {
     setSyncDot('syncing');
+    markRecentlySaved(id);
     await syncOp('/api/stubs?id='+id,'DELETE');
     if(isOnline) { setSyncDot('ok'); showToast('Deleted'); }
     else showToast('Deleted offline — will sync when reconnected');
@@ -2569,6 +2581,7 @@ async function bulkSave() {
   let saved=0, failed=0;
   for(const stub of toSave) {
     try {
+      markRecentlySaved(stub.id);
       await syncOp('/api/stubs','POST',stub);
       stubs.unshift(stub);
       if(window._idb && currentUser) window._idb.idbPutStub(stub, currentUser.id).catch(()=>{});
