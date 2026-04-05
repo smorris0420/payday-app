@@ -851,7 +851,9 @@ const fmtH = n => parseFloat(n||0).toFixed(2);
 // Round each pay component individually (matches payroll rounding line-by-line)
 const payRound = n => Math.round((n + Number.EPSILON) * 100) / 100;
 // Round rate to 4 decimal places like payroll systems display (17.1000, 25.6500)
-const rateRound = n => Math.round(n * 10000) / 10000; // hours always 2 decimals
+const rateRound = n => Math.round(n * 10000) / 10000;
+// Disney payroll uses ceiling for OT/DT components (32.0625 → 32.07)
+const payCeil = n => Math.ceil(Math.round(n * 1000000) / 1000000 * 100) / 100; // hours always 2 decimals
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
 function setSyncDot(s, count=0) {
   const d = document.getElementById('syncDot');
@@ -1189,7 +1191,7 @@ function calc() {
   const medI=parseFloat(document.getElementById('iMedI').value)||0;
   const vis=parseFloat(document.getElementById('iVis').value)||0;
   const regRate=rateRound(rate), otRate=rateRound(rate*1.5), dtRate=rateRound(rate*2);
-  const regPay=payRound(regRate*reg), otPay=payRound(otRate*ot), dtPay=payRound(dtRate*dt);
+  const regPay=payRound(regRate*reg), otPay=payCeil(otRate*ot), dtPay=payCeil(dtRate*dt);
   const holPay=payRound(regRate*hol), sickPay=payRound(regRate*sick), vacPay=payRound(regRate*vac), fltHolPay=payRound(regRate*fltHol);
   const premPay=premRate*premHrs;
   const gross=regPay+otPay+dtPay+holPay+sickPay+vacPay+fltHolPay+premPay+addl;
@@ -1491,8 +1493,8 @@ function buildYTD() {
   const tDed  = tTax+tBen;
   const tReg  = filtered.reduce((a,s)=>a+payRound(rateRound(s.rate)*s.reg), 0);
   const tBenTime = filtered.reduce((a,s)=>a+payRound(rateRound(s.rate)*((s.sick||0)+(s.vac||0)+(s.fltHol||0))), 0);
-  const tOT   = filtered.reduce((a,s)=>a+(s.ot||0)*s.rate*1.5, 0);
-  const tDT   = filtered.reduce((a,s)=>a+(s.dt||0)*s.rate*2, 0);
+  const tOT   = filtered.reduce((a,s)=>a+payCeil(rateRound(s.rate*1.5)*(s.ot||0)), 0);
+  const tDT   = filtered.reduce((a,s)=>a+payCeil(rateRound(s.rate*2)*(s.dt||0)), 0);
   const tHol  = filtered.reduce((a,s)=>a+payRound(rateRound(s.rate)*(s.hol||0)), 0);
   const tPrem = filtered.reduce((a,s)=>a+(s.premHrs||0)*(s.premRate||0), 0);
   const tAddl = filtered.reduce((a,s)=>a+(s.addl||0), 0);
@@ -1862,7 +1864,7 @@ async function saveLog() {
   const premHrs=parseFloat(document.getElementById('lPremHrs').value)||0;
   const addl=parseFloat(document.getElementById('lAddl').value)||0;
   const _regR=rateRound(rate),_otR=rateRound(rate*1.5),_dtR=rateRound(rate*2);
-  const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
+  const gross=parseFloat((payRound(_regR*reg)+payCeil(_otR*ot)+payCeil(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
   const fedRaw=parseFloat(document.getElementById('lFed').value), fed=isNaN(fedRaw)?parseFloat((gross*effFedRate()).toFixed(2)):fedRaw;
   const ssRaw=parseFloat(document.getElementById('lSS').value), ss=isNaN(ssRaw)?parseFloat((gross*0.062).toFixed(2)):ssRaw;
   const medRaw=parseFloat(document.getElementById('lMed').value), med=isNaN(medRaw)?parseFloat((gross*0.0145).toFixed(2)):medRaw;
@@ -1907,7 +1909,7 @@ function renderReadView(s) {
   return `<div class="card">
     <div class="card-row"><span class="card-label">Hourly rate</span><span class="card-value">$${parseFloat(s.rate).toFixed(2)}/hr</span></div>
     <div class="card-row"><span class="card-label">Regular (${fmtH(s.reg)}h @ $${rateRound(s.rate).toFixed(4)}/hr)</span><span class="card-value">${fmt(payRound(rateRound(s.rate)*s.reg))}</span></div>
-    ${(s.ot||0)>0?`<div class="card-row"><span class="card-label">Overtime (${fmtH(s.ot)}h × 1.5 @ $${rateRound(s.rate*1.5).toFixed(4)}/hr)</span><span class="card-value amber">${fmt(payRound(rateRound(s.rate*1.5)*(s.ot||0)))}</span></div>`:''}
+    ${(s.ot||0)>0?`<div class="card-row"><span class="card-label">Overtime (${fmtH(s.ot)}h × 1.5 @ $${rateRound(s.rate*1.5).toFixed(4)}/hr)</span><span class="card-value amber">${fmt(payCeil(rateRound(s.rate*1.5)*(s.ot||0)))}</span></div>`:''}
     ${(s.dt||0)>0?`<div class="card-row"><span class="card-label">Double time (${fmtH(s.dt)}h × 2.0)</span><span class="card-value amber">${fmt(s.dt*s.rate*2)}</span></div>`:''}
     ${(s.hol||0)>0?`<div class="card-row"><span class="card-label">Holiday (${fmtH(s.hol)}h @ $${rateRound(s.rate).toFixed(4)}/hr)</span><span class="card-value">${fmt(payRound(rateRound(s.rate)*s.hol))}</span></div>`:''}
     ${(s.sick||0)>0?`<div class="card-row"><span class="card-label">Sick / Care (${fmtH(s.sick)}h @ $${rateRound(s.rate).toFixed(4)}/hr)</span><span class="card-value">${fmt(payRound(rateRound(s.rate)*s.sick))}</span></div>`:''}
@@ -1993,8 +1995,8 @@ async function saveEdit() {
   Object.assign(s,updated);
   const _eRegR=rateRound(updated.rate),_eOtRate=rateRound(updated.rate*1.5),_eDtRate=rateRound(updated.rate*2);
   s.gross=parseFloat((
-    payRound(_eRegR*updated.reg)+payRound(_eOtRate*updated.ot)+
-    payRound(_eDtRate*updated.dt)+payRound(_eRegR*updated.hol)+
+    payRound(_eRegR*updated.reg)+payCeil(_eOtRate*updated.ot)+
+    payCeil(_eDtRate*updated.dt)+payRound(_eRegR*updated.hol)+
     payRound(_eRegR*(updated.sick||0))+payRound(_eRegR*(updated.vac||0))+payRound(_eRegR*(updated.fltHol||0))+
     payRound((updated.premRate||0)*(updated.premHrs||0))+(updated.addl||0)
   ).toFixed(2));
@@ -2096,7 +2098,7 @@ async function bulkSave() {
     const premHrs=parseFloat(document.getElementById('bpremh-'+i)?.value)||0;
     const addl=parseFloat(document.getElementById('baddl-'+i)?.value)||0;
     const _regR=rateRound(rate),_otR=rateRound(rate*1.5),_dtR=rateRound(rate*2);
-    const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
+    const gross=parseFloat((payRound(_regR*reg)+payCeil(_otR*ot)+payCeil(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
     const fedRaw=parseFloat(document.getElementById('bfed-'+i)?.value);
     const ssRaw=parseFloat(document.getElementById('bss-'+i)?.value);
     const medRaw=parseFloat(document.getElementById('bmed-'+i)?.value);
