@@ -1665,21 +1665,13 @@ function buildYTD() {
   const tVision  = filtered.reduce((a,s)=>a+s.vis, 0);
   const tRetire  = filtered.reduce((a,s)=>a+(s.retire||0), 0);
   // OT+DT: use stored otPay directly when available, derive from gross otherwise
-  const tOTDT = filtered.reduce((a,s)=>{
-    // Use stored otPay directly — most accurate
-    if(s.otPay != null && s.otPay > 0) {
-      return a + s.otPay;
-    }
-    // No stored value — derive from gross minus all non-OT components
-    const regPay  = (s.regPay!=null&&s.regPay>0) ? s.regPay : payRound(rateRound(s.rate)*s.reg);
-    const holPay  = payRound(rateRound(s.rate)*(s.hol||0));
-    const benPay  = payRound(rateRound(s.rate)*((s.sick||0)+(s.vac||0)+(s.fltHol||0)));
-    const premPay = payRound((s.premHrs||0)*(s.premRate||0));
-    const addl    = s.addl||0;
-    return a + Math.max(0, s.gross - regPay - holPay - benPay - premPay - addl);
+  // OT: use stored otPay directly when available, otherwise calculate from hours
+  const tOT = filtered.reduce((a,s)=>{
+    if(s.otPay!=null&&s.otPay>0) return a+s.otPay;
+    return a+payRound(rateRound(s.rate*1.5)*(s.ot||0));
   }, 0);
-  const tOT = tOTDT;
-  const tDT = 0;
+  // DT: always calculate from hours (no stored dtPay field)
+  const tDT = filtered.reduce((a,s)=>a+payRound(rateRound(s.rate*2)*(s.dt||0)), 0);
   const tHrs  = filtered.reduce((a,s)=>a+s.reg+(s.ot||0)+(s.dt||0)+(s.hol||0)+(s.sick||0)+(s.vac||0)+(s.fltHol||0), 0);
   const tOTHrs= filtered.reduce((a,s)=>a+(s.ot||0), 0);
   const nets  = filtered.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return s.net||(s.gross-d); });
@@ -1698,7 +1690,7 @@ function buildYTD() {
   set('ytdTax',      fmt(tTax));
   set('ytdOT',       tOT>0 ? fmt(tOT) : '—');
   set('ytdOT2',      tOT>0 ? fmt(tOT) : '—');
-  set('ytdDT',       tDTEarnings>0 ? fmt(tDTEarnings) : '—');
+  set('ytdDT',       tDT>0 ? fmt(tDT) : '—');
   set('ytdCount',    filtered.length);
   set('ytdReg',      fmt(tReg));
   set('ytdHol',      tHol>0 ? fmt(tHol) : '—');
@@ -2406,6 +2398,14 @@ function bulkCardHTML(i) {
         <label>OT Hrs (1.5×)</label>
         <input type="number" id="bc-ot-${i}" step="0.25" min="0" placeholder="0" oninput="bulkCardPreview(${i})">
       </div>
+      <div class="bulk-cell" style="flex:1">
+        <label>Sick/Care Hrs</label>
+        <input type="number" id="bc-sick-${i}" step="0.25" min="0" placeholder="0" oninput="bulkCardPreview(${i})">
+      </div>
+      <div class="bulk-cell" style="flex:1">
+        <label>Vacation Hrs</label>
+        <input type="number" id="bc-vac-${i}" step="0.25" min="0" placeholder="0" oninput="bulkCardPreview(${i})">
+      </div>
       <div class="bulk-cell cell-del">
         <button class="bulk-del-btn" onclick="bulkRemoveCard(${i})" title="Remove">✕</button>
       </div>
@@ -2464,7 +2464,7 @@ function bulkCardHTML(i) {
     <div class="bulk-row" style="background:var(--bg3);padding:0">
       <button class="bulk-expand-btn" onclick="bulkToggleMore(${i})">
         <svg id="bc-morechev-${i}" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .15s"><polyline points="6 9 12 15 18 9"/></svg>
-        <span id="bc-morelabel-${i}">DT · Holiday · Sick · Vac · Float Hol · Premium · Additional</span>
+        <span id="bc-morelabel-${i}">DT · Holiday · Float Hol · Premium · Additional</span>
       </button>
     </div>
     <div id="bc-morehrs-${i}" style="display:none">
@@ -2477,14 +2477,6 @@ function bulkCardHTML(i) {
         <div class="bulk-cell" style="flex:1">
           <label>Holiday Hrs</label>
           <input type="number" id="bc-hol-${i}" step="0.25" min="0" placeholder="0" oninput="bulkCardPreview(${i})">
-        </div>
-        <div class="bulk-cell" style="flex:1">
-          <label>Sick/Care Hrs</label>
-          <input type="number" id="bc-sick-${i}" step="0.25" min="0" placeholder="0" oninput="bulkCardPreview(${i})">
-        </div>
-        <div class="bulk-cell" style="flex:1">
-          <label>Vacation Hrs</label>
-          <input type="number" id="bc-vac-${i}" step="0.25" min="0" placeholder="0" oninput="bulkCardPreview(${i})">
         </div>
         <div class="bulk-cell" style="flex:1">
           <label>Float Hol Hrs</label>
