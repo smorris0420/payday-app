@@ -72,7 +72,8 @@ export default async function handler(req, res) {
     const regRate = rateRound(s.rate);
     const otRate  = rateRound(s.rate * 1.5);
     const dtRate  = rateRound(s.rate * 2);
-    const gross = parseFloat((
+    // Use gross from client if provided (handles pay overrides), otherwise calculate
+    const gross = (s.gross && s.gross > 0) ? parseFloat(s.gross) : parseFloat((
       payRound(regRate * s.reg) +
       payRound(otRate * (s.ot || 0)) +
       payRound(dtRate * (s.dt || 0)) +

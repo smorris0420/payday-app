@@ -2174,7 +2174,8 @@ async function saveEdit() {
   if(window._idb && currentUser) window._idb.idbPutStub(s, currentUser.id).catch(()=>{});
   try {
     setSyncDot('syncing');
-    await syncOp('/api/stubs?id='+s.id,'PATCH',updated);
+    // Send the computed gross so API doesn't recalculate from hours
+    await syncOp('/api/stubs?id='+s.id,'PATCH',{...updated, gross: s.gross});
     if(isOnline) { setSyncDot('ok'); showToast('Paycheck updated'); }
     else showToast('Saved offline — will sync when reconnected');
   } catch { setSyncDot('err'); showToast('Sync failed',true); }
