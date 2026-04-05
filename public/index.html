@@ -525,7 +525,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         <!-- EARNINGS BREAKDOWN ROW -->
         <div class="metrics metrics-6" style="margin-top:16px">
           <div class="metric"><div class="metric-label">Regular Pay</div><div class="metric-value" id="ytdReg">—</div></div>
-          <div class="metric"><div class="metric-label">OT Earnings</div><div class="metric-value amber" id="ytdOT2">—</div></div>
+          <div class="metric"><div class="metric-label">Total OT &amp; DT</div><div class="metric-value amber" id="ytdOT2">—</div></div>
           <div class="metric"><div class="metric-label">Double Time</div><div class="metric-value red" id="ytdDT">—</div></div>
           <div class="metric"><div class="metric-label">Holiday Pay</div><div class="metric-value blue" id="ytdHol">—</div></div>
           <div class="metric"><div class="metric-label">Additional Pay</div><div class="metric-value" id="ytdAddl">—</div></div>
@@ -1689,7 +1689,7 @@ function buildYTD() {
   set('ytdAvg',      fmt(avgNet));
   set('ytdTax',      fmt(tTax));
   set('ytdOT',       tOT>0 ? fmt(tOT) : '—');
-  set('ytdOT2',      tOT>0 ? fmt(tOT) : '—');
+  set('ytdOT2',      (tOT+tDT)>0 ? fmt(tOT+tDT) : '—');
   set('ytdDT',       tDT>0 ? fmt(tDT) : '—');
   set('ytdCount',    filtered.length);
   set('ytdReg',      fmt(tReg));
