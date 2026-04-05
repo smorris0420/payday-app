@@ -208,7 +208,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
 .bulk-card:hover{border-color:var(--border2)}
 .bulk-row{display:flex;align-items:stretch;border-bottom:1px solid var(--border)}
 .bulk-row:last-child{border-bottom:none}
-.bulk-row.row-a{background:var(--bg3)}
+.bulk-row.row-a{background:var(--bg3);border-bottom:1px solid var(--border2)}
 .bulk-row.row-b{background:var(--bg2)}
 .bulk-row.row-x{background:var(--bg4)}
 .bulk-cell{display:flex;flex-direction:column;justify-content:center;padding:6px 8px;border-right:1px solid var(--border);min-width:0}
@@ -221,8 +221,8 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
 .bulk-cell input[type=date]{font-family:var(--sans);font-size:11px}
 .bulk-cell input::placeholder{color:var(--text3);opacity:.45}
 .bulk-cell input:focus{color:var(--green)}
-.bulk-cell.cell-money input{color:var(--amber)}
-.bulk-cell.cell-totals input{color:var(--green);font-weight:600}
+.bulk-cell.cell-money input{color:var(--text)}
+.bulk-cell.cell-totals input{color:var(--text);font-weight:500}
 .bulk-del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:color .15s}
 .bulk-del-btn:hover{color:var(--red);background:var(--red-dim)}
 .bulk-expand-btn{width:100%;background:none;border:none;color:var(--text3);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;padding:4px 8px;text-align:left;display:flex;align-items:center;gap:4px;transition:color .15s}
@@ -413,6 +413,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Dental</span><span class="card-value red" id="bDen">—</span></div>
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Medical</span><span class="card-value red" id="bMedI">—</span></div>
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Vision</span><span class="card-value red" id="bVis">—</span></div>
+          <div class="card-row" id="rowRetire" style="display:none"><span class="card-label" style="color:var(--red)">– 401k / Retirement</span><span class="card-value red" id="bRetire">—</span></div>
           <div class="card-row card-total"><span class="card-label">Take-home pay</span><span class="card-value green" id="bNet">—</span></div>
         </div>
         <div class="section-title">Hours &amp; Pay</div>
@@ -434,6 +435,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           <div class="input-row"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iDen" value="2.00" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iMedI" value="17.00" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iVis" value="0.50" step="0.01" min="0"></div></div>
+          <div class="input-row"><label>401k / Retirement</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iRetire" value="0" step="0.01" min="0"></div></div>
         </div>
         <button class="btn btn-primary" style="margin-top:4px;margin-bottom:8px" onclick="openLogModal()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -579,6 +581,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           <div class="input-row" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border)"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sDen" value="2.00" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sMedI" value="17.00" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sVis" value="0.50" step="0.01" min="0"></div></div>
+          <div class="input-row"><label>401k / Retirement</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sRetire" value="0.00" step="0.01" min="0"></div></div>
         </div>
         <button class="btn btn-primary" style="margin-bottom:8px" onclick="saveSettings()">Save defaults</button>
         <div class="section-title">Federal withholding</div>
@@ -703,6 +706,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         <div class="form-field"><label>Dental ($)</label><input type="number" id="lDen" step="0.01" min="0"></div>
         <div class="form-field"><label>Medical ($)</label><input type="number" id="lMedI" step="0.01" min="0"></div>
         <div class="form-field"><label>Vision ($)</label><input type="number" id="lVis" step="0.01" min="0"></div>
+      <div class="form-field"><label>401k / Retirement ($)</label><input type="number" id="lRetire" step="0.01" min="0" placeholder="0"></div>
       </div>
     </div>
 
@@ -712,6 +716,8 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         Paystub overrides <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;opacity:.8">&nbsp;— enter exact values to match paystub</span>
       </div>
       <div class="form-grid">
+        <div class="form-field"><label>Regular pay ($)</label><input type="number" id="lRegPay" step="0.01" min="0" placeholder="optional"></div>
+        <div class="form-field"><label>OT pay ($)</label><input type="number" id="lOTPay" step="0.01" min="0" placeholder="optional"></div>
         <div class="form-field"><label>Actual gross ($)</label><input type="number" id="lGross" step="0.01" min="0" placeholder="optional"></div>
         <div class="form-field"><label>Actual net ($)</label><input type="number" id="lNet" step="0.01" min="0" placeholder="optional"></div>
       </div>
@@ -785,6 +791,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           <div class="form-field"><label>Dental ($)</label><input type="number" id="eDen" step="0.01" min="0"></div>
           <div class="form-field"><label>Medical ($)</label><input type="number" id="eMedI" step="0.01" min="0"></div>
           <div class="form-field"><label>Vision ($)</label><input type="number" id="eVis" step="0.01" min="0"></div>
+          <div class="form-field"><label>401k / Retirement ($)</label><input type="number" id="eRetire" step="0.01" min="0" placeholder="0"></div>
         </div>
       </div>
 
@@ -794,6 +801,8 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           Paystub overrides <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;opacity:.8">&nbsp;— enter exact values to match paystub</span>
         </div>
         <div class="form-grid">
+          <div class="form-field"><label>Regular pay ($)</label><input type="number" id="eRegPay" step="0.01" min="0" placeholder="optional"></div>
+          <div class="form-field"><label>OT pay ($)</label><input type="number" id="eOTPay" step="0.01" min="0" placeholder="optional"></div>
           <div class="form-field"><label>Actual gross ($)</label><input type="number" id="eGross" step="0.01" min="0" placeholder="optional"></div>
           <div class="form-field"><label>Actual net ($)</label><input type="number" id="eNet" step="0.01" min="0" placeholder="optional"></div>
         </div>
@@ -1076,6 +1085,7 @@ async function loadAllAsUser(userId, displayName) {
     if(appSettings.den) document.getElementById('iDen').value=parseFloat(appSettings.den).toFixed(2);
     if(appSettings.medI) document.getElementById('iMedI').value=parseFloat(appSettings.medI).toFixed(2);
     if(appSettings.vis) document.getElementById('iVis').value=parseFloat(appSettings.vis).toFixed(2);
+    if(appSettings.retire) document.getElementById('iRetire').value=parseFloat(appSettings.retire).toFixed(2);
     showViewAsBanner(displayName);
     showToast('Viewing as '+displayName);
     setSyncDot('ok');
@@ -1117,6 +1127,7 @@ async function loadAll() {
     if(appSettings.den) document.getElementById('iDen').value=parseFloat(appSettings.den).toFixed(2);
     if(appSettings.medI) document.getElementById('iMedI').value=parseFloat(appSettings.medI).toFixed(2);
     if(appSettings.vis) document.getElementById('iVis').value=parseFloat(appSettings.vis).toFixed(2);
+    if(appSettings.retire) document.getElementById('iRetire').value=parseFloat(appSettings.retire).toFixed(2);
     const defaultRate=appSettings.defaultRate||mostRecentRate()||21.90;
     document.getElementById('iRate').value=defaultRate;
     // Show pending outbox count
@@ -1172,7 +1183,7 @@ function fromRealtimeRow(r) {
     gross: parseFloat(r.gross), fed: parseFloat(r.fed),
     ss: parseFloat(r.ss), med: parseFloat(r.med),
     den: parseFloat(r.den), medI: parseFloat(r.med_i),
-    vis: parseFloat(r.vis),
+    vis: parseFloat(r.vis), retire: parseFloat(r.retire||0),
     net: r.net != null ? parseFloat(r.net) : null,
     seeded: r.seeded,
   };
@@ -1260,13 +1271,14 @@ function calc() {
   const den=parseFloat(document.getElementById('iDen').value)||0;
   const medI=parseFloat(document.getElementById('iMedI').value)||0;
   const vis=parseFloat(document.getElementById('iVis').value)||0;
+  const retire=parseFloat(document.getElementById('iRetire').value)||0;
   const regRate=rateRound(rate), otRate=rateRound(rate*1.5), dtRate=rateRound(rate*2);
   const regPay=payRound(regRate*reg), otPay=payRound(otRate*ot), dtPay=payRound(dtRate*dt);
   const holPay=payRound(regRate*hol), sickPay=payRound(regRate*sick), vacPay=payRound(regRate*vac), fltHolPay=payRound(regRate*fltHol);
   const premPay=premRate*premHrs;
   const gross=regPay+otPay+dtPay+holPay+sickPay+vacPay+fltHolPay+premPay+addl;
   const fr=effFedRate(), fed=gross*fr, ss=gross*0.062, med=gross*0.0145;
-  const totalDed=fed+ss+med+den+medI+vis, net=gross-totalDed;
+  const totalDed=fed+ss+med+den+medI+vis+retire, net=gross-totalDed;
   document.getElementById('mGross').textContent=fmt(gross);
   document.getElementById('mDeduct').textContent=fmt(totalDed);
   document.getElementById('mNet').textContent=fmt(net);
@@ -1285,6 +1297,8 @@ function calc() {
   document.getElementById('bDen').textContent=fmt(den);
   document.getElementById('bMedI').textContent=fmt(medI);
   document.getElementById('bVis').textContent=fmt(vis);
+  document.getElementById('bRetire').textContent=fmt(retire);
+  document.getElementById('rowRetire').style.display=retire>0?'flex':'none';
   document.getElementById('bNet').textContent=fmt(net);
   document.getElementById('calcRateLabel').textContent='$'+rate.toFixed(2)+'/hr';
   document.getElementById('rowOT').style.display=ot>0?'flex':'none';
@@ -1296,7 +1310,7 @@ function calc() {
   document.getElementById('rowPrem').style.display=premPay>0?'flex':'none';
   document.getElementById('rowAddl').style.display=addl>0?'flex':'none';
 }
-['iRate','iReg','iOT','iDT','iHol','iSick','iVac','iFltHol','iPremRate','iPremHrs','iAddl','iDen','iMedI','iVis'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+['iRate','iReg','iOT','iDT','iHol','iSick','iVac','iFltHol','iPremRate','iPremHrs','iAddl','iDen','iMedI','iVis','iRetire'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 
 // ===== NAVIGATION =====
 const pageOrder = ['calc','history','ytd','bulk','settings','admin'];
@@ -1408,7 +1422,7 @@ function buildHistory() {
   sorted.forEach(s=>{
     const yr=s.date.slice(0,4);
     if(yr!==lastYear) { html+=`<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 7px;padding-left:2px;font-weight:700">${yr}</div>`; lastYear=yr; }
-    const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis, net=s.net||(s.gross-ded);
+    const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0), net=s.net||(s.gross-ded);
     const pct=(s.gross/maxG*100).toFixed(1);
     const d=new Date(s.date+'T12:00:00'), ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     const totalHrs=s.reg+(s.ot||0)+(s.dt||0)+(s.hol||0)+(s.sick||0)+(s.vac||0)+(s.fltHol||0);
@@ -1470,9 +1484,9 @@ function buildHistorySheet() {
       rows += `<tr class="hist-yr-header"><td colspan="${cols}">${yr}</td></tr>`;
       lastYear = yr;
     }
-    const ded = s.fed+s.ss+s.med+s.den+s.medI+s.vis;
+    const ded = s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
     const net = s.net||(s.gross-ded);
-    const benefits = s.den+s.medI+s.vis;
+    const benefits = s.den+s.medI+s.vis+(s.retire||0);
     const d = new Date(s.date+'T12:00:00');
     const ds = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     rows += `<tr onclick="${bulkMode?`toggleSelect('${s.id}',event)`:`openDetail('${s.id}')`}">
@@ -1499,8 +1513,8 @@ function buildHistorySheet() {
   const tFed   = sorted.reduce((a,s)=>a+s.fed,0);
   const tSS    = sorted.reduce((a,s)=>a+s.ss,0);
   const tMed   = sorted.reduce((a,s)=>a+s.med,0);
-  const tBen   = sorted.reduce((a,s)=>a+s.den+s.medI+s.vis,0);
-  const tNets  = sorted.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis; return s.net||(s.gross-d); });
+  const tBen   = sorted.reduce((a,s)=>a+s.den+s.medI+s.vis+(s.retire||0),0);
+  const tNets  = sorted.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return s.net||(s.gross-d); });
   const tNet   = tNets.reduce((a,v)=>a+v,0);
   const extraCols = (hasDT?1:0)+(hasHol?1:0)+(hasPrem?2:0)+(hasAddl?1:0);
   rows += `<tr style="background:var(--green-dim);font-weight:700;border-top:2px solid var(--green-border)">
@@ -1558,7 +1572,7 @@ function buildYTD() {
   const tFed  = filtered.reduce((a,s)=>a+s.fed, 0);
   const tSS   = filtered.reduce((a,s)=>a+s.ss, 0);
   const tMed  = filtered.reduce((a,s)=>a+s.med, 0);
-  const tBen  = filtered.reduce((a,s)=>a+s.den+s.medI+s.vis, 0);
+  const tBen  = filtered.reduce((a,s)=>a+s.den+s.medI+s.vis+(s.retire||0), 0);
   const tTax  = tFed+tSS+tMed;
   const tDed  = tTax+tBen;
   // Use stored gross for accuracy — derive OT/DT as remainder after reg/hol/ben/prem/addl
@@ -1580,7 +1594,7 @@ function buildYTD() {
   const tDT = 0;     // folded into tOT above
   const tHrs  = filtered.reduce((a,s)=>a+s.reg+(s.ot||0)+(s.dt||0)+(s.hol||0)+(s.sick||0)+(s.vac||0)+(s.fltHol||0), 0);
   const tOTHrs= filtered.reduce((a,s)=>a+(s.ot||0), 0);
-  const nets  = filtered.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis; return s.net||(s.gross-d); });
+  const nets  = filtered.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return s.net||(s.gross-d); });
   const tNet  = nets.reduce((a,v)=>a+v, 0);
   const avgNet= tNet/nets.length;
   const avgG  = tG/filtered.length;
@@ -1613,7 +1627,7 @@ function buildYTD() {
   // ── Charts ────────────────────────────────────────────────────────────────
   const sorted=[...filtered].sort((a,b)=>a.date.localeCompare(b.date));
   const labels=sorted.map(s=>{ const d=new Date(s.date+'T12:00:00'); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); });
-  const netData=sorted.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis; return parseFloat((s.net||(s.gross-d)).toFixed(2)); });
+  const netData=sorted.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return parseFloat((s.net||(s.gross-d)).toFixed(2)); });
 
   const chartDefaults = {
     responsive:true, maintainAspectRatio:false,
@@ -1659,6 +1673,7 @@ function buildSettingsUI() {
   if(appSettings.den) document.getElementById('sDen').value=parseFloat(appSettings.den).toFixed(2);
   if(appSettings.medI) document.getElementById('sMedI').value=parseFloat(appSettings.medI).toFixed(2);
   if(appSettings.vis) document.getElementById('sVis').value=parseFloat(appSettings.vis).toFixed(2);
+  if(appSettings.retire) document.getElementById('sRetire').value=parseFloat(appSettings.retire).toFixed(2);
   if(appSettings.fedOverride) document.getElementById('sFedRate').value=appSettings.fedOverride;
   document.getElementById('sEffRate').textContent=(effFedRate()*100).toFixed(2)+'%';
   // Show admin nav item in sidebar
@@ -1862,12 +1877,14 @@ async function saveSettings() {
     den: parseFloat(document.getElementById('sDen').value)||2,
     medI: parseFloat(document.getElementById('sMedI').value)||17,
     vis: parseFloat(document.getElementById('sVis').value)||0.5,
+    retire: parseFloat(document.getElementById('sRetire').value)||0,
   };
   if(rateVal > 0) s.defaultRate = rateVal;
   Object.assign(appSettings, s);
   document.getElementById('iDen').value=s.den;
   document.getElementById('iMedI').value=s.medI;
   document.getElementById('iVis').value=s.vis;
+  if(s.retire>=0) document.getElementById('iRetire').value=s.retire;
   if(rateVal > 0) document.getElementById('iRate').value=rateVal;
   calc();
   if(window._idb && currentUser) window._idb.idbSaveSettings({...appSettings}, currentUser.id).catch(()=>{});
@@ -1920,8 +1937,11 @@ function openLogModal() {
   document.getElementById('lPremRate').value=0;
   document.getElementById('lPremHrs').value=0;
   document.getElementById('lAddl').value=0;
+  document.getElementById('lRegPay').value='';
+  document.getElementById('lOTPay').value='';
   document.getElementById('lGross').value='';
   document.getElementById('lNet').value='';
+  document.getElementById('lRetire').value='';
   document.getElementById('lFed').value='';
   document.getElementById('lSS').value='';
   document.getElementById('lMed').value='';
@@ -1952,10 +1972,23 @@ async function saveLog() {
   const den=parseFloat(document.getElementById('lDen').value)||0;
   const medI=parseFloat(document.getElementById('lMedI').value)||0;
   const vis=parseFloat(document.getElementById('lVis').value)||0;
+  // Use exact paystub values if entered, otherwise use calculated
+  const regPayRaw=parseFloat(document.getElementById('lRegPay').value);
+  const otPayRaw=parseFloat(document.getElementById('lOTPay').value);
   const grossRaw=parseFloat(document.getElementById('lGross').value);
-  const finalGross = !isNaN(grossRaw) && grossRaw > 0 ? grossRaw : gross;
+  // If individual pay amounts entered, recalc gross from those
+  const hasPayOverrides = (!isNaN(regPayRaw)&&regPayRaw>0) || (!isNaN(otPayRaw)&&otPayRaw>0);
+  let finalGross = gross;
+  if(!isNaN(grossRaw) && grossRaw > 0) {
+    finalGross = grossRaw;
+  } else if(hasPayOverrides) {
+    const fReg = !isNaN(regPayRaw)&&regPayRaw>0 ? regPayRaw : payRound(rateRound(rate)*reg);
+    const fOT  = !isNaN(otPayRaw)&&otPayRaw>0   ? otPayRaw  : payRound(rateRound(rate*1.5)*ot);
+    const _r=rateRound(rate);
+    finalGross = parseFloat((fReg+fOT+payRound(rateRound(rate*2)*dt)+payRound(_r*hol)+payRound(_r*sick)+payRound(_r*vac)+payRound(_r*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
+  }
   const netRaw=parseFloat(document.getElementById('lNet').value);
-  const stub={id:uid(),date:document.getElementById('lDate').value,rate,reg,ot,dt,hol,sick,vac,fltHol,premRate,premHrs,addl,gross:finalGross,fed,ss,med,den,medI,vis,net:isNaN(netRaw)?null:netRaw,seeded:false};
+  const stub={id:uid(),date:document.getElementById('lDate').value,rate,reg,ot,dt,hol,sick,vac,fltHol,premRate,premHrs,addl,gross:finalGross,fed,ss,med,den,medI,vis,retire,net:isNaN(netRaw)?null:netRaw,seeded:false};
 
   // === LIVE UPDATE: add to local state immediately ===
   stubs.unshift(stub);
@@ -1988,7 +2021,7 @@ async function saveLog() {
 
 // ===== DETAIL MODAL =====
 function renderReadView(s) {
-  const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis, net=s.net||(s.gross-ded);
+  const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0), net=s.net||(s.gross-ded);
   // Derive OT/DT from stored gross so display always matches paystub exactly
   const _rr=rateRound(s.rate);
   const regPay  = payRound(_rr*s.reg);
@@ -2025,6 +2058,8 @@ function renderReadView(s) {
     <div class="card-row"><span class="card-label" style="color:var(--red)">&#x2212; Soc Security</span><span class="card-value red">${fmt(s.ss)}</span></div>
     <div class="card-row"><span class="card-label" style="color:var(--red)">&#x2212; Medicare</span><span class="card-value red">${fmt(s.med)}</span></div>
     <div class="card-row"><span class="card-label" style="color:var(--red)">&#x2212; Benefits</span><span class="card-value red">${fmt(s.den+s.medI+s.vis)}</span></div>
+    ${(s.retire||0)>0?`<div class="card-row"><span class="card-label" style="color:var(--red)">&#x2212; 401k / Retirement</span><span class="card-value red">${fmt(s.retire)}</span></div>`:''}
+
     <div class="card-row card-total"><span class="card-label">Take-home</span><span class="card-value green">${fmt(net)}</span></div>
   </div>${s.seeded?'<p style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">Imported from paystubs</p>':''}`;
 }
@@ -2066,6 +2101,22 @@ function toggleEditMode() {
     document.getElementById('eDen').value=s.den;
     document.getElementById('eMedI').value=s.medI;
     document.getElementById('eVis').value=s.vis;
+    document.getElementById('eRetire').value=s.retire||0;
+    // Pre-fill reg/OT pay from stored gross (back-derived)
+    const _eRr=rateRound(s.rate);
+    const _eRegP=payRound(_eRr*s.reg);
+    const _eHolP=payRound(_eRr*(s.hol||0));
+    const _eSickP=payRound(_eRr*(s.sick||0));
+    const _eVacP=payRound(_eRr*(s.vac||0));
+    const _eFltP=payRound(_eRr*(s.fltHol||0));
+    const _ePremP=payRound((s.premRate||0)*(s.premHrs||0));
+    const _eOtdtRaw=Math.max(0,parseFloat((s.gross-_eRegP-_eHolP-_eSickP-_eVacP-_eFltP-_ePremP-(s.addl||0)).toFixed(2)));
+    const _eCalcOT=payRound(rateRound(s.rate*1.5)*(s.ot||0));
+    const _eCalcDT=payRound(rateRound(s.rate*2)*(s.dt||0));
+    const _eOtDtTotal=_eCalcOT+_eCalcDT;
+    const _eShowOT=_eOtDtTotal>0?payRound(_eOtdtRaw*(_eCalcOT/_eOtDtTotal)):0;
+    document.getElementById('eRegPay').value=_eRegP||'';
+    document.getElementById('eOTPay').value=(s.ot||0)>0?(_eShowOT||''):'';
     document.getElementById('eGross').value=s.gross||'';
     document.getElementById('eNet').value=s.net||'';
     document.getElementById('dReadView').style.display='none';
@@ -2094,17 +2145,23 @@ async function saveEdit() {
     den:parseFloat(document.getElementById('eDen').value)||0,
     medI:parseFloat(document.getElementById('eMedI').value)||0,
     vis:parseFloat(document.getElementById('eVis').value)||0,
+    retire:parseFloat(document.getElementById('eRetire').value)||0,
+    regPay:parseFloat(document.getElementById('eRegPay').value)||0,
+    otPay:parseFloat(document.getElementById('eOTPay').value)||0,
     gross:parseFloat(document.getElementById('eGross').value)||s.gross,
     net:parseFloat(document.getElementById('eNet').value)||null,
   };
   Object.assign(s,updated);
   const _eRegR=rateRound(updated.rate),_eOtRate=rateRound(updated.rate*1.5),_eDtRate=rateRound(updated.rate*2);
-  s.gross=parseFloat((
-    payRound(_eRegR*updated.reg)+payRound(_eOtRate*updated.ot)+
+  const _eRegPay = updated.regPay>0 ? updated.regPay : payRound(_eRegR*updated.reg);
+  const _eOTPay  = updated.otPay>0  ? updated.otPay  : payRound(_eOtRate*updated.ot);
+  const _calcGross=parseFloat((
+    _eRegPay+_eOTPay+
     payRound(_eDtRate*updated.dt)+payRound(_eRegR*updated.hol)+
     payRound(_eRegR*(updated.sick||0))+payRound(_eRegR*(updated.vac||0))+payRound(_eRegR*(updated.fltHol||0))+
     payRound((updated.premRate||0)*(updated.premHrs||0))+(updated.addl||0)
   ).toFixed(2));
+  s.gross = (updated.gross && updated.gross > 0) ? updated.gross : _calcGross;
   // Live update
   document.getElementById('dReadView').innerHTML=renderReadView(s);
   document.getElementById('dReadView').style.display='block';
@@ -2207,9 +2264,17 @@ function bulkCardHTML(i) {
       </div>
     </div>
 
-    <!-- Row B: Deductions + Totals -->
+    <!-- Row B: Pay amounts + Deductions + Totals -->
     <div class="bulk-row row-b">
       <div class="bulk-cell cell-num"></div>
+      <div class="bulk-cell" style="flex:1">
+        <label>Reg Pay ($)</label>
+        <input type="number" id="bc-regpay-${i}" step="0.01" min="0" placeholder="opt.">
+      </div>
+      <div class="bulk-cell" style="flex:1">
+        <label>OT Pay ($)</label>
+        <input type="number" id="bc-otpay-${i}" step="0.01" min="0" placeholder="opt.">
+      </div>
       <div class="bulk-cell cell-money" style="flex:1">
         <label>Fed ($)</label>
         <input type="number" id="bc-fed-${i}" step="0.01" min="0" placeholder="auto">
@@ -2233,6 +2298,10 @@ function bulkCardHTML(i) {
       <div class="bulk-cell cell-money" style="flex:1">
         <label>Vision ($)</label>
         <input type="number" id="bc-vis-${i}" step="0.01" min="0" placeholder="auto">
+      </div>
+      <div class="bulk-cell" style="flex:1">
+        <label>401k ($)</label>
+        <input type="number" id="bc-retire-${i}" step="0.01" min="0" placeholder="0">
       </div>
       <div class="bulk-cell cell-totals" style="flex:1">
         <label>Gross ($)</label>
@@ -2353,14 +2422,19 @@ async function bulkSave() {
     const premRate=parseFloat(document.getElementById('bc-premr-'+i)?.value)||0;
     const premHrs=parseFloat(document.getElementById('bc-premh-'+i)?.value)||0;
     const addl=parseFloat(document.getElementById('bc-addl-'+i)?.value)||0;
+    const regPayOvr=parseFloat(document.getElementById('bc-regpay-'+i)?.value);
+    const otPayOvr=parseFloat(document.getElementById('bc-otpay-'+i)?.value);
     const _regR=rateRound(rate),_otR=rateRound(rate*1.5),_dtR=rateRound(rate*2);
-    const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
+    const _regPay = (!isNaN(regPayOvr)&&regPayOvr>0) ? regPayOvr : payRound(_regR*reg);
+    const _otPay  = (!isNaN(otPayOvr)&&otPayOvr>0)   ? otPayOvr  : payRound(_otR*ot);
+    const gross=parseFloat((_regPay+_otPay+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
     const fedRaw=parseFloat(document.getElementById('bc-fed-'+i)?.value);
     const ssRaw=parseFloat(document.getElementById('bc-ss-'+i)?.value);
     const medRaw=parseFloat(document.getElementById('bc-med-'+i)?.value);
     const fed=isNaN(fedRaw)?parseFloat((gross*effFedRate()).toFixed(2)):fedRaw;
     const ss=isNaN(ssRaw)?parseFloat((gross*0.062).toFixed(2)):ssRaw;
     const med=isNaN(medRaw)?parseFloat((gross*0.0145).toFixed(2)):medRaw;
+    const retireVal=parseFloat(document.getElementById('bc-retire-'+i)?.value)||0;
     const _denRaw=document.getElementById('bc-den-'+i)?.value;
     const _medIRaw=document.getElementById('bc-medi-'+i)?.value;
     const _visRaw=document.getElementById('bc-vis-'+i)?.value;
@@ -2371,7 +2445,7 @@ async function bulkSave() {
     const grossRaw=parseFloat(document.getElementById('bc-gross-'+i)?.value);
     const finalGross=(!isNaN(grossRaw)&&grossRaw>0)?grossRaw:gross;
     const netRaw=parseFloat(document.getElementById('bc-net-'+i)?.value);
-    toSave.push({id:uid(),date,rate,reg,ot,dt,hol,sick,vac,fltHol,premRate,premHrs,addl,gross:finalGross,fed,ss,med,den,medI,vis,net:isNaN(netRaw)?null:netRaw,seeded:false});
+    toSave.push({id:uid(),date,rate,reg,ot,dt,hol,sick,vac,fltHol,premRate,premHrs,addl,gross:finalGross,fed,ss,med,den,medI,vis,retire:retireVal,net:isNaN(netRaw)?null:netRaw,seeded:false});
   }
   if(!toSave.length) { showToast('No valid paychecks to save — check dates and rates',true); return; }
   document.getElementById('bulkStatus').textContent='Saving '+toSave.length+' paychecks…';
