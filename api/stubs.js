@@ -24,6 +24,8 @@ function fromRow(r) {
     vac:    parseFloat(r.vac     || 0),
     fltHol: parseFloat(r.flt_hol || 0),
     retire: parseFloat(r.retire  || 0),
+    regPay: r.reg_pay != null ? parseFloat(r.reg_pay) : null,
+    otPay:  r.ot_pay  != null ? parseFloat(r.ot_pay)  : null,
     net:   r.net != null ? parseFloat(r.net) : null,
     seeded: r.seeded,
   };
