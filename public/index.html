@@ -398,6 +398,7 @@ html{transition:background .2s,color .2s}
 .sync-dot.offline{background:var(--text3)}
 .sync-dot.pending{background:var(--amber);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* USER MANAGEMENT */
 .user-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;box-shadow:var(--shadow)}
@@ -585,7 +586,16 @@ html{transition:background .2s,color .2s}
           <div style="font-size:20px;font-weight:700;letter-spacing:-.3px">Dashboard</div>
           <div style="font-size:12px;color:var(--text3);margin-top:1px">Drag widgets from the panel · drag to move · resize from corner</div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span id="dashSaveStatus" style="font-size:11px;color:var(--text3);display:none;align-items:center;gap:4px"></span>
+          <button class="btn btn-primary btn-sm" id="dashSaveBtn" onclick="forceSaveDash()" style="gap:5px;display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save layout
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="resetDashboard()" style="gap:5px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Reset to default
+          </button>
           <button class="btn btn-secondary btn-sm" id="dashClearBtn" onclick="clearDashboard()" style="color:var(--red)">Clear all</button>
           <div style="font-size:11px;color:var(--text3);padding:0 4px">|</div>
           <button class="btn btn-secondary btn-sm" id="dashPanelToggle" onclick="toggleDashPanel()">
@@ -2808,36 +2818,97 @@ function computeDashData(yr) {
 
 // ── Load / Save ──────────────────────────────────────────────────────────────
 async function loadDashboard() {
+  let isNew = false;
   try {
     const r = await apiFetch('/api/dashboard');
-    dashConfig = (r.config && r.config.length) ? r.config : getDefaultDashConfig();
-  } catch(e) { dashConfig = getDefaultDashConfig(); }
+    if(r.config && r.config.length) {
+      dashConfig = r.config;
+    } else {
+      // No saved config — new user, seed with default and save immediately
+      dashConfig = getDefaultDashConfig();
+      isNew = true;
+    }
+  } catch(e) { dashConfig = getDefaultDashConfig(); isNew = true; }
+  if(isNew) {
+    // Save default layout to Supabase so it persists
+    try { await apiFetch('/api/dashboard',{method:'POST',body:JSON.stringify({config:dashConfig})}); } catch(e){}
+  }
   computeDashData();
   renderDashboard(); buildDashPanel();
-  // Always populate panel — it's a constant catalog, needs no data
-  buildDashPanel();
   requestAnimationFrame(()=>{ initCanvasDrop(); initDashResizeObserver(); });
 }
 
 function getDefaultDashConfig() {
   return [
-    { id:dashUID(), widgetId:'total-gross',   x:0,  y:0, w:3, h:2, chartType:null },
-    { id:dashUID(), widgetId:'total-net',     x:3,  y:0, w:3, h:2, chartType:null },
-    { id:dashUID(), widgetId:'keep-rate',     x:6,  y:0, w:3, h:2, chartType:null },
-    { id:dashUID(), widgetId:'ot-earnings',   x:9,  y:0, w:3, h:2, chartType:null },
-    { id:dashUID(), widgetId:'chart-gross',   x:0,  y:2, w:8, h:3, chartType:'bar' },
-    { id:dashUID(), widgetId:'chart-earnings',x:8,  y:2, w:4, h:3, chartType:'doughnut' },
-    { id:dashUID(), widgetId:'track-ss',      x:0,  y:5, w:4, h:3, chartType:null },
-    { id:dashUID(), widgetId:'track-recent',  x:4,  y:5, w:8, h:3, chartType:null },
+    // Row 0 — four key stats
+    { id:dashUID(), widgetId:'total-gross',    x:0,  y:0, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'total-net',      x:3,  y:0, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'keep-rate',      x:6,  y:0, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'ot-earnings',    x:9,  y:0, w:3, h:2, chartType:null },
+    // Row 2 — main chart + earnings donut
+    { id:dashUID(), widgetId:'chart-gross',    x:0,  y:2, w:8, h:4, chartType:'bar' },
+    { id:dashUID(), widgetId:'chart-earnings', x:8,  y:2, w:4, h:4, chartType:'doughnut' },
+    // Row 6 — pace stats + OT info
+    { id:dashUID(), widgetId:'proj-gross',     x:0,  y:6, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'ot-hours',       x:3,  y:6, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'track-streak',   x:6,  y:6, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'net-per-day',    x:9,  y:6, w:3, h:2, chartType:null },
+    // Row 8 — SS tracker + recent paychecks
+    { id:dashUID(), widgetId:'track-ss',       x:0,  y:8, w:4, h:3, chartType:null },
+    { id:dashUID(), widgetId:'track-recent',   x:4,  y:8, w:8, h:3, chartType:null },
   ];
 }
 
+function _dashSetSaveUI(state){
+  // state: 'unsaved' | 'saving' | 'saved' | 'error'
+  const status = document.getElementById('dashSaveStatus');
+  const btn    = document.getElementById('dashSaveBtn');
+  if(!status||!btn) return;
+  if(state==='unsaved'){
+    status.style.display='inline-flex';
+    status.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--amber)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Unsaved changes';
+    btn.style.display='inline-flex';
+  } else if(state==='saving'){
+    status.style.display='inline-flex';
+    status.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text3);animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving…';
+    btn.style.display='none';
+  } else if(state==='saved'){
+    status.style.display='inline-flex';
+    status.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--green)"><polyline points="20 6 9 17 4 12"/></svg> Saved';
+    btn.style.display='none';
+    setTimeout(()=>{ if(status) status.style.display='none'; }, 2000);
+  } else if(state==='error'){
+    status.style.display='inline-flex';
+    status.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--red)"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Save failed';
+    btn.style.display='inline-flex';
+  }
+}
+
+async function forceSaveDash(){
+  clearTimeout(dashSaveTimer);
+  _dashSetSaveUI('saving');
+  try {
+    await apiFetch('/api/dashboard',{method:'POST',body:JSON.stringify({config:dashConfig})});
+    _dashSetSaveUI('saved');
+  } catch(e){
+    console.warn('Dashboard save failed',e);
+    _dashSetSaveUI('error');
+  }
+}
+
 async function saveDashConfig() {
+  _dashSetSaveUI('unsaved');
   clearTimeout(dashSaveTimer);
   dashSaveTimer = setTimeout(async()=>{
-    try { await apiFetch('/api/dashboard',{method:'POST',body:JSON.stringify({config:dashConfig})}); }
-    catch(e){ console.warn('Dashboard save failed',e); }
-  }, 600);
+    _dashSetSaveUI('saving');
+    try {
+      await apiFetch('/api/dashboard',{method:'POST',body:JSON.stringify({config:dashConfig})});
+      _dashSetSaveUI('saved');
+    } catch(e){
+      console.warn('Dashboard save failed',e);
+      _dashSetSaveUI('error');
+    }
+  }, 1500);
 }
 
 // ── Render canvas ────────────────────────────────────────────────────────────
@@ -3219,6 +3290,16 @@ function clearDashboard(){
   dashConfig=[];
   saveDashConfig();
   renderDashboard(); buildDashPanel();
+}
+
+function resetDashboard(){
+  if(!confirm('Reset your dashboard to the default layout? Your current layout will be lost.')) return;
+  Object.values(dashCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+  dashCharts={};
+  dashConfig = getDefaultDashConfig();
+  saveDashConfig();
+  renderDashboard(); buildDashPanel();
+  showToast('Dashboard reset to default');
 }
 
 // ── Event delegation for dashboard ───────────────────────────────────────────
