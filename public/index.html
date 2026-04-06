@@ -579,7 +579,7 @@ html{transition:background .2s,color .2s}
     </div>
 
     <!-- DASHBOARD PAGE -->
-    <div id="page-dash" class="page">
+    <div id="page-dash" class="page active">
       <!-- Header bar (outside the flex layout) -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1.5px solid var(--border);flex-shrink:0;flex-wrap:wrap;gap:8px">
         <div>
@@ -630,7 +630,7 @@ html{transition:background .2s,color .2s}
     </div>
 
     <!-- CALCULATOR PAGE -->
-    <div id="page-calc" class="page active">
+    <div id="page-calc" class="page">
       <div class="page-inner">
         <div class="page-header">
           <div>
@@ -1479,7 +1479,7 @@ async function login() {
     updateSidebarUser();
     // Always reset to calculator on every login — clears any leftover page state from previous user
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.getElementById('page-calc').classList.add('active');
+    document.getElementById('page-dash').classList.add('active');
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.sidebar-nav-btn').forEach(b=>b.classList.remove('active'));
     const firstSb=document.querySelector('.sidebar-nav-btn');
@@ -1592,6 +1592,7 @@ async function loadAll() {
     if(pending > 0) setSyncDot('pending', pending);
     else setSyncDot(isOnline?'ok':'offline');
     calc(); buildYTDTabs(); buildYTD();
+    if(isOnline) loadDashboard();
     if(currentUser?.role==='admin' && isOnline) {
       try { allUsers=await apiFetch('/api/users'); } catch {}
     }
@@ -1857,7 +1858,9 @@ function showPage(id, btn, source) {
   if(id==='history') buildHistory();
   if(id!=='history' && bulkMode) { bulkMode=false; selectedIds.clear(); const btn=document.getElementById('histBulkToggle'); if(btn) btn.textContent='Select'; updateBulkBar(); }
   if(id==='dash') {
-    computeDashData(); renderDashboard(); buildDashPanel();
+    computeDashData();
+    // Only re-render if config already loaded; loadDashboard() handles first load
+    if(dashConfig.length) { renderDashboard(); buildDashPanel(); }
     requestAnimationFrame(()=>{ initCanvasDrop(); initDashResizeObserver(); });
   }
   if(id==='ytd') { buildYTDTabs(); buildYTD();
@@ -4460,9 +4463,9 @@ if(token&&currentUser) {
   document.getElementById('appShell').classList.add('visible');
   updateSidebarUser();
   // Restore last visited page on reload (but guard admin page for non-admins)
-  const savedPage = sessionStorage.getItem('payday_page') || 'calc';
-  const safePage = (savedPage === 'admin' && currentUser.role !== 'admin') ? 'calc' : savedPage;
-  if(safePage !== 'calc') {
+  const savedPage = sessionStorage.getItem('payday_page') || 'dash';
+  const safePage = (savedPage === 'admin' && currentUser.role !== 'admin') ? 'dash' : savedPage;
+  if(safePage !== 'dash') {
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     const pageEl = document.getElementById('page-'+safePage);
     if(pageEl) pageEl.classList.add('active');
