@@ -2209,19 +2209,23 @@ function buildYTD() {
   const streakEl=document.getElementById('ytdStreak');
   if(streakEl) streakEl.style.color=curStreak>=3?'var(--amber)':curStreak>0?'var(--text)':'var(--text3)';
 
-  // Pay rate history
+  // Pay rate history — use ALL stubs across all years, not just filtered
   const rateChanges=[];
   let lastRate=null;
-  [...filtered].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
-    if(s.rate!==lastRate){ rateChanges.push({date:s.date,rate:s.rate}); lastRate=s.rate; }
+  [...stubs].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
+    if(lastRate===null||Math.abs(s.rate-lastRate)>0.0001){
+      rateChanges.push({date:s.date,rate:s.rate});
+      lastRate=s.rate;
+    }
   });
   const rateEl=document.getElementById('ytdRateHistory');
   if(rateEl){
     if(rateChanges.length===0) rateEl.textContent='No data';
     else rateEl.innerHTML=rateChanges.map((r,i)=>{
-      const d=new Date(r.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      const arrow=i>0&&r.rate>rateChanges[i-1].rate?'<span style="color:var(--green)">▲</span>':i>0?'<span style="color:var(--red)">▼</span>':'';
-      return `<div>${arrow} <strong>$${r.rate.toFixed(2)}/hr</strong> <span style="color:var(--text3)">from ${d}</span></div>`;
+      const d=new Date(r.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      const isCurrentYear=r.date.startsWith(String(ytdYear));
+      const arrow=i>0&&r.rate>rateChanges[i-1].rate?'<span style="color:var(--green)">▲</span>':i>0?'<span style="color:var(--red)">▼</span>':'<span style="color:var(--text3)">•</span>';
+      return `<div style="${isCurrentYear?'':'opacity:.6'}">${arrow} <strong>$${r.rate.toFixed(4)}/hr</strong> <span style="color:var(--text3)">since ${d}</span></div>`;
     }).join('');
   }
 
