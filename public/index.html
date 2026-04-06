@@ -27,9 +27,34 @@
   --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
   --sidebar-w:220px;--content-max:960px;
 }
+[data-theme="dark"] {
+  --bg:#0f1117;--bg2:#1a1d27;--bg3:#21242f;--bg4:#2a2d3a;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8edf3;--text2:#9ba8b8;--text3:#5a6678;
+  --green:#22c55e;--green-mid:#4ade80;--green-dim:rgba(34,197,94,0.12);--green-border:rgba(34,197,94,0.25);--green-btn:#16a34a;
+  --red:#f87171;--red-dim:rgba(248,113,113,0.10);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
+  --blue:#60a5fa;--blue-dim:rgba(96,165,250,0.10);
+  --shadow:0 1px 3px rgba(0,0,0,0.3),0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.4);
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg)}
 body{font-family:var(--sans);color:var(--text);line-height:1.5}
+
+/* DARK MODE TRANSITION */
+html{transition:background .2s,color .2s}
+[data-theme="dark"] .bottom-nav{background:rgba(26,29,39,0.95)}
+
+/* SECTION DIVIDERS (YTD page sections) */
+.ytd-section{margin-bottom:28px}
+.ytd-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.ytd-section-label::after{content:'';flex:1;height:1px;background:var(--border2)}
+
+/* DARK MODE TOGGLE BUTTON */
+.dark-toggle{background:none;border:1.5px solid var(--border2);border-radius:20px;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap}
+.dark-toggle:hover{background:var(--bg3);color:var(--text)}
+.dark-toggle svg{width:14px;height:14px;flex-shrink:0}
 
 /* LOGIN */
 #loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;gap:24px;background:var(--bg)}
@@ -261,6 +286,8 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
 @media(min-width:1000px){.ytd-bottom-grid{grid-template-columns:repeat(3,1fr)!important}}
 .ytd-two-col{grid-template-columns:1fr!important}
 @media(min-width:700px){.ytd-two-col{grid-template-columns:1fr 1fr!important}}
+.ytd-pulse-grid{grid-template-columns:1fr 1fr!important}
+@media(min-width:900px){.ytd-pulse-grid{grid-template-columns:repeat(4,1fr)!important}}
 
 /* YTD Header */
 .ytd-header-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px}
@@ -388,6 +415,49 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
 .icon-btn.view-as:hover{color:var(--blue);border-color:rgba(29,78,216,.3);background:var(--blue-dim)}
 
 ::-webkit-scrollbar{width:0}
+
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;align-items:start}
+.dash-widget{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .15s}
+.dash-widget:hover .dash-drag-handle{opacity:1}
+.dash-widget-header{display:flex;align-items:center;gap:8px;padding:10px 14px 0;min-height:36px}
+.dash-drag-handle{cursor:grab;color:var(--text3);opacity:0;transition:opacity .15s;flex-shrink:0;touch-action:none}
+.dash-drag-handle:active{cursor:grabbing}
+.dash-widget-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-widget-controls{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity .15s}
+.dash-widget:hover .dash-widget-controls{opacity:1}
+.dash-wbtn{background:none;border:1px solid var(--border2);border-radius:5px;padding:2px 6px;font-size:10px;color:var(--text3);cursor:pointer;font-family:var(--sans);transition:all .1s;line-height:1.4}
+.dash-wbtn:hover{background:var(--bg3);color:var(--text)}
+.dash-wbtn.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(29,78,216,.3)}
+.dash-wbtn.danger:hover{color:var(--red);background:var(--red-dim)}
+.dash-widget-body{padding:12px 14px 14px}
+/* Stat widget */
+.dash-stat-val{font-family:var(--mono);font-weight:700;color:var(--text);line-height:1;margin-bottom:3px}
+.dash-stat-val.sz-sm{font-size:20px}.dash-stat-val.sz-md{font-size:26px}.dash-stat-val.sz-lg{font-size:32px}
+.dash-stat-val.green{color:var(--green)}.dash-stat-val.red{color:var(--red)}.dash-stat-val.amber{color:var(--amber)}
+.dash-stat-sub{font-size:11px;color:var(--text3)}
+.dash-stat-sub2{font-size:12px;color:var(--text2);margin-top:2px}
+/* Chart widget */
+.dash-chart-wrap{position:relative;width:100%}
+/* Size cols */
+.dash-col-3{grid-column:span 3}.dash-col-4{grid-column:span 4}.dash-col-6{grid-column:span 6}.dash-col-12{grid-column:span 12}
+@media(max-width:700px){.dash-col-3,.dash-col-4,.dash-col-6,.dash-col-12{grid-column:span 12}}
+@media(min-width:701px) and (max-width:1000px){.dash-col-3{grid-column:span 6}.dash-col-4{grid-column:span 6}}
+/* Add widget panel */
+.dash-add-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end;justify-content:center}
+.dash-add-panel.open{display:flex}
+@media(min-width:768px){.dash-add-panel{align-items:center}}
+.dash-add-inner{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:20px}
+@media(min-width:768px){.dash-add-inner{border-radius:var(--radius);max-height:80vh}}
+.dash-widget-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:14px}
+.dash-pick-item{background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;cursor:pointer;transition:all .15s}
+.dash-pick-item:hover{border-color:var(--blue);background:var(--blue-dim)}
+.dash-pick-icon{font-size:20px;margin-bottom:6px}
+.dash-pick-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.dash-pick-desc{font-size:10px;color:var(--text3)}
+/* Empty state */
+.dash-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px;color:var(--text3)}
+.dash-empty-icon{font-size:40px;opacity:.4}
 </style>
 </head>
 <body>
@@ -465,6 +535,86 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       Viewing as <strong id="viewAsName" style="margin-left:4px"></strong>
       <button onclick="exitViewAs()">Exit view</button>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dash" class="page">
+      <div class="page-inner-wide">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Dashboard</div>
+            <div class="page-sub" id="dashSub">Your personal view</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="openDashAddPanel()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Add widget
+            </button>
+            <button class="btn btn-secondary btn-sm" id="dashEditBtn" onclick="toggleDashEdit()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+          </div>
+        </div>
+        <div id="dashGrid" class="dash-grid"></div>
+      </div>
+    </div>
+
+    <!-- ADD WIDGET PANEL -->
+    <div class="dash-add-panel" id="dashAddPanel" onclick="if(event.target===this)closeDashAddPanel()">
+      <div class="dash-add-inner">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:16px;font-weight:700">Add a widget</div>
+          <button onclick="closeDashAddPanel()" style="background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:0 4px">✕</button>
+        </div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Choose from your paycheck data. Widgets are live — they update as you log new paychecks.</div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:14px 0 6px">Metrics</div>
+        <div class="dash-widget-picker" id="dashPickerMetrics"></div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 6px">Charts</div>
+        <div class="dash-widget-picker" id="dashPickerCharts"></div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 6px">Trackers</div>
+        <div class="dash-widget-picker" id="dashPickerTrackers"></div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dash" class="page">
+      <div class="page-inner-wide">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Dashboard</div>
+            <div class="page-sub" id="dashSub">Your personal view</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="openDashAddPanel()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Add widget
+            </button>
+            <button class="btn btn-secondary btn-sm" id="dashEditBtn" onclick="toggleDashEdit()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit layout
+            </button>
+          </div>
+        </div>
+        <div id="dashGrid" class="dash-grid"></div>
+      </div>
+    </div>
+
+    <!-- ADD WIDGET PANEL -->
+    <div class="dash-add-panel" id="dashAddPanel" onclick="if(event.target===this)closeDashAddPanel()">
+      <div class="dash-add-inner">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:16px;font-weight:700">Add a widget</div>
+          <button onclick="closeDashAddPanel()" style="background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:0 4px">✕</button>
+        </div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Choose from your paycheck data. Widgets live-update as you log new paychecks.</div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:14px 0 6px">Stat Cards</div>
+        <div class="dash-widget-picker" id="dashPickerMetrics"></div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 6px">Charts</div>
+        <div class="dash-widget-picker" id="dashPickerCharts"></div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 6px">Trackers</div>
+        <div class="dash-widget-picker" id="dashPickerTrackers"></div>
+      </div>
     </div>
 
     <!-- CALCULATOR PAGE -->
@@ -566,7 +716,7 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
     <div id="page-ytd" class="page">
       <div class="page-inner-wide">
 
-        <!-- Header bar -->
+        <!-- Header -->
         <div class="ytd-header-bar">
           <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
             <div class="page-title" style="margin:0">Year to Date</div>
@@ -587,243 +737,227 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         </div>
 
         <!-- Year tabs -->
-        <div class="tab-row" id="ytdTabs" style="margin-bottom:16px"></div>
+        <div class="tab-row" id="ytdTabs" style="margin-bottom:20px"></div>
 
-        <!-- HERO CARDS -->
-        <div class="ytd-hero" style="margin-bottom:16px">
-          <div class="ytd-hero-card">
-            <div class="ytd-hero-label">Total Gross</div>
-            <div class="ytd-hero-value" id="ytdGross">—</div>
-            <div class="ytd-hero-sub" id="ytdAvgGrossSub">avg — / check</div>
-          </div>
-          <div class="ytd-hero-card ytd-hero-card--green">
-            <div class="ytd-hero-label">Total Net</div>
-            <div class="ytd-hero-value green" id="ytdTotalNet">—</div>
-            <div class="ytd-hero-sub" id="ytdAvgSub">avg — / check</div>
-          </div>
-          <div class="ytd-hero-card ytd-hero-card--red">
-            <div class="ytd-hero-label">Total Deducted</div>
-            <div class="ytd-hero-value red" id="ytdTotalDedHero">—</div>
-            <div class="ytd-hero-sub" id="ytdKeepSub">keep rate —%</div>
+        <!-- ── SECTION: OVERVIEW ── -->
+        <div class="ytd-section">
+          <div class="ytd-section-label">Overview</div>
+          <div class="ytd-hero">
+            <div class="ytd-hero-card">
+              <div class="ytd-hero-label">Total Gross</div>
+              <div class="ytd-hero-value" id="ytdGross">—</div>
+              <div class="ytd-hero-sub" id="ytdAvgGrossSub">avg — / check</div>
+            </div>
+            <div class="ytd-hero-card ytd-hero-card--green">
+              <div class="ytd-hero-label">Total Net (take-home)</div>
+              <div class="ytd-hero-value green" id="ytdTotalNet">—</div>
+              <div class="ytd-hero-sub" id="ytdAvgSub">avg — / check</div>
+            </div>
+            <div class="ytd-hero-card ytd-hero-card--red">
+              <div class="ytd-hero-label">Total Deducted</div>
+              <div class="ytd-hero-value red" id="ytdTotalDedHero">—</div>
+              <div class="ytd-hero-sub" id="ytdKeepSub">keep rate —%</div>
+            </div>
           </div>
         </div>
 
-        <!-- PACE / PROJECTIONS ROW -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" class="ytd-bottom-grid">
-          <div class="ytd-pace-card" id="ytdPaceCard">
-            <div class="ytd-pace-icon">📈</div>
-            <div>
-              <div class="ytd-pace-label">Projected Gross</div>
+        <!-- ── SECTION: PULSE ── -->
+        <div class="ytd-section">
+          <div class="ytd-section-label">Pulse — right now</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px" class="ytd-pulse-grid">
+            <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:4px">
+              <div class="ytd-pace-label">Projected Year-End</div>
               <div class="ytd-pace-value" id="ytdProjGross">—</div>
               <div class="ytd-pace-sub" id="ytdProjSub">at current pace</div>
             </div>
+            <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:4px">
+              <div class="ytd-pace-label">Last vs Previous Check</div>
+              <div class="ytd-pace-value" id="ytdWoWGross">—</div>
+              <div class="ytd-pace-sub" id="ytdWoWPrev">—</div>
+            </div>
+            <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:4px">
+              <div class="ytd-pace-label">OT Streak</div>
+              <div class="ytd-pace-value amber" id="ytdStreak">—</div>
+              <div class="ytd-pace-sub" id="ytdStreakBest">—</div>
+            </div>
+            <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:4px">
+              <div class="ytd-pace-label">SS Wage Base Used</div>
+              <div class="ytd-pace-value" id="ytdSSPctPulse">—</div>
+              <div style="width:100%;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:4px"><div id="ytdSSBar" style="height:100%;border-radius:2px;background:var(--blue);transition:width .4s;width:0%"></div></div>
+            </div>
           </div>
-          <div class="ytd-pace-card">
-            <div class="ytd-pace-icon">🏆</div>
-            <div>
-              <div class="ytd-pace-label">Best Paycheck</div>
+        </div>
+
+        <!-- ── SECTION: EARNINGS ── -->
+        <div class="ytd-section">
+          <div class="ytd-section-label">Earnings</div>
+
+          <!-- Main chart -->
+          <div class="card card-pad" style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em" id="ytdMainChartLabel">Gross per paycheck</div>
+              <div style="display:flex;gap:10px;font-size:11px;color:var(--text3)" id="ytdChartLegend"></div>
+            </div>
+            <div style="height:200px"><canvas id="ytdMainChart"></canvas></div>
+            <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Click any bar to jump to that paycheck below</div>
+          </div>
+
+          <!-- Earnings breakdown + Hours side by side -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="ytd-two-col">
+            <div class="card">
+              <div class="card-row"><span class="card-label" style="font-weight:700;font-size:12px">Earnings breakdown</span></div>
+              <div class="ytd-bar-row"><div class="ytd-bar-label">Regular</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue" id="ytdBarReg"></div></div><div class="ytd-bar-value" id="ytdReg">—</div></div>
+              <div class="ytd-bar-row"><div class="ytd-bar-label">Overtime (1.5×)</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--amber" id="ytdBarOT"></div></div><div class="ytd-bar-value amber" id="ytdOTBar">—</div></div>
+              <div class="ytd-bar-row" id="ytdRowDT" style="display:none"><div class="ytd-bar-label">Double Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--red" id="ytdBarDT"></div></div><div class="ytd-bar-value red" id="ytdDT">—</div></div>
+              <div class="ytd-bar-row" id="ytdRowHol" style="display:none"><div class="ytd-bar-label">Holiday</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue2" id="ytdBarHol"></div></div><div class="ytd-bar-value blue" id="ytdHol">—</div></div>
+              <div class="ytd-bar-row" id="ytdRowBenTime" style="display:none"><div class="ytd-bar-label">Benefit Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--teal" id="ytdBarBenTime"></div></div><div class="ytd-bar-value" id="ytdBenTime">—</div></div>
+              <div class="ytd-bar-row" id="ytdRowPrem" style="display:none"><div class="ytd-bar-label">Shift Premium</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--purple" id="ytdBarPrem"></div></div><div class="ytd-bar-value" id="ytdPrem">—</div></div>
+              <div class="ytd-bar-row" id="ytdRowAddl" style="display:none"><div class="ytd-bar-label">Additional</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--green" id="ytdBarAddl"></div></div><div class="ytd-bar-value" id="ytdAddl">—</div></div>
+              <div class="ytd-stat-divider"></div>
+              <div class="ytd-bar-row"><div class="ytd-bar-label" style="width:auto;flex:1;color:var(--text3)">OT dependency</div><div class="ytd-bar-value" style="width:auto;text-align:left"><span id="ytdOTDep">—</span></div></div>
+            </div>
+            <div class="card">
+              <div class="card-row"><span class="card-label" style="font-weight:700;font-size:12px">Hours</span></div>
+              <div class="ytd-bar-row"><div class="ytd-bar-label">Regular</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue" id="ytdBarRegHrs"></div></div><div class="ytd-bar-value" id="ytdRegHrs">—</div></div>
+              <div class="ytd-bar-row"><div class="ytd-bar-label">Overtime</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--amber" id="ytdBarOTHrs2"></div></div><div class="ytd-bar-value amber" id="ytdOTHrs2">—</div></div>
+              <div class="ytd-bar-row" id="ytdRowDTHrs" style="display:none"><div class="ytd-bar-label">Double Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--red" id="ytdBarDTHrs"></div></div><div class="ytd-bar-value red" id="ytdDTHrs">—</div></div>
+              <div class="ytd-bar-row" id="ytdRowHolHrs" style="display:none"><div class="ytd-bar-label">Holiday</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue2" id="ytdBarHolHrs"></div></div><div class="ytd-bar-value" id="ytdHolHrs">—</div></div>
+              <div class="ytd-bar-row" id="ytdRowBenHrs" style="display:none"><div class="ytd-bar-label">Benefit Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--teal" id="ytdBarBenHrs"></div></div><div class="ytd-bar-value" id="ytdBenHrs">—</div></div>
+              <div class="ytd-stat-divider"></div>
+              <div class="card-row" style="padding:8px 14px 4px"><span class="card-label">Avg hrs / check</span><span class="card-value" id="ytdAvgHrs">—</span></div>
+              <div class="card-row" style="padding:4px 14px 4px"><span class="card-label">OT % of hours</span><span class="card-value amber" id="ytdOTPct">—</span></div>
+              <div class="card-row" style="padding:4px 14px 8px"><span class="card-label">Total hours</span><span class="card-value" id="ytdHrs">—</span></div>
+            </div>
+          </div>
+
+          <!-- Secondary charts -->
+          <div class="chart-grid" style="margin-top:12px;margin-bottom:0">
+            <div class="card card-pad" style="margin-bottom:0">
+              <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Hours by month</div>
+              <div style="height:150px"><canvas id="ytdHrsMonthChart"></canvas></div>
+            </div>
+            <div class="card card-pad" style="margin-bottom:0">
+              <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">OT hours trend</div>
+              <div style="height:150px"><canvas id="ytdOTTrendChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECTION: TAXES & DEDUCTIONS ── -->
+        <div class="ytd-section">
+          <div class="ytd-section-label">Taxes &amp; Deductions</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px" class="ytd-bottom-grid">
+            <div class="card">
+              <div class="card-row"><span class="card-label" style="font-weight:700">Taxes withheld</span></div>
+              <div class="card-row"><span class="card-label">Fed withholding</span><span class="card-value red" id="ytdFed">—</span></div>
+              <div class="card-row"><span class="card-label">Soc Security (6.2%)</span><span class="card-value red" id="ytdSS">—</span></div>
+              <div class="card-row"><span class="card-label">Medicare (1.45%)</span><span class="card-value red" id="ytdMed">—</span></div>
+              <div class="card-row"><span class="card-label" style="color:var(--text3)">Projected fed (YE)</span><span class="card-value amber" id="ytdProjFed">—</span></div>
+              <div class="card-row card-total"><span class="card-label">Total taxes</span><span class="card-value red" id="ytdTotalDed">—</span></div>
+            </div>
+            <div class="card">
+              <div class="card-row"><span class="card-label" style="font-weight:700">Benefits &amp; Retirement</span></div>
+              <div class="card-row"><span class="card-label">Dental</span><span class="card-value red" id="ytdDental">—</span></div>
+              <div class="card-row"><span class="card-label">Medical</span><span class="card-value red" id="ytdMedical">—</span></div>
+              <div class="card-row"><span class="card-label">Vision</span><span class="card-value red" id="ytdVision">—</span></div>
+              <div class="card-row"><span class="card-label">401k / Retirement</span><span class="card-value red" id="ytdRetire">—</span></div>
+              <div class="card-row card-total"><span class="card-label">Total benefits</span><span class="card-value red" id="ytdBen">—</span></div>
+            </div>
+            <div class="card">
+              <div class="card-row"><span class="card-label" style="font-weight:700">Rates</span></div>
+              <div class="card-row"><span class="card-label">Effective fed rate</span><span class="card-value amber" id="ytdFedRate">—</span></div>
+              <div class="card-row"><span class="card-label">FICA (SS + Med)</span><span class="card-value" id="ytdFICA">7.65%</span></div>
+              <div class="card-row"><span class="card-label">Combined tax rate</span><span class="card-value amber" id="ytdRate">—</span></div>
+              <div class="card-row"><span class="card-label">Avg gross / check</span><span class="card-value" id="ytdAvgGross">—</span></div>
+              <div class="card-row card-total"><span class="card-label">Keep rate</span><span class="card-value green" id="ytdKeep">—</span></div>
+            </div>
+          </div>
+          <!-- Tax charts side by side -->
+          <div class="chart-grid" style="margin-bottom:0">
+            <div class="card card-pad" style="margin-bottom:0">
+              <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Tax burden % per paycheck</div>
+              <div style="height:150px"><canvas id="ytdTaxBurdenChart"></canvas></div>
+            </div>
+            <div class="card card-pad" style="margin-bottom:0">
+              <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Cumulative net pay</div>
+              <div style="height:150px"><canvas id="ytdCumChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECTION: COMPARISONS ── -->
+        <div class="ytd-section">
+          <div class="ytd-section-label">Comparisons</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px" class="ytd-bottom-grid">
+            <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:4px">
+              <div class="ytd-pace-label">🏆 Best paycheck</div>
               <div class="ytd-pace-value green" id="ytdBestPay">—</div>
               <div class="ytd-pace-sub" id="ytdBestDate">—</div>
             </div>
-          </div>
-          <div class="ytd-pace-card">
-            <div class="ytd-pace-icon">📅</div>
-            <div>
-              <div class="ytd-pace-label">This Month vs Last</div>
+            <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:4px">
+              <div class="ytd-pace-label">📅 This month vs last</div>
               <div class="ytd-pace-value" id="ytdMoMVal">—</div>
               <div class="ytd-pace-sub" id="ytdMoMSub">—</div>
             </div>
-          </div>
-        </div>
-
-        <!-- OT DEPENDENCY + RATE HISTORY + STREAK -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" class="ytd-bottom-grid">
-          <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:6px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">⚡ OT Dependency</div>
-            <div style="font-family:var(--mono);font-size:22px;font-weight:700" id="ytdOTDep">—</div>
-            <div style="font-size:11px;color:var(--text3)" id="ytdOTDepSub">of gross comes from OT</div>
-            <div style="height:5px;width:100%;background:var(--bg4);border-radius:3px;overflow:hidden;margin-top:2px"><div id="ytdOTDepBar" style="height:100%;background:var(--amber);border-radius:3px;transition:width .4s"></div></div>
-          </div>
-          <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:6px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">🔥 OT Streak</div>
-            <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--amber)" id="ytdStreak">—</div>
-            <div style="font-size:11px;color:var(--text3)" id="ytdStreakSub">consecutive OT paychecks</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:2px" id="ytdStreakBest">—</div>
-          </div>
-          <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:6px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">💰 Pay Rate History</div>
-            <div id="ytdRateHistory" style="font-size:11px;color:var(--text2);line-height:1.7;width:100%">—</div>
-          </div>
-        </div>
-
-        <!-- WoW CHANGE + SS TRACKER — same 3-col grid as pace section -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" class="ytd-bottom-grid">
-          <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:8px;grid-column:span 2">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">📊 Week-over-Week Change</div>
-            <div style="display:flex;gap:24px;flex-wrap:wrap;width:100%">
-              <div><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Gross change</div><div class="ytd-pace-value" id="ytdWoWGross">—</div></div>
-              <div><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Net change</div><div class="ytd-pace-value" id="ytdWoWNet">—</div></div>
-              <div style="margin-left:auto"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Previous check</div><div style="font-size:12px;color:var(--text3);font-family:var(--mono)" id="ytdWoWPrev">—</div></div>
+            <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:6px">
+              <div class="ytd-pace-label">💰 Pay rate history</div>
+              <div id="ytdRateHistory" style="font-size:11px;color:var(--text2);line-height:1.8;width:100%">—</div>
             </div>
           </div>
-          <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:8px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">🏛 SS Wage Base <span style="font-weight:400;font-size:9px">($176,100)</span></div>
-            <div style="width:100%">
-              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px">
-                <span style="font-family:var(--mono);font-weight:600" id="ytdSSWages">—</span>
-                <span style="font-size:10px;color:var(--text3)" id="ytdSSRemain">—</span>
-              </div>
-              <div style="height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
-                <div id="ytdSSBar" style="height:100%;border-radius:3px;background:var(--blue);transition:width .4s;width:0%"></div>
-              </div>
-              <div style="font-size:10px;color:var(--text3);margin-top:3px" id="ytdSSPct">—</div>
+          <!-- YoY table -->
+          <div class="card card-pad" style="margin-bottom:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Year-over-year</div>
+            <div style="overflow-x:auto">
+              <table class="ytd-yoy-table" id="ytdYOYTable"><thead></thead><tbody></tbody></table>
+            </div>
+          </div>
+          <!-- Month table -->
+          <div class="card card-pad" style="margin-bottom:0">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Month-by-month</div>
+            <div style="overflow-x:auto">
+              <table class="hist-table" id="ytdMonthTable"><thead id="ytdMonthHead"></thead><tbody id="ytdMonthBody"></tbody></table>
             </div>
           </div>
         </div>
 
-        <!-- MAIN CHART -->
-        <div class="card card-pad" style="margin-bottom:16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em" id="ytdMainChartLabel">Gross Pay Per Paycheck</div>
-            <div style="display:flex;gap:10px;font-size:11px;color:var(--text3)" id="ytdChartLegend"></div>
-          </div>
-          <div style="height:220px"><canvas id="ytdMainChart"></canvas></div>
-          <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Click any bar to view that paycheck's details</div>
-        </div>
-
-        <!-- HOURS + CUMULATIVE -->
-        <div class="chart-grid" style="margin-bottom:16px">
-          <div class="card card-pad" style="margin-bottom:0">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Hours by Month</div>
-            <div style="height:160px"><canvas id="ytdHrsMonthChart"></canvas></div>
-          </div>
-          <div class="card card-pad" style="margin-bottom:0">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">OT Hours Trend</div>
-            <div style="height:160px"><canvas id="ytdOTTrendChart"></canvas></div>
-          </div>
-        </div>
-
-        <!-- TAX BURDEN + CUMULATIVE -->
-        <div class="chart-grid" style="margin-bottom:16px">
-          <div class="card card-pad" style="margin-bottom:0">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Tax Burden % Per Paycheck</div>
-            <div style="height:160px"><canvas id="ytdTaxBurdenChart"></canvas></div>
-          </div>
-          <div class="card card-pad" style="margin-bottom:0">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Cumulative Net Pay</div>
-            <div style="height:160px"><canvas id="ytdCumChart"></canvas></div>
-          </div>
-        </div>
-
-        <!-- YOY COMPARISON -->
-        <div class="card card-pad" style="margin-bottom:16px">
-          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Year-over-Year Comparison</div>
-          <div id="ytdYOY" style="overflow-x:auto">
-            <table class="ytd-yoy-table" id="ytdYOYTable"><tbody></tbody></table>
-          </div>
-        </div>
-
-        <!-- MONTH-BY-MONTH TABLE -->
-        <div class="card card-pad" style="margin-bottom:16px">
-          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Month-by-Month Breakdown</div>
-          <div style="overflow-x:auto">
-            <table class="hist-table" id="ytdMonthTable"><thead id="ytdMonthHead"></thead><tbody id="ytdMonthBody"></tbody></table>
-          </div>
-        </div>
-
-        <!-- EARNINGS + HOURS BARS -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" class="ytd-two-col">
-          <div class="card">
-            <div class="card-row"><span class="card-label" style="font-weight:700;font-size:12px">Earnings Breakdown</span></div>
-            <div class="ytd-bar-row"><div class="ytd-bar-label">Regular Pay</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue" id="ytdBarReg"></div></div><div class="ytd-bar-value" id="ytdReg">—</div></div>
-            <div class="ytd-bar-row"><div class="ytd-bar-label">Overtime (1.5×)</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--amber" id="ytdBarOT"></div></div><div class="ytd-bar-value amber" id="ytdOTBar">—</div></div>
-            <div class="ytd-bar-row" id="ytdRowDT" style="display:none"><div class="ytd-bar-label">Double Time (2×)</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--red" id="ytdBarDT"></div></div><div class="ytd-bar-value red" id="ytdDT">—</div></div>
-            <div class="ytd-bar-row" id="ytdRowHol" style="display:none"><div class="ytd-bar-label">Holiday</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue2" id="ytdBarHol"></div></div><div class="ytd-bar-value blue" id="ytdHol">—</div></div>
-            <div class="ytd-bar-row" id="ytdRowBenTime" style="display:none"><div class="ytd-bar-label">Benefit Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--teal" id="ytdBarBenTime"></div></div><div class="ytd-bar-value" id="ytdBenTime">—</div></div>
-            <div class="ytd-bar-row" id="ytdRowPrem" style="display:none"><div class="ytd-bar-label">Shift Premium</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--purple" id="ytdBarPrem"></div></div><div class="ytd-bar-value" id="ytdPrem">—</div></div>
-            <div class="ytd-bar-row" id="ytdRowAddl" style="display:none"><div class="ytd-bar-label">Additional Pay</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--green" id="ytdBarAddl"></div></div><div class="ytd-bar-value" id="ytdAddl">—</div></div>
-          </div>
-          <div class="card">
-            <div class="card-row"><span class="card-label" style="font-weight:700;font-size:12px">Hours Summary</span></div>
-            <div class="ytd-bar-row"><div class="ytd-bar-label">Regular</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue" id="ytdBarRegHrs"></div></div><div class="ytd-bar-value" id="ytdRegHrs">—</div></div>
-            <div class="ytd-bar-row"><div class="ytd-bar-label">Overtime</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--amber" id="ytdBarOTHrs2"></div></div><div class="ytd-bar-value amber" id="ytdOTHrs2">—</div></div>
-            <div class="ytd-bar-row" id="ytdRowDTHrs" style="display:none"><div class="ytd-bar-label">Double Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--red" id="ytdBarDTHrs"></div></div><div class="ytd-bar-value red" id="ytdDTHrs">—</div></div>
-            <div class="ytd-bar-row" id="ytdRowHolHrs" style="display:none"><div class="ytd-bar-label">Holiday</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue2" id="ytdBarHolHrs"></div></div><div class="ytd-bar-value" id="ytdHolHrs">—</div></div>
-            <div class="ytd-bar-row" id="ytdRowBenHrs" style="display:none"><div class="ytd-bar-label">Benefit Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--teal" id="ytdBarBenHrs"></div></div><div class="ytd-bar-value" id="ytdBenHrs">—</div></div>
-            <div class="ytd-stat-divider"></div>
-            <div class="card-row" style="padding:8px 14px 4px"><span class="card-label">Avg hrs/check</span><span class="card-value" id="ytdAvgHrs">—</span></div>
-            <div class="card-row" style="padding:4px 14px 4px"><span class="card-label">OT % of hours</span><span class="card-value amber" id="ytdOTPct">—</span></div>
-            <div class="card-row" style="padding:4px 14px 8px"><span class="card-label">Total hours</span><span class="card-value" id="ytdHrs">—</span></div>
-          </div>
-        </div>
-
-        <!-- DEDUCTIONS CARDS -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px" class="ytd-bottom-grid">
-          <div class="card">
-            <div class="card-row"><span class="card-label" style="font-weight:700">Tax Deductions</span></div>
-            <div class="card-row"><span class="card-label" style="color:var(--red)">– Fed withholding</span><span class="card-value red" id="ytdFed">—</span></div>
-            <div class="card-row"><span class="card-label" style="color:var(--red)">– Soc Security (6.2%)</span><span class="card-value red" id="ytdSS">—</span></div>
-            <div class="card-row"><span class="card-label" style="color:var(--red)">– Medicare (1.45%)</span><span class="card-value red" id="ytdMed">—</span></div>
-            <div class="card-row"><span class="card-label">Projected fed (YE)</span><span class="card-value amber" id="ytdProjFed">—</span></div>
-            <div class="card-row card-total"><span class="card-label">Total taxes</span><span class="card-value red" id="ytdTotalDed">—</span></div>
-          </div>
-          <div class="card">
-            <div class="card-row"><span class="card-label" style="font-weight:700">Benefits &amp; Retirement</span></div>
-            <div class="card-row"><span class="card-label" style="color:var(--red)">– Dental</span><span class="card-value red" id="ytdDental">—</span></div>
-            <div class="card-row"><span class="card-label" style="color:var(--red)">– Medical</span><span class="card-value red" id="ytdMedical">—</span></div>
-            <div class="card-row"><span class="card-label" style="color:var(--red)">– Vision</span><span class="card-value red" id="ytdVision">—</span></div>
-            <div class="card-row"><span class="card-label" style="color:var(--red)">– 401k / Retirement</span><span class="card-value red" id="ytdRetire">—</span></div>
-            <div class="card-row card-total"><span class="card-label">Total benefits</span><span class="card-value red" id="ytdBen">—</span></div>
-          </div>
-          <div class="card">
-            <div class="card-row"><span class="card-label" style="font-weight:700">Tax Summary</span></div>
-            <div class="card-row"><span class="card-label">Effective fed rate</span><span class="card-value amber" id="ytdFedRate">—</span></div>
-            <div class="card-row"><span class="card-label">FICA rate (SS + Med)</span><span class="card-value" id="ytdFICA">7.65%</span></div>
-            <div class="card-row"><span class="card-label">Combined tax rate</span><span class="card-value amber" id="ytdRate">—</span></div>
-            <div class="card-row"><span class="card-label">Avg gross / paycheck</span><span class="card-value" id="ytdAvgGross">—</span></div>
-            <div class="card-row card-total"><span class="card-label">Keep rate (net/gross)</span><span class="card-value green" id="ytdKeep">—</span></div>
-          </div>
-        </div>
-
-        <!-- PAYCHECK CARD GRID + INLINE MODAL -->
-        <div class="card card-pad" style="margin-bottom:0">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Paychecks</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <button class="btn btn-secondary btn-sm" onclick="exportYTDCSV()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                CSV
-              </button>
-              <input type="search" id="ytdSearch" placeholder="Search date, amount…" style="border:1.5px solid var(--border2);background:var(--bg3);border-radius:var(--radius-sm);padding:5px 10px;font-size:12px;color:var(--text);outline:none;width:180px">
-            </div>
-          </div>
-          <div id="ytdDetailBody" class="ytd-card-grid"></div>
-          <div style="display:flex;gap:14px;font-size:11px;color:var(--text3);margin-top:10px;flex-wrap:wrap;align-items:center">
-            <span style="color:var(--text3)">Tap any card to see full breakdown</span>
-            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:4px;background:rgba(59,130,246,.7);border-radius:2px;display:inline-block"></span>Regular</span>
-            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:4px;background:rgba(251,191,36,.8);border-radius:2px;display:inline-block"></span>OT</span>
-            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:4px;background:rgba(239,68,68,.45);border-radius:2px;display:inline-block"></span>Deductions</span>
-          </div>
-        </div>
-
-        <!-- NET PAY GOAL TRACKER -->
-        <div class="card card-pad" style="margin-top:16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Net Pay Goal Tracker</div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <label style="font-size:11px;color:var(--text3)">Annual net goal</label>
-              <div style="display:flex;align-items:center;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:4px 8px;gap:4px">
-                <span style="font-size:12px;color:var(--text3)">$</span>
-                <input type="number" id="ytdGoalInput" placeholder="e.g. 40000" step="500" min="0" style="border:none;background:transparent;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;width:90px" oninput="updateYTDGoal()">
+        <!-- ── SECTION: PAYCHECKS ── -->
+        <div class="ytd-section">
+          <div class="ytd-section-label">Paychecks</div>
+          <div class="card card-pad">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
+              <div style="font-size:11px;color:var(--text3)">Tap any card to see full breakdown · <span style="display:inline-flex;align-items:center;gap:3px"><span style="width:10px;height:3px;background:rgba(59,130,246,.7);border-radius:1px;display:inline-block"></span>Reg</span> <span style="display:inline-flex;align-items:center;gap:3px"><span style="width:10px;height:3px;background:rgba(251,191,36,.8);border-radius:1px;display:inline-block"></span>OT</span> <span style="display:inline-flex;align-items:center;gap:3px"><span style="width:10px;height:3px;background:rgba(239,68,68,.45);border-radius:1px;display:inline-block"></span>Ded</span></div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button class="btn btn-secondary btn-sm" onclick="exportYTDCSV()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  CSV
+                </button>
+                <input type="search" id="ytdSearch" placeholder="Search…" style="border:1.5px solid var(--border2);background:var(--bg3);border-radius:var(--radius-sm);padding:5px 10px;font-size:12px;color:var(--text);outline:none;width:150px">
               </div>
             </div>
+            <div id="ytdDetailBody" class="ytd-card-grid"></div>
           </div>
-          <div id="ytdGoalContent"></div>
+        </div>
+
+        <!-- ── SECTION: GOAL ── -->
+        <div class="ytd-section">
+          <div class="ytd-section-label">Net Pay Goal</div>
+          <div class="card card-pad">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
+              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Annual net target</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label style="font-size:11px;color:var(--text3)">Goal</label>
+                <div style="display:flex;align-items:center;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:4px 8px;gap:4px">
+                  <span style="font-size:12px;color:var(--text3)">$</span>
+                  <input type="number" id="ytdGoalInput" placeholder="e.g. 40000" step="500" min="0" style="border:none;background:transparent;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;width:90px" oninput="updateYTDGoal()">
+                </div>
+              </div>
+            </div>
+            <div id="ytdGoalContent"></div>
+          </div>
         </div>
 
       </div>
     </div>
-
     <!-- BULK IMPORT PAGE -->
     <div id="page-bulk" class="page">
       <div class="page-inner">
@@ -886,6 +1020,25 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           <div class="input-row"><label>Confirm</label><div class="input-wrap"><input type="password" id="confirmPw" placeholder="Confirm" class="no-prefix" style="width:160px"></div></div>
         </div>
         <button class="btn btn-secondary" style="margin-bottom:16px" onclick="changePassword()">Change password</button>
+        <div class="section-title">Appearance</div>
+        <div class="card card-pad" style="margin-bottom:8px">
+          <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Choose your preferred color scheme. Syncs across all your devices.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="themeLight" class="btn btn-secondary btn-sm" onclick="setTheme('light')" style="gap:5px;flex:1;min-width:80px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              Light
+            </button>
+            <button id="themeDark" class="btn btn-secondary btn-sm" onclick="setTheme('dark')" style="gap:5px;flex:1;min-width:80px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+              Dark
+            </button>
+            <button id="themeSystem" class="btn btn-secondary btn-sm" onclick="setTheme('system')" style="gap:5px;flex:1;min-width:80px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              System
+            </button>
+          </div>
+        </div>
+
         <div class="section-title">Data</div>
         <button class="btn btn-secondary" style="margin-bottom:8px" onclick="exportData()">Export paychecks (JSON)</button>
         <button class="btn btn-danger" onclick="confirmClear()">Delete all paycheck history</button>
@@ -1397,6 +1550,7 @@ async function loadAll() {
     if(isOnline) {
       const [sd,st] = await Promise.all([apiFetch('/api/stubs'), apiFetch('/api/settings')]);
       stubs=sd; appSettings=st;
+      applyServerTheme(appSettings); // sync theme across devices
       // Persist to IndexedDB for offline use
       if(window._idb && userId) {
         window._idb.idbSaveStubs(stubs, userId).catch(()=>{});
@@ -1687,6 +1841,7 @@ function showPage(id, btn, source) {
   sessionStorage.setItem('payday_page', id);
   if(id==='history') buildHistory();
   if(id!=='history' && bulkMode) { bulkMode=false; selectedIds.clear(); const btn=document.getElementById('histBulkToggle'); if(btn) btn.textContent='Select'; updateBulkBar(); }
+  if(id==='dash') { computeDashData(); renderDashboard(); }
   if(id==='ytd') { buildYTDTabs(); buildYTD();
     // Wire search box
     const srch=document.getElementById('ytdSearch');
@@ -2185,6 +2340,7 @@ function buildYTD() {
     const gEl = document.getElementById('ytdWoWGross');
     const nEl = document.getElementById('ytdWoWNet');
     if(gEl){gEl.textContent=(gDiff>=0?'▲ ':'▼ ')+fmt(Math.abs(gDiff));gEl.style.color=gDiff>=0?'var(--green)':'var(--red)';}
+    set('ytdWoWPrev', new Date(prev2.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})+' ('+fmt(prev2.gross)+')')
     if(nEl){nEl.textContent=(nDiff>=0?'▲ ':'▼ ')+fmt(Math.abs(nDiff));nEl.style.color=nDiff>=0?'var(--green)':'var(--red)';}
     set('ytdWoWPrev', new Date(prev2.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})+' ('+fmt(prev2.gross)+')');
   } else {
@@ -2245,6 +2401,7 @@ function buildYTD() {
   set('ytdSSWages', fmt(tSSWages)+' earned');
   set('ytdSSRemain', fmt(Math.max(0,SS_LIMIT-tSSWages))+' remaining');
   set('ytdSSPct', (tSSWages/SS_LIMIT*100).toFixed(1)+'% of $176,100 SS wage base used');
+  set('ytdSSPctPulse', (tSSWages/SS_LIMIT*100).toFixed(1)+'%');
 
   // ── Hours by Month chart ──────────────────────────────────────────────────
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -2532,6 +2689,545 @@ function updateYTDGoal() {
     </div>`:'<div style="font-size:11px;color:var(--text3);text-align:center">Enter a goal above to track your progress against a target</div>'}`;
 }
 
+// ===== DASHBOARD =====
+// Widget catalog — defines every available widget type
+const DASH_CATALOG = {
+  metrics: [
+    // ── Income ──
+    { type:'stat', id:'total-gross',    icon:'💵', name:'Total Gross',           desc:'YTD gross earnings',                 color:'',       fn:d=>fmt(d.tG),                         sub:d=>`avg ${fmt(d.avgG)} / check` },
+    { type:'stat', id:'total-net',      icon:'💰', name:'Total Net',             desc:'YTD take-home pay',                  color:'green',  fn:d=>fmt(d.tNet),                       sub:d=>`avg ${fmt(d.avgNet)} / check` },
+    { type:'stat', id:'avg-gross',      icon:'📈', name:'Avg Gross / Check',     desc:'Mean gross per paycheck',            color:'',       fn:d=>fmt(d.avgG),                       sub:d=>`${d.n} paychecks so far` },
+    { type:'stat', id:'avg-net',        icon:'💚', name:'Avg Net / Check',       desc:'Mean take-home per check',           color:'green',  fn:d=>fmt(d.avgNet),                     sub:d=>`keep rate ${d.keepRate.toFixed(1)}%` },
+    { type:'stat', id:'best-check',     icon:'🏆', name:'Best Paycheck',         desc:'Highest gross single check',         color:'green',  fn:d=>d.bestStub?fmt(d.bestStub.gross):'—', sub:d=>d.bestStub?new Date(d.bestStub.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'' },
+    { type:'stat', id:'worst-check',    icon:'📉', name:'Worst Paycheck',        desc:'Lowest gross single check',          color:'red',    fn:d=>d.worstStub?fmt(d.worstStub.gross):'—', sub:d=>d.worstStub?new Date(d.worstStub.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'' },
+    { type:'stat', id:'proj-gross',     icon:'🎯', name:'Projected Year-End',    desc:'Gross at current pace',              color:'',       fn:d=>fmt(d.projGross),                  sub:d=>`${d.daysPassed} of ${d.daysInYear} days elapsed` },
+    { type:'stat', id:'proj-net',       icon:'🔮', name:'Projected Net (YE)',    desc:'Take-home at current pace',          color:'green',  fn:d=>fmt(d.tNet/d.daysPassed*d.daysInYear), sub:d=>`from ${fmt(d.tNet)} earned so far` },
+    { type:'stat', id:'paycheck-count', icon:'📋', name:'Paychecks',             desc:'Number of paychecks logged',         color:'',       fn:d=>d.n,                               sub:d=>`${d.yr} year to date` },
+    // ── Overtime ──
+    { type:'stat', id:'ot-earnings',    icon:'⚡', name:'OT Earnings',           desc:'Overtime pay earned',                color:'amber',  fn:d=>d.tOT>0?fmt(d.tOT):'—',            sub:d=>`${fmtH(d.tOTHrs)}h OT worked` },
+    { type:'stat', id:'ot-hours',       icon:'⏱',  name:'OT Hours',              desc:'Total overtime hours',               color:'amber',  fn:d=>d.tOTHrs>0?fmtH(d.tOTHrs)+'h':'—', sub:d=>`${d.tHrs>0?(d.tOTHrs/d.tHrs*100).toFixed(0):0}% of total hours` },
+    { type:'stat', id:'ot-dep',         icon:'⚠️', name:'OT Dependency',         desc:'% of income from OT',               color:'amber',  fn:d=>d.tG>0?(Math.max(0,d.tOT)/d.tG*100).toFixed(1)+'%':'—', sub:d=>`${fmt(Math.max(0,d.tOT))} from OT` },
+    { type:'stat', id:'avg-ot-hrs',     icon:'⏰', name:'Avg OT Hrs / Check',    desc:'Mean OT hours per paycheck',         color:'amber',  fn:d=>d.n>0?fmtH(d.tOTHrs/d.n)+'h':'—', sub:d=>`${d.tOTHrs>0?((d.tOTHrs/d.n).toFixed(1)):0}h per check` },
+    // ── Hours ──
+    { type:'stat', id:'total-hours',    icon:'🕐', name:'Total Hours',           desc:'All hours worked',                   color:'',       fn:d=>fmtH(d.tHrs)+'h',                 sub:d=>`avg ${fmtH(d.tHrs/d.n)} / check` },
+    { type:'stat', id:'avg-hours',      icon:'📅', name:'Avg Hours / Check',     desc:'Mean total hours per paycheck',      color:'',       fn:d=>d.n>0?fmtH(d.tHrs/d.n)+'h':'—',  sub:d=>`${fmtH(d.tHrs)} total hours` },
+    // ── Tax & deductions ──
+    { type:'stat', id:'total-tax',      icon:'🏛',  name:'Total Taxes',           desc:'Fed + SS + Medicare withheld',       color:'red',    fn:d=>fmt(d.tTax),                       sub:d=>`${d.taxRate.toFixed(1)}% of gross` },
+    { type:'stat', id:'total-deducted', icon:'➖', name:'Total Deducted',        desc:'Taxes + all benefits',               color:'red',    fn:d=>fmt(d.tDed),                       sub:d=>`${(d.tDed/d.tG*100).toFixed(1)}% of gross` },
+    { type:'stat', id:'fed-withheld',   icon:'🏛',  name:'Fed Withheld',          desc:'Federal income tax YTD',             color:'red',    fn:d=>fmt(d.tFed),                       sub:d=>`${d.fedRate.toFixed(1)}% effective rate` },
+    { type:'stat', id:'fed-rate',       icon:'📉', name:'Effective Fed Rate',    desc:'Fed withholding ÷ gross',            color:'amber',  fn:d=>d.fedRate.toFixed(1)+'%',          sub:d=>`${fmt(d.tFed)} withheld so far` },
+    { type:'stat', id:'keep-rate',      icon:'📊', name:'Keep Rate',             desc:'Net ÷ Gross — how much you keep',    color:'green',  fn:d=>d.keepRate.toFixed(1)+'%',         sub:d=>`${(100-d.keepRate).toFixed(1)}% to taxes/benefits` },
+    { type:'stat', id:'benefits-total', icon:'🏥', name:'Benefits Total',        desc:'Dental + Medical + Vision + 401k',   color:'red',    fn:d=>fmt(d.tBen),                       sub:d=>`${fmt(d.tBen/d.n)} avg / check` },
+    { type:'stat', id:'fica-total',     icon:'💳', name:'FICA (SS + Medicare)',  desc:'Social Security + Medicare YTD',     color:'red',    fn:d=>fmt(d.tSS+d.tMed),                 sub:d=>`7.65% flat rate` },
+    // ── Pace ──
+    { type:'stat', id:'net-per-day',    icon:'📆', name:'Net Per Day',           desc:'Average daily take-home pace',       color:'green',  fn:d=>fmt(d.tNet/d.daysPassed),          sub:d=>`${d.daysPassed} days in ${d.yr}` },
+    { type:'stat', id:'gross-per-day',  icon:'📆', name:'Gross Per Day',         desc:'Average daily gross earnings pace',  color:'',       fn:d=>fmt(d.tG/d.daysPassed),            sub:d=>`at current pace` },
+    { type:'stat', id:'pay-rate',       icon:'💲', name:'Current Pay Rate',      desc:'Most recent hourly rate on file',    color:'',       fn:d=>d.filtered&&d.filtered.length?'$'+[...d.filtered].sort((a,b)=>b.date.localeCompare(a.date))[0].rate.toFixed(4)+'/hr':'—', sub:d=>`from most recent paycheck` },
+  ],
+  charts: [
+    { type:'chart', id:'chart-gross',     icon:'📊', name:'Gross Trend',          desc:'Gross + running avg per check',    chartType:'bar',  defaultSize:6 },
+    { type:'chart', id:'chart-net',       icon:'📈', name:'Net Trend',            desc:'Take-home per paycheck over time', chartType:'line', defaultSize:6 },
+    { type:'chart', id:'chart-cum',       icon:'📉', name:'Cumulative Net',       desc:'Running total of take-home pay',   chartType:'line', defaultSize:6 },
+    { type:'chart', id:'chart-earnings',  icon:'🥧', name:'Earnings Mix',         desc:'Breakdown by Regular/OT/Holiday',  chartType:'doughnut', defaultSize:4 },
+    { type:'chart', id:'chart-hrs-month', icon:'📅', name:'Hours by Month',       desc:'Stacked Reg/OT hours per month',   chartType:'bar',  defaultSize:6 },
+    { type:'chart', id:'chart-ot-trend',  icon:'⚡', name:'OT Trend',             desc:'OT hours per paycheck over time',  chartType:'line', defaultSize:6 },
+    { type:'chart', id:'chart-tax-burden',icon:'🏛',  name:'Tax Burden %',        desc:'Tax % each check with avg line',   chartType:'line', defaultSize:6 },
+    { type:'chart', id:'chart-gross-net', icon:'📊', name:'Gross vs Net',         desc:'Both gross and net side by side',  chartType:'bar',  defaultSize:12 },
+    { type:'chart', id:'chart-deductions',icon:'💸', name:'Deductions Breakdown', desc:'Where your money goes (donut)',     chartType:'doughnut', defaultSize:4 },
+    { type:'chart', id:'chart-monthly',   icon:'📅', name:'Monthly Gross',        desc:'Total gross earnings per month',   chartType:'bar',  defaultSize:6 },
+    { type:'chart', id:'chart-hours-pie', icon:'🕐', name:'Hours Mix',            desc:'Reg vs OT vs other hours split',   chartType:'doughnut', defaultSize:3 },
+  ],
+  trackers: [
+    { type:'tracker', id:'track-ss',     icon:'🏛',  name:'SS Wage Base',         desc:'Progress toward $176,100 SS limit', defaultSize:4 },
+    { type:'tracker', id:'track-goal',   icon:'🎯',  name:'Net Pay Goal',         desc:'Annual net pay goal tracker',        defaultSize:6 },
+    { type:'tracker', id:'track-streak', icon:'🔥',  name:'OT Streak',            desc:'Consecutive OT paychecks',           defaultSize:3 },
+    { type:'tracker', id:'track-mom',    icon:'📅',  name:'Month vs Last',        desc:'This month gross vs last month',     defaultSize:3 },
+    { type:'tracker', id:'track-rate',   icon:'💰',  name:'Pay Rate History',     desc:'Hourly rate changes over time',      defaultSize:4 },
+    { type:'tracker', id:'track-pace',   icon:'🏃',  name:'Earning Pace',         desc:'Daily/weekly pace with projection',  defaultSize:4 },
+    { type:'tracker', id:'track-recent', icon:'📋',  name:'Recent Paychecks',     desc:'Last 3 paychecks at a glance',       defaultSize:6 },
+  ]
+};
+
+const SIZE_COLS = { sm:3, md:4, lg:6, xl:12 };
+const SIZE_LABELS = { sm:'S', md:'M', lg:'L', xl:'Full' };
+const CHART_TYPES_FOR = {
+  'chart-gross':      ['bar','line'],
+  'chart-net':        ['bar','line'],
+  'chart-cum':        ['line'],
+  'chart-earnings':   ['doughnut','pie','bar'],
+  'chart-hrs-month':  ['bar'],
+  'chart-ot-trend':   ['line','bar'],
+  'chart-tax-burden': ['line','bar'],
+  'chart-gross-net':  ['bar'],
+  'chart-deductions': ['doughnut','pie','bar'],
+  'chart-monthly':    ['bar','line'],
+  'chart-hours-pie':  ['doughnut','pie'],
+};
+
+let dashConfig = [];   // [{id, widgetId, size, chartType, year}]
+let dashEditMode = false;
+let dashCharts = {};   // widgetId → Chart instance
+let dashSaveTimer = null;
+let dashData = {};     // computed stats for current year
+
+function dashUID(){ return Math.random().toString(36).slice(2,9); }
+
+async function loadDashboard() {
+  try {
+    const r = await apiFetch('/api/dashboard');
+    dashConfig = r.config || [];
+    if(!dashConfig.length) dashConfig = getDefaultDashConfig();
+  } catch(e) { dashConfig = getDefaultDashConfig(); }
+  computeDashData();
+  renderDashboard();
+}
+
+function getDefaultDashConfig() {
+  return [
+    { id:dashUID(), widgetId:'total-gross',   size:'md', year:'current' },
+    { id:dashUID(), widgetId:'total-net',     size:'md', year:'current' },
+    { id:dashUID(), widgetId:'keep-rate',     size:'md', year:'current' },
+    { id:dashUID(), widgetId:'ot-earnings',   size:'md', year:'current' },
+    { id:dashUID(), widgetId:'chart-gross',   size:'lg', chartType:'bar',  year:'current' },
+    { id:dashUID(), widgetId:'chart-earnings',size:'md', chartType:'doughnut', year:'current' },
+    { id:dashUID(), widgetId:'track-ss',      size:'md', year:'current' },
+    { id:dashUID(), widgetId:'track-goal',    size:'lg', year:'current' },
+  ];
+}
+
+function computeDashData(yr) {
+  const year = yr || ytdYear;
+  const filtered = stubs.filter(s=>s.date.startsWith(year+''));
+  if(!filtered.length){ dashData={yr:year,n:0,tG:0,tNet:0,tTax:0,tDed:0,tFed:0,tSS:0,tMed:0,tOT:0,tOTHrs:0,tHrs:0,avgG:0,avgNet:0,fedRate:0,taxRate:0,keepRate:0,projGross:0,bestStub:null,daysPassed:1,daysInYear:365}; return; }
+  const tG=filtered.reduce((a,s)=>a+s.gross,0);
+  const tFed=filtered.reduce((a,s)=>a+s.fed,0);
+  const tSS=filtered.reduce((a,s)=>a+s.ss,0);
+  const tMed=filtered.reduce((a,s)=>a+s.med,0);
+  const tBen=filtered.reduce((a,s)=>a+s.den+s.medI+s.vis+(s.retire||0),0);
+  const tTax=tFed+tSS+tMed, tDed=tTax+tBen;
+  const tOT=filtered.reduce((a,s)=>a+(s.otPay!=null?s.otPay:payRound(rateRound(s.rate*1.5)*(s.ot||0))),0);
+  const tOTHrs=filtered.reduce((a,s)=>a+(s.ot||0),0);
+  const tHrs=filtered.reduce((a,s)=>a+s.reg+(s.ot||0)+(s.dt||0)+(s.hol||0)+(s.sick||0)+(s.vac||0)+(s.fltHol||0),0);
+  const nets=filtered.map(s=>s.net||(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0))));
+  const tNet=nets.reduce((a,v)=>a+v,0);
+  const n=filtered.length, avgG=tG/n, avgNet=tNet/n;
+  const now=new Date(), yearStart=new Date(year,0,1), yearEnd=new Date(year,11,31);
+  const daysPassed=Math.max(1,Math.ceil((now-yearStart)/86400000));
+  const daysInYear=Math.ceil((yearEnd-yearStart)/86400000)+1;
+  const projGross=tG/daysPassed*daysInYear;
+  const bestStub=filtered.reduce((b,s)=>s.gross>b.gross?s:b,filtered[0]);
+  const worstStub=filtered.reduce((b,s)=>s.gross<b.gross?s:b,filtered[0]);
+  dashData={yr:year,n,tG,tFed,tSS,tMed,tBen,tTax,tDed,tOT,tOTHrs,tHrs,tNet,avgG,avgNet,
+    fedRate:tG>0?(tFed/tG)*100:0, taxRate:tG>0?(tTax/tG)*100:0, keepRate:tG>0?(tNet/tG)*100:0,
+    projGross, bestStub, worstStub, daysPassed, daysInYear, filtered,
+    nets: filtered.map(s=>{const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net||(s.gross-d)).toFixed(2));})
+  };
+}
+
+function renderDashboard() {
+  const grid = document.getElementById('dashGrid');
+  if(!grid) return;
+  // Destroy old chart instances
+  Object.values(dashCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+  dashCharts={};
+
+  if(!dashConfig.length){
+    grid.innerHTML=`<div class="dash-empty" style="grid-column:span 12"><div class="dash-empty-icon">✦</div><div style="font-size:14px;font-weight:600">Your dashboard is empty</div><div style="font-size:12px;text-align:center">Click <strong>Add widget</strong> to start customising your personal view</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = dashConfig.map(w=>renderWidgetShell(w)).join('');
+
+  // Populate charts after DOM update
+  requestAnimationFrame(()=>{
+    dashConfig.forEach(w=>{ if(w.widgetId.startsWith('chart-')) renderDashChart(w); });
+    dashConfig.forEach(w=>{ if(w.widgetId.startsWith('track-')) renderDashTracker(w); });
+  });
+}
+
+function renderWidgetShell(w) {
+  const def = findDef(w.widgetId);
+  if(!def) return '';
+  const sizeClass = 'dash-col-'+(SIZE_COLS[w.size]||6);
+  const isEditing = dashEditMode ? 'style="outline:2px dashed var(--border2);outline-offset:2px"' : '';
+
+  // Chart type toggle buttons
+  const chartTypes = CHART_TYPES_FOR[w.widgetId]||[];
+  const chartBtns = chartTypes.length>1 ? chartTypes.map(t=>
+    `<button class="dash-wbtn${w.chartType===t?' active':''}" onclick="setDashChartType('${w.id}','${t}')">${t==='bar'?'Bar':t==='line'?'Line':t==='doughnut'?'Donut':t==='pie'?'Pie':t}</button>`
+  ).join('') : '';
+
+  // Size buttons
+  const sizeBtns = Object.entries(SIZE_COLS).map(([sz,cols])=>
+    `<button class="dash-wbtn${w.size===sz?' active':''}" onclick="setDashSize('${w.id}','${sz}')">${SIZE_LABELS[sz]}</button>`
+  ).join('');
+
+  const editControls = dashEditMode ? `
+    <div class="dash-widget-controls" style="opacity:1">
+      ${chartBtns}
+      ${sizeBtns}
+      <button class="dash-wbtn danger" onclick="removeDashWidget('${w.id}')" title="Remove">✕</button>
+    </div>` : `
+    <div class="dash-widget-controls">
+      ${chartBtns}
+      ${sizeBtns}
+      <button class="dash-wbtn danger" onclick="removeDashWidget('${w.id}')" title="Remove">✕</button>
+    </div>`;
+
+  let body = '';
+  if(def.type==='stat')    body = renderStatBody(w, def);
+  else if(def.type==='chart')   body = `<div class="dash-chart-wrap"><canvas id="dc-${w.id}" style="height:${w.size==='sm'?120:w.size==='md'?150:200}px;max-height:200px"></canvas></div>`;
+  else if(def.type==='tracker') body = `<div id="dt-${w.id}"></div>`;
+
+  return `<div class="dash-widget ${sizeClass}" id="dw-${w.id}" ${isEditing}>
+    <div class="dash-widget-header">
+      <span class="dash-widget-title">${def.name}</span>
+      ${editControls}
+    </div>
+    <div class="dash-widget-body">${body}</div>
+  </div>`;
+}
+
+function renderStatBody(w, def) {
+  const d = dashData;
+  const val = d.n>0 ? def.fn(d) : '—';
+  const sub = d.n>0 ? (def.sub ? def.sub(d) : '') : 'No data';
+  const sz = w.size==='xl'||w.size==='lg' ? 'sz-lg' : w.size==='md' ? 'sz-md' : 'sz-sm';
+  return `<div class="dash-stat-val ${sz} ${def.color||''}">${val}</div>
+    <div class="dash-stat-sub">${sub}</div>`;
+}
+
+function renderDashChart(w) {
+  const canvas = document.getElementById('dc-'+w.id);
+  if(!canvas) return;
+  const d = dashData;
+  if(!d.filtered||!d.filtered.length){ canvas.parentElement.innerHTML='<div style="height:120px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3)">No data for this year</div>'; return; }
+
+  const sorted=[...d.filtered].sort((a,b)=>a.date.localeCompare(b.date));
+  const labels=sorted.map(s=>new Date(s.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const chartDefs={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{ticks:{font:{size:8},color:'#8a96a3',autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},
+            y:{ticks:{font:{size:8},color:'#8a96a3',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(128,128,128,.08)'},border:{display:false}}}};
+
+  let cfg = {};
+  const ct = w.chartType||'bar';
+
+  if(w.widgetId==='chart-gross'){
+    const gd=sorted.map(s=>s.gross);
+    const avg=gd.map((_,i)=>parseFloat((gd.slice(0,i+1).reduce((a,v)=>a+v,0)/(i+1)).toFixed(2)));
+    cfg={type:ct==='line'?'line':'bar',data:{labels,datasets:[
+      {label:'Gross',data:gd,backgroundColor:'rgba(251,191,36,.5)',borderColor:'rgba(251,191,36,.8)',borderWidth:1,borderRadius:3,borderSkipped:false},
+      {label:'Avg',data:avg,type:'line',borderColor:'rgba(251,191,36,.7)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
+    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{mode:'index',intersect:false}}}};
+  } else if(w.widgetId==='chart-net'){
+    const nd=d.nets;
+    const avg=nd.map((_,i)=>parseFloat((nd.slice(0,i+1).reduce((a,v)=>a+v,0)/(i+1)).toFixed(2)));
+    cfg={type:ct==='bar'?'bar':'line',data:{labels,datasets:[
+      {label:'Net',data:nd,backgroundColor:'rgba(22,163,74,.45)',borderColor:'rgba(22,163,74,.8)',borderWidth:ct==='bar'?1:2,borderRadius:3,fill:ct==='line',tension:0.3},
+      {label:'Avg',data:avg,type:'line',borderColor:'rgba(22,163,74,.6)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
+    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{mode:'index',intersect:false}}}};
+  } else if(w.widgetId==='chart-cum'){
+    let run=0; const cum=d.nets.map(v=>parseFloat((run+=v,run).toFixed(2)));
+    cfg={type:'line',data:{labels,datasets:[{label:'Cumulative net',data:cum,borderColor:'rgba(22,163,74,.9)',backgroundColor:'rgba(22,163,74,.08)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{callbacks:{label:c=>'Total: '+fmt(c.raw)}}}}};
+  } else if(w.widgetId==='chart-earnings'){
+    const vals=[
+      Math.round(d.filtered.reduce((a,s)=>a+(s.regPay!=null?s.regPay:payRound(rateRound(s.rate)*s.reg)),0)),
+      Math.max(0,Math.round(d.tOT)),
+      Math.round(d.filtered.reduce((a,s)=>a+payRound(rateRound(s.rate)*(s.hol||0)),0)),
+    ].filter(v=>v>0);
+    const labls=['Regular','Overtime','Holiday'].filter((_,i)=>[d.filtered.reduce((a,s)=>a+(s.regPay!=null?s.regPay:payRound(rateRound(s.rate)*s.reg)),0),Math.max(0,d.tOT),d.filtered.reduce((a,s)=>a+payRound(rateRound(s.rate)*(s.hol||0)),0)][i]>0);
+    const colors=['rgba(59,130,246,.7)','rgba(251,191,36,.8)','rgba(96,165,250,.7)'];
+    if(ct==='bar'){ cfg={type:'bar',data:{labels:labls,datasets:[{data:vals,backgroundColor:colors}]},options:{...chartDefs,indexAxis:'y',plugins:{legend:{display:false}}}}; }
+    else { cfg={type:ct,data:{labels:labls,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'var(--bg2)',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:ct==='doughnut'?'62%':'0',plugins:{legend:{display:true,position:'right',labels:{font:{size:9},boxWidth:10}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)}`}}}}}; }
+  } else if(w.widgetId==='chart-hrs-month'){
+    const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const bm={}; d.filtered.forEach(s=>{const m=new Date(s.date+'T12:00:00').getMonth();if(!bm[m])bm[m]={reg:0,ot:0};bm[m].reg+=s.reg;bm[m].ot+=s.ot||0;});
+    const mk=Object.keys(bm).sort((a,b)=>a-b);
+    cfg={type:'bar',data:{labels:mk.map(m=>MONTHS[m]),datasets:[
+      {label:'Regular',data:mk.map(m=>parseFloat(bm[m].reg.toFixed(2))),backgroundColor:'rgba(59,130,246,.6)',stack:'h'},
+      {label:'OT',data:mk.map(m=>parseFloat(bm[m].ot.toFixed(2))),backgroundColor:'rgba(251,191,36,.7)',stack:'h'},
+    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{...chartDefs.scales,y:{...chartDefs.scales.y,ticks:{...chartDefs.scales.y.ticks,callback:v=>v+'h'},stacked:true}}}};
+  } else if(w.widgetId==='chart-ot-trend'){
+    cfg={type:ct==='bar'?'bar':'line',data:{labels,datasets:[{label:'OT Hrs',data:sorted.map(s=>parseFloat((s.ot||0).toFixed(2))),borderColor:'rgba(251,191,36,.9)',backgroundColor:'rgba(251,191,36,.12)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{...chartDefs,scales:{...chartDefs.scales,y:{...chartDefs.scales.y,ticks:{...chartDefs.scales.y.ticks,callback:v=>v+'h'}}}}};
+  } else if(w.widgetId==='chart-tax-burden'){
+    const taxPcts=sorted.map(s=>s.gross>0?parseFloat(((s.fed+s.ss+s.med)/s.gross*100).toFixed(1)):0);
+    const avgTax=parseFloat((taxPcts.reduce((a,v)=>a+v,0)/taxPcts.length).toFixed(1));
+    cfg={type:ct==='bar'?'bar':'line',data:{labels,datasets:[
+      {label:'Tax %',data:taxPcts,borderColor:'rgba(239,68,68,.8)',backgroundColor:'rgba(239,68,68,.08)',borderWidth:2,pointRadius:2,fill:true,tension:0.3},
+      {label:'Avg',data:Array(sorted.length).fill(avgTax),type:'line',borderColor:'rgba(107,114,128,.5)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
+    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{...chartDefs.scales,y:{...chartDefs.scales.y,ticks:{...chartDefs.scales.y.ticks,callback:v=>v+'%'}}}}};
+  } else if(w.widgetId==='chart-gross-net'){
+    const gd=sorted.map(s=>s.gross);
+    const nd=d.nets;
+    cfg={type:'bar',data:{labels,datasets:[
+      {label:'Gross',data:gd,backgroundColor:'rgba(251,191,36,.5)',borderColor:'rgba(251,191,36,.8)',borderWidth:1,borderRadius:3,borderSkipped:false,order:2},
+      {label:'Net',data:nd,type:'line',borderColor:'rgba(22,163,74,.9)',borderWidth:2,pointRadius:2,fill:false,tension:0.3,order:1}
+    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false}}}};
+  } else if(w.widgetId==='chart-deductions'){
+    const tFed2=d.filtered.reduce((a,s)=>a+s.fed,0);
+    const tSS2=d.filtered.reduce((a,s)=>a+s.ss,0);
+    const tMed2=d.filtered.reduce((a,s)=>a+s.med,0);
+    const tDen=d.filtered.reduce((a,s)=>a+s.den,0);
+    const tMedI=d.filtered.reduce((a,s)=>a+s.medI,0);
+    const tVis=d.filtered.reduce((a,s)=>a+s.vis,0);
+    const tRet=d.filtered.reduce((a,s)=>a+(s.retire||0),0);
+    const vals=[tFed2,tSS2,tMed2,tDen+tMedI+tVis+tRet].filter(v=>v>0);
+    const labls=['Fed Tax','Soc Security','Medicare','Benefits'].filter((_,i)=>[tFed2,tSS2,tMed2,tDen+tMedI+tVis+tRet][i]>0);
+    const colors=['rgba(239,68,68,.8)','rgba(251,146,60,.7)','rgba(251,191,36,.7)','rgba(59,130,246,.6)'];
+    if(ct==='bar'){cfg={type:'bar',data:{labels:labls,datasets:[{data:vals,backgroundColor:colors}]},options:{...chartDefs,indexAxis:'y',plugins:{legend:{display:false}}}};}
+    else{cfg={type:ct,data:{labels:labls,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'var(--bg2)',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:ct==='doughnut'?'62%':'0',plugins:{legend:{display:true,position:'right',labels:{font:{size:9},boxWidth:10}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)}`}}}}};}
+  } else if(w.widgetId==='chart-monthly'){
+    const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const bm={}; d.filtered.forEach(s=>{const m=new Date(s.date+'T12:00:00').getMonth();if(!bm[m])bm[m]=0;bm[m]+=s.gross;});
+    const mk=Object.keys(bm).sort((a,b)=>a-b);
+    cfg={type:ct==='line'?'line':'bar',data:{labels:mk.map(m=>MONTHS[m]),datasets:[{label:'Monthly Gross',data:mk.map(m=>parseFloat(bm[m].toFixed(2))),backgroundColor:'rgba(59,130,246,.55)',borderColor:'rgba(59,130,246,.8)',borderWidth:1,borderRadius:4,fill:ct==='line',tension:0.3}]},options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{callbacks:{label:c=>'Total: '+fmt(c.raw)}}}}};
+  } else if(w.widgetId==='chart-hours-pie'){
+    const regH=d.filtered.reduce((a,s)=>a+s.reg,0);
+    const otH=d.filtered.reduce((a,s)=>a+(s.ot||0),0);
+    const benH=d.filtered.reduce((a,s)=>a+(s.sick||0)+(s.vac||0)+(s.fltHol||0)+(s.hol||0),0);
+    const vals=[regH,otH,benH].filter(v=>v>0);
+    const labls=['Regular','Overtime','Benefit/Hol'].filter((_,i)=>[regH,otH,benH][i]>0);
+    const colors=['rgba(59,130,246,.7)','rgba(251,191,36,.8)','rgba(45,212,191,.7)'];
+    cfg={type:ct==='bar'?'bar':'doughnut',data:{labels:labls,datasets:[{data:vals,backgroundColor:colors.filter((_,i)=>[regH,otH,benH][i]>0),borderWidth:2,borderColor:'var(--bg2)',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'right',labels:{font:{size:9},boxWidth:10}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmtH(c.raw)}h`}}}}};
+  }
+
+  if(cfg.type) {
+    try { if(dashCharts[w.id]){dashCharts[w.id].destroy();} dashCharts[w.id]=new Chart(canvas,cfg); }
+    catch(e){ console.error('Chart error',e); }
+  }
+}
+
+function renderDashTracker(w) {
+  const el = document.getElementById('dt-'+w.id);
+  if(!el) return;
+  const d = dashData;
+  if(!d.n){ el.innerHTML='<div style="font-size:12px;color:var(--text3)">No data for this year</div>'; return; }
+
+  if(w.widgetId==='track-ss'){
+    const SS_LIMIT=176100, tSSW=d.filtered.reduce((a,s)=>a+s.gross-s.den-s.medI-s.vis,0);
+    const pct=Math.min(100,tSSW/SS_LIMIT*100);
+    el.innerHTML=`
+      <div style="font-family:var(--mono);font-size:20px;font-weight:700;margin-bottom:2px">${pct.toFixed(1)}%</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">${fmt(tSSW)} of $176,100 SS wage base</div>
+      <div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct.toFixed(1)}%;background:var(--blue);border-radius:4px;transition:width .4s"></div></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px">${fmt(Math.max(0,SS_LIMIT-tSSW))} remaining</div>`;
+  } else if(w.widgetId==='track-streak'){
+    const sorted=[...d.filtered].sort((a,b)=>b.date.localeCompare(a.date));
+    let streak=0; for(const s of sorted){if((s.ot||0)>0)streak++;else break;}
+    let best=0,tmp=0; for(const s of [...d.filtered].sort((a,b)=>a.date.localeCompare(b.date))){if((s.ot||0)>0){tmp++;if(tmp>best)best=tmp;}else tmp=0;}
+    el.innerHTML=`<div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--amber)">${streak}</div><div style="font-size:11px;color:var(--text3)">consecutive OT paychecks</div><div style="font-size:11px;color:var(--text3);margin-top:4px">Best streak this year: ${best}</div>`;
+  } else if(w.widgetId==='track-mom'){
+    const now=new Date(); const tm=now.getMonth(); const lm=tm===0?11:tm-1;
+    const tg=d.filtered.filter(s=>new Date(s.date+'T12:00:00').getMonth()===tm).reduce((a,s)=>a+s.gross,0);
+    const lg=d.filtered.filter(s=>new Date(s.date+'T12:00:00').getMonth()===lm).reduce((a,s)=>a+s.gross,0);
+    const diff=tg-lg;
+    el.innerHTML=`<div style="font-family:var(--mono);font-size:20px;font-weight:700;margin-bottom:2px">${tg>0?fmt(tg):'—'}</div><div style="font-size:11px;color:var(--text3)">this month gross</div>${lg>0?`<div style="font-size:13px;font-weight:600;color:${diff>=0?'var(--green)':'var(--red)'};margin-top:6px">${diff>=0?'▲':'▼'} ${fmt(Math.abs(diff))} vs last month</div>`:''}`;
+  } else if(w.widgetId==='track-rate'){
+    const rateChanges=[];let lastR=null;
+    [...(d.filtered||[])].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
+      if(lastR===null||Math.abs(s.rate-lastR)>0.0001){rateChanges.push({date:s.date,rate:s.rate});lastR=s.rate;}
+    });
+    // also check prior years
+    const allRates=[];let lr2=null;
+    [...stubs].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
+      if(lr2===null||Math.abs(s.rate-lr2)>0.0001){allRates.push({date:s.date,rate:s.rate});lr2=s.rate;}
+    });
+    el.innerHTML=allRates.length===0?'<div style="font-size:12px;color:var(--text3)">No data</div>':
+      allRates.map((r,i)=>{
+        const isNow=r.date.startsWith(String(d.yr));
+        const arrow=i>0&&r.rate>allRates[i-1].rate?'<span style="color:var(--green)">▲</span>':i>0?'<span style="color:var(--red)">▼</span>':'<span style="color:var(--text3)">●</span>';
+        const dt=new Date(r.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        return `<div style="font-size:12px;${isNow?'':'opacity:.55'};margin-bottom:3px;display:flex;align-items:center;gap:6px">${arrow}<strong>$${r.rate.toFixed(4)}/hr</strong><span style="font-size:10px;color:var(--text3)">since ${dt}</span></div>`;
+      }).join('');
+  } else if(w.widgetId==='track-pace'){
+    const projG=d.tG/d.daysPassed*d.daysInYear;
+    const projN=d.tNet/d.daysPassed*d.daysInYear;
+    const gPerDay=d.tG/d.daysPassed, gPerWeek=gPerDay*7;
+    const nPerDay=d.tNet/d.daysPassed, nPerWeek=nPerDay*7;
+    el.innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:var(--bg3);border-radius:6px;padding:8px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Gross/day</div>
+          <div style="font-family:var(--mono);font-size:15px;font-weight:700">${fmt(gPerDay)}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:8px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Gross/week</div>
+          <div style="font-family:var(--mono);font-size:15px;font-weight:700">${fmt(gPerWeek)}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:8px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Net/day</div>
+          <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">${fmt(nPerDay)}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:8px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Proj. net YE</div>
+          <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">${fmt(projN)}</div>
+        </div>
+      </div>`;
+  } else if(w.widgetId==='track-recent'){
+    const recent=[...d.filtered].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+    el.innerHTML=recent.map(s=>{
+      const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
+      const net=parseFloat((s.net||(s.gross-ded)).toFixed(2));
+      const dt=new Date(s.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const otBadge=(s.ot||0)>0?`<span style="font-size:9px;background:rgba(251,191,36,.15);color:#92400e;padding:1px 5px;border-radius:10px;font-weight:600">OT ${fmtH(s.ot||0)}h</span>`:'';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div><div style="font-size:11px;font-weight:600;color:var(--text2)">${dt}</div><div style="display:flex;gap:4px;margin-top:2px">${otBadge}</div></div>
+        <div style="text-align:right"><div style="font-family:var(--mono);font-size:13px;font-weight:700">${fmt(s.gross)}</div><div style="font-family:var(--mono);font-size:11px;color:var(--green)">${fmt(net)} net</div></div>
+      </div>`;
+    }).join('')+'<div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Last 3 paychecks</div>';
+  }
+    // Re-use goal tracker logic
+    const goal=parseFloat(localStorage.getItem('dash-goal-'+d.yr)||0);
+    const projNet=d.tNet/d.daysPassed*d.daysInYear;
+    const remain=Math.max(0,goal-d.tNet);
+    const pct=goal>0?Math.min(100,d.tNet/goal*100):0;
+    const onTrack=goal>0?projNet>=goal:true;
+    el.innerHTML=`
+      ${goal>0?`<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span>${fmt(d.tNet)} of ${fmt(goal)}</span><span style="color:${onTrack?'var(--green)':'var(--amber)'}">${pct.toFixed(0)}%</span></div>
+      <div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:${pct.toFixed(1)}%;background:${onTrack?'var(--green)':'var(--amber)'};border-radius:4px;transition:width .4s"></div></div>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Earned</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)">${fmt(d.tNet)}</div></div>
+        <div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Projected</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${onTrack?'var(--green)':'var(--amber)'}">${fmt(projNet)}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px"><label style="font-size:11px;color:var(--text3);white-space:nowrap">Goal $</label><input type="number" step="500" value="${goal||''}" placeholder="Set annual target" style="flex:1;padding:5px 8px;font-family:var(--mono);font-size:12px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:6px;color:var(--text);outline:none" oninput="setDashGoal('${w.id}',this.value,'${d.yr}')"></div>`;
+  }
+}
+
+function setDashGoal(wid, val, yr){
+  localStorage.setItem('dash-goal-'+yr, val);
+  renderDashTracker(dashConfig.find(w=>w.id===wid));
+}
+
+function findDef(widgetId){
+  for(const cat of Object.values(DASH_CATALOG)){
+    const found=cat.find(d=>d.id===widgetId);
+    if(found) return found;
+  }
+  return null;
+}
+
+function openDashAddPanel(){
+  populateDashPicker();
+  document.getElementById('dashAddPanel').classList.add('open');
+}
+function closeDashAddPanel(){ document.getElementById('dashAddPanel').classList.remove('open'); }
+
+function populateDashPicker(){
+  const existing=new Set(dashConfig.map(w=>w.widgetId));
+  ['Metrics','Charts','Trackers'].forEach(cat=>{
+    const key=cat.toLowerCase();
+    const el=document.getElementById('dashPicker'+cat);
+    if(!el) return;
+    el.innerHTML=DASH_CATALOG[key].map(def=>`
+      <div class="dash-pick-item${existing.has(def.id)?' ytd-bar--teal':''}" onclick="addDashWidget('${def.id}');closeDashAddPanel()">
+        <div class="dash-pick-icon">${def.icon}</div>
+        <div class="dash-pick-name">${def.name}</div>
+        <div class="dash-pick-desc">${def.desc}</div>
+        ${existing.has(def.id)?'<div style="font-size:9px;color:var(--text3);margin-top:4px">Already added</div>':''}
+      </div>`).join('');
+  });
+}
+
+function addDashWidget(widgetId){
+  const def=findDef(widgetId);
+  if(!def) return;
+  const w={ id:dashUID(), widgetId, size:def.defaultSize?Object.entries(SIZE_COLS).find(([,v])=>v===def.defaultSize)?.[0]||'md':'md', chartType:def.chartType||null, year:'current' };
+  dashConfig.push(w);
+  saveDashConfig();
+  renderDashboard();
+  showToast('Widget added');
+}
+
+function removeDashWidget(id){
+  if(dashCharts[id]){ try{dashCharts[id].destroy();}catch(e){} delete dashCharts[id]; }
+  dashConfig=dashConfig.filter(w=>w.id!==id);
+  saveDashConfig();
+  renderDashboard();
+}
+
+function setDashSize(id, size){
+  const w=dashConfig.find(w=>w.id===id);
+  if(!w) return;
+  w.size=size;
+  saveDashConfig();
+  renderDashboard();
+}
+
+function setDashChartType(id, chartType){
+  const w=dashConfig.find(w=>w.id===id);
+  if(!w) return;
+  w.chartType=chartType;
+  saveDashConfig();
+  if(dashCharts[id]){try{dashCharts[id].destroy();}catch(e){}delete dashCharts[id];}
+  requestAnimationFrame(()=>renderDashChart(w));
+  // Re-render just the controls
+  const ctrl=document.querySelector(`#dw-${id} .dash-widget-controls`);
+  if(ctrl){
+    const types=CHART_TYPES_FOR[w.widgetId]||[];
+    ctrl.querySelectorAll('.dash-wbtn:not(.danger)').forEach(b=>{
+      const t=b.textContent.trim().toLowerCase();
+      const match={bar:'bar',line:'line',donut:'doughnut',pie:'pie'}[t]||t;
+      if(types.includes(match)) b.classList.toggle('active',match===chartType||t===chartType);
+    });
+  }
+}
+
+function toggleDashEdit(){
+  dashEditMode=!dashEditMode;
+  const btn=document.getElementById('dashEditBtn');
+  if(btn){ btn.style.background=dashEditMode?'var(--amber-dim)':''; btn.style.color=dashEditMode?'var(--amber)':''; btn.style.borderColor=dashEditMode?'var(--amber)':''; }
+  renderDashboard();
+}
+
+async function saveDashConfig(){
+  clearTimeout(dashSaveTimer);
+  dashSaveTimer=setTimeout(async()=>{
+    try { await apiFetch('/api/dashboard',{method:'POST',body:JSON.stringify({config:dashConfig})}); }
+    catch(e){ console.warn('Dashboard save failed',e); }
+  }, 800);
+}
+
+// ===== DARK MODE (cross-device via settings API) =====
+function applyTheme(theme) {
+  const resolved = theme==='system'
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : theme;
+  document.documentElement.setAttribute('data-theme', resolved);
+  localStorage.setItem('payday-theme-pref', theme); // remember preference type
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.content = resolved==='dark' ? '#0f1117' : '#f8f9fa';
+  // Highlight active button in settings
+  ['Light','Dark','System'].forEach(t=>{
+    const btn = document.getElementById('theme'+t);
+    if(!btn) return;
+    const isActive = t.toLowerCase()===theme;
+    btn.style.background = isActive ? 'var(--blue-dim)' : '';
+    btn.style.color       = isActive ? 'var(--blue)' : '';
+    btn.style.borderColor = isActive ? 'rgba(29,78,216,.4)' : '';
+    btn.style.fontWeight  = isActive ? '700' : '';
+  });
+}
+async function setTheme(theme) {
+  applyTheme(theme);
+  // Persist to server (cross-device)
+  try { await apiFetch('/api/settings',{method:'POST',body:JSON.stringify({theme})}); }
+  catch(e) { /* falls back to localStorage */ }
+  showToast(theme==='dark'?'Dark mode on':theme==='light'?'Light mode on':'Following system theme');
+}
+// Keep toggleDark for any legacy callers
+function toggleDark(){ setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'); }
+
+// Boot: apply immediately from localStorage (avoids flash), then sync from server after login
+(function(){
+  const pref = localStorage.getItem('payday-theme-pref') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  applyTheme(pref);
+})();
+// Called after settings load from server
+function applyServerTheme(settings) {
+  if(settings.theme) { applyTheme(settings.theme); localStorage.setItem('payday-theme-pref', settings.theme); }
+}
+
 // ===== SETTINGS =====
 function buildSettingsUI() {
   if(appSettings.defaultRate) document.getElementById('sRate').value=parseFloat(appSettings.defaultRate).toFixed(2);
@@ -2541,6 +3237,8 @@ function buildSettingsUI() {
   if(appSettings.fedExtra) document.getElementById('sFedExtra').value=parseFloat(appSettings.fedExtra).toFixed(2);
   if(appSettings.retire) document.getElementById('sRetire').value=parseFloat(appSettings.retire).toFixed(2);
   if(appSettings.fedOverride) document.getElementById('sFedRate').value=appSettings.fedOverride;
+  // Highlight active theme
+  if(appSettings.theme) applyTheme(appSettings.theme);
   document.getElementById('sEffRate').textContent=(effFedRate()*100).toFixed(2)+'%';
   // Show admin nav item in sidebar
   const adminNav=document.getElementById('adminNavItem');
@@ -2880,6 +3578,7 @@ async function saveLog() {
   buildHistory();
   buildYTDTabs();
   buildYTD();
+  loadDashboard();
   // Update calculator rate
   document.getElementById('iRate').value=rate;
   appSettings.defaultRate=rate;
