@@ -299,6 +299,21 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
 .ytd-bar--teal{background:#2dd4bf}
 .ytd-bar--purple{background:#a78bfa}
 .ytd-stat-divider{border-top:1px solid var(--border);margin:6px 0}
+/* YTD Pace cards */
+.ytd-pace-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow)}
+.ytd-pace-icon{font-size:22px;flex-shrink:0}
+.ytd-pace-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:3px}
+.ytd-pace-value{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text);line-height:1;margin-bottom:2px}
+.ytd-pace-sub{font-size:11px;color:var(--text3)}
+/* YTD YoY table */
+.ytd-yoy-table{width:100%;border-collapse:collapse;font-size:12px}
+.ytd-yoy-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:6px 10px;border-bottom:1.5px solid var(--border2);text-align:right;white-space:nowrap}
+.ytd-yoy-table th:first-child{text-align:left}
+.ytd-yoy-table td{padding:7px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;text-align:right;color:var(--text)}
+.ytd-yoy-table td:first-child{text-align:left;font-family:var(--sans);font-weight:600;color:var(--text2)}
+.ytd-yoy-table tr:last-child td{border-bottom:none}
+.ytd-yoy-table .yr-cur{color:var(--blue);font-weight:700}
+.ytd-yoy-table .pos{color:var(--green)}.ytd-yoy-table .neg{color:var(--red)}
 
 /* Chart tooltip */
 .ytd-chart-tooltip{position:absolute;background:var(--bg);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:8px 10px;font-size:11px;pointer-events:none;box-shadow:var(--shadow);z-index:10;min-width:140px}
@@ -525,20 +540,18 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
     <div id="page-ytd" class="page">
       <div class="page-inner-wide">
 
-        <!-- Header + controls -->
+        <!-- Header bar -->
         <div class="ytd-header-bar">
           <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
             <div class="page-title" style="margin:0">Year to Date</div>
             <span id="ytdYearLabel" class="page-sub" style="margin:0"></span>
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <!-- Chart type toggle -->
             <div class="ytd-toggle-group">
-              <button class="ytd-toggle active" onclick="setYTDChartMode('gross',this)" id="ytdBtnGross">Gross</button>
-              <button class="ytd-toggle" onclick="setYTDChartMode('net',this)" id="ytdBtnNet">Net</button>
-              <button class="ytd-toggle" onclick="setYTDChartMode('both',this)" id="ytdBtnBoth">Both</button>
+              <button class="ytd-toggle active" onclick="setYTDChartMode('gross',this)">Gross</button>
+              <button class="ytd-toggle" onclick="setYTDChartMode('net',this)">Net</button>
+              <button class="ytd-toggle" onclick="setYTDChartMode('both',this)">Both</button>
             </div>
-            <!-- Cutoff filter -->
             <div class="ytd-cutoff-wrap">
               <span class="ytd-cutoff-label">Through</span>
               <input type="date" id="ytdCutoff" class="ytd-cutoff-input" onchange="buildYTD()">
@@ -550,8 +563,8 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         <!-- Year tabs -->
         <div class="tab-row" id="ytdTabs" style="margin-bottom:16px"></div>
 
-        <!-- HERO METRICS — 3 big numbers -->
-        <div class="ytd-hero">
+        <!-- HERO CARDS -->
+        <div class="ytd-hero" style="margin-bottom:16px">
           <div class="ytd-hero-card">
             <div class="ytd-hero-label">Total Gross</div>
             <div class="ytd-hero-value" id="ytdGross">—</div>
@@ -569,124 +582,143 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           </div>
         </div>
 
-        <!-- SECONDARY METRICS -->
-        <div class="metrics metrics-6" style="margin-bottom:16px">
-          <div class="metric"><div class="metric-label">Paychecks</div><div class="metric-value" id="ytdCount">—</div></div>
-          <div class="metric"><div class="metric-label">Total Taxes</div><div class="metric-value red" id="ytdTax">—</div></div>
-          <div class="metric"><div class="metric-label">OT Earnings</div><div class="metric-value amber" id="ytdOT">—</div></div>
-          <div class="metric"><div class="metric-label">Total OT &amp; DT</div><div class="metric-value amber" id="ytdOT2">—</div></div>
-          <div class="metric"><div class="metric-label">Total Hours</div><div class="metric-value" id="ytdHrs">—</div></div>
-          <div class="metric"><div class="metric-label">OT Hours</div><div class="metric-value amber" id="ytdOTHrs">—</div></div>
+        <!-- PACE / PROJECTIONS ROW -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" class="ytd-bottom-grid">
+          <div class="ytd-pace-card" id="ytdPaceCard">
+            <div class="ytd-pace-icon">📈</div>
+            <div>
+              <div class="ytd-pace-label">Projected Gross</div>
+              <div class="ytd-pace-value" id="ytdProjGross">—</div>
+              <div class="ytd-pace-sub" id="ytdProjSub">at current pace</div>
+            </div>
+          </div>
+          <div class="ytd-pace-card">
+            <div class="ytd-pace-icon">🏆</div>
+            <div>
+              <div class="ytd-pace-label">Best Paycheck</div>
+              <div class="ytd-pace-value green" id="ytdBestPay">—</div>
+              <div class="ytd-pace-sub" id="ytdBestDate">—</div>
+            </div>
+          </div>
+          <div class="ytd-pace-card">
+            <div class="ytd-pace-icon">📅</div>
+            <div>
+              <div class="ytd-pace-label">This Month vs Last</div>
+              <div class="ytd-pace-value" id="ytdMoMVal">—</div>
+              <div class="ytd-pace-sub" id="ytdMoMSub">—</div>
+            </div>
+          </div>
         </div>
 
-        <!-- MAIN CHART — full width, interactive -->
-        <div class="card card-pad" style="margin-bottom:16px;position:relative">
+        <!-- WoW CHANGE + SS TRACKER -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px" class="ytd-two-col">
+          <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:8px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">Week-over-Week Change</div>
+            <div style="display:flex;gap:20px;flex-wrap:wrap">
+              <div><div style="font-size:10px;color:var(--text3)">Gross change</div><div class="ytd-pace-value" id="ytdWoWGross">—</div></div>
+              <div><div style="font-size:10px;color:var(--text3)">Net change</div><div class="ytd-pace-value" id="ytdWoWNet">—</div></div>
+              <div><div style="font-size:10px;color:var(--text3)">Previous check</div><div style="font-size:12px;color:var(--text3)" id="ytdWoWPrev">—</div></div>
+            </div>
+          </div>
+          <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:8px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">SS Wage Base Tracker <span style="font-weight:400;color:var(--text3);font-size:10px">($176,100 limit)</span></div>
+            <div style="width:100%">
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+                <span id="ytdSSWages">—</span>
+                <span id="ytdSSRemain" style="color:var(--text3)">— remaining</span>
+              </div>
+              <div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden">
+                <div id="ytdSSBar" style="height:100%;border-radius:4px;background:var(--blue);transition:width .4s;width:0%"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text3);margin-top:4px" id="ytdSSPct">—% of annual SS wage base used</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAIN CHART -->
+        <div class="card card-pad" style="margin-bottom:16px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
             <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em" id="ytdMainChartLabel">Gross Pay Per Paycheck</div>
             <div style="display:flex;gap:10px;font-size:11px;color:var(--text3)" id="ytdChartLegend"></div>
           </div>
-          <div style="height:220px;position:relative"><canvas id="ytdMainChart"></canvas></div>
-          <div id="ytdChartTooltip" class="ytd-chart-tooltip" style="display:none"></div>
+          <div style="height:220px"><canvas id="ytdMainChart"></canvas></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Click any bar to view that paycheck's details</div>
         </div>
 
-        <!-- TWO CHART ROW -->
+        <!-- HOURS + CUMULATIVE -->
         <div class="chart-grid" style="margin-bottom:16px">
+          <div class="card card-pad" style="margin-bottom:0">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Hours by Month</div>
+            <div style="height:160px"><canvas id="ytdHrsMonthChart"></canvas></div>
+          </div>
+          <div class="card card-pad" style="margin-bottom:0">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">OT Hours Trend</div>
+            <div style="height:160px"><canvas id="ytdOTTrendChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- TAX BURDEN + CUMULATIVE -->
+        <div class="chart-grid" style="margin-bottom:16px">
+          <div class="card card-pad" style="margin-bottom:0">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Tax Burden % Per Paycheck</div>
+            <div style="height:160px"><canvas id="ytdTaxBurdenChart"></canvas></div>
+          </div>
           <div class="card card-pad" style="margin-bottom:0">
             <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Cumulative Net Pay</div>
             <div style="height:160px"><canvas id="ytdCumChart"></canvas></div>
           </div>
-          <div class="card card-pad" style="margin-bottom:0">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Earnings Breakdown</div>
-            <div style="height:160px;display:flex;align-items:center;justify-content:center"><canvas id="ytdDonutChart"></canvas></div>
+        </div>
+
+        <!-- YOY COMPARISON -->
+        <div class="card card-pad" style="margin-bottom:16px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Year-over-Year Comparison</div>
+          <div id="ytdYOY" style="overflow-x:auto">
+            <table class="ytd-yoy-table" id="ytdYOYTable"><tbody></tbody></table>
           </div>
         </div>
 
-        <!-- EARNINGS + HOURS DETAIL -->
+        <!-- MONTH-BY-MONTH TABLE -->
+        <div class="card card-pad" style="margin-bottom:16px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">Month-by-Month Breakdown</div>
+          <div style="overflow-x:auto">
+            <table class="hist-table" id="ytdMonthTable"><thead id="ytdMonthHead"></thead><tbody id="ytdMonthBody"></tbody></table>
+          </div>
+        </div>
+
+        <!-- EARNINGS + HOURS BARS -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" class="ytd-two-col">
           <div class="card">
             <div class="card-row"><span class="card-label" style="font-weight:700;font-size:12px">Earnings Breakdown</span></div>
-            <div class="ytd-bar-row">
-              <div class="ytd-bar-label">Regular Pay</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue" id="ytdBarReg"></div></div>
-              <div class="ytd-bar-value" id="ytdReg">—</div>
-            </div>
-            <div class="ytd-bar-row">
-              <div class="ytd-bar-label">Overtime (1.5×)</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--amber" id="ytdBarOT"></div></div>
-              <div class="ytd-bar-value amber" id="ytdOTBar">—</div>
-            </div>
-            <div class="ytd-bar-row" id="ytdRowDT" style="display:none">
-              <div class="ytd-bar-label">Double Time (2×)</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--red" id="ytdBarDT"></div></div>
-              <div class="ytd-bar-value red" id="ytdDT">—</div>
-            </div>
-            <div class="ytd-bar-row" id="ytdRowHol" style="display:none">
-              <div class="ytd-bar-label">Holiday</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue2" id="ytdBarHol"></div></div>
-              <div class="ytd-bar-value blue" id="ytdHol">—</div>
-            </div>
-            <div class="ytd-bar-row" id="ytdRowBenTime" style="display:none">
-              <div class="ytd-bar-label">Benefit Time</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--teal" id="ytdBarBenTime"></div></div>
-              <div class="ytd-bar-value" id="ytdBenTime">—</div>
-            </div>
-            <div class="ytd-bar-row" id="ytdRowPrem" style="display:none">
-              <div class="ytd-bar-label">Shift Premium</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--purple" id="ytdBarPrem"></div></div>
-              <div class="ytd-bar-value" id="ytdPrem">—</div>
-            </div>
-            <div class="ytd-bar-row" id="ytdRowAddl" style="display:none">
-              <div class="ytd-bar-label">Additional Pay</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--green" id="ytdBarAddl"></div></div>
-              <div class="ytd-bar-value" id="ytdAddl">—</div>
-            </div>
+            <div class="ytd-bar-row"><div class="ytd-bar-label">Regular Pay</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue" id="ytdBarReg"></div></div><div class="ytd-bar-value" id="ytdReg">—</div></div>
+            <div class="ytd-bar-row"><div class="ytd-bar-label">Overtime (1.5×)</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--amber" id="ytdBarOT"></div></div><div class="ytd-bar-value amber" id="ytdOTBar">—</div></div>
+            <div class="ytd-bar-row" id="ytdRowDT" style="display:none"><div class="ytd-bar-label">Double Time (2×)</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--red" id="ytdBarDT"></div></div><div class="ytd-bar-value red" id="ytdDT">—</div></div>
+            <div class="ytd-bar-row" id="ytdRowHol" style="display:none"><div class="ytd-bar-label">Holiday</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue2" id="ytdBarHol"></div></div><div class="ytd-bar-value blue" id="ytdHol">—</div></div>
+            <div class="ytd-bar-row" id="ytdRowBenTime" style="display:none"><div class="ytd-bar-label">Benefit Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--teal" id="ytdBarBenTime"></div></div><div class="ytd-bar-value" id="ytdBenTime">—</div></div>
+            <div class="ytd-bar-row" id="ytdRowPrem" style="display:none"><div class="ytd-bar-label">Shift Premium</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--purple" id="ytdBarPrem"></div></div><div class="ytd-bar-value" id="ytdPrem">—</div></div>
+            <div class="ytd-bar-row" id="ytdRowAddl" style="display:none"><div class="ytd-bar-label">Additional Pay</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--green" id="ytdBarAddl"></div></div><div class="ytd-bar-value" id="ytdAddl">—</div></div>
           </div>
           <div class="card">
             <div class="card-row"><span class="card-label" style="font-weight:700;font-size:12px">Hours Summary</span></div>
-            <div class="ytd-bar-row">
-              <div class="ytd-bar-label">Regular</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue" id="ytdBarRegHrs"></div></div>
-              <div class="ytd-bar-value" id="ytdRegHrs">—</div>
-            </div>
-            <div class="ytd-bar-row">
-              <div class="ytd-bar-label">Overtime</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--amber" id="ytdBarOTHrs2"></div></div>
-              <div class="ytd-bar-value amber" id="ytdOTHrs2">—</div>
-            </div>
-            <div class="ytd-bar-row" id="ytdRowDTHrs" style="display:none">
-              <div class="ytd-bar-label">Double Time</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--red" id="ytdBarDTHrs"></div></div>
-              <div class="ytd-bar-value red" id="ytdDTHrs">—</div>
-            </div>
-            <div class="ytd-bar-row" id="ytdRowHolHrs" style="display:none">
-              <div class="ytd-bar-label">Holiday</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue2" id="ytdBarHolHrs"></div></div>
-              <div class="ytd-bar-value" id="ytdHolHrs">—</div>
-            </div>
-            <div class="ytd-bar-row" id="ytdRowBenHrs" style="display:none">
-              <div class="ytd-bar-label">Benefit Time</div>
-              <div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--teal" id="ytdBarBenHrs"></div></div>
-              <div class="ytd-bar-value" id="ytdBenHrs">—</div>
-            </div>
+            <div class="ytd-bar-row"><div class="ytd-bar-label">Regular</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue" id="ytdBarRegHrs"></div></div><div class="ytd-bar-value" id="ytdRegHrs">—</div></div>
+            <div class="ytd-bar-row"><div class="ytd-bar-label">Overtime</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--amber" id="ytdBarOTHrs2"></div></div><div class="ytd-bar-value amber" id="ytdOTHrs2">—</div></div>
+            <div class="ytd-bar-row" id="ytdRowDTHrs" style="display:none"><div class="ytd-bar-label">Double Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--red" id="ytdBarDTHrs"></div></div><div class="ytd-bar-value red" id="ytdDTHrs">—</div></div>
+            <div class="ytd-bar-row" id="ytdRowHolHrs" style="display:none"><div class="ytd-bar-label">Holiday</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--blue2" id="ytdBarHolHrs"></div></div><div class="ytd-bar-value" id="ytdHolHrs">—</div></div>
+            <div class="ytd-bar-row" id="ytdRowBenHrs" style="display:none"><div class="ytd-bar-label">Benefit Time</div><div class="ytd-bar-track"><div class="ytd-bar-fill ytd-bar--teal" id="ytdBarBenHrs"></div></div><div class="ytd-bar-value" id="ytdBenHrs">—</div></div>
             <div class="ytd-stat-divider"></div>
-            <div class="card-row" style="padding:10px 14px 6px">
-              <span class="card-label">Avg hrs/check</span>
-              <span class="card-value" id="ytdAvgHrs">—</span>
-            </div>
-            <div class="card-row" style="padding:4px 14px 10px">
-              <span class="card-label">OT % of hours</span>
-              <span class="card-value amber" id="ytdOTPct">—</span>
-            </div>
+            <div class="card-row" style="padding:8px 14px 4px"><span class="card-label">Avg hrs/check</span><span class="card-value" id="ytdAvgHrs">—</span></div>
+            <div class="card-row" style="padding:4px 14px 4px"><span class="card-label">OT % of hours</span><span class="card-value amber" id="ytdOTPct">—</span></div>
+            <div class="card-row" style="padding:4px 14px 8px"><span class="card-label">Total hours</span><span class="card-value" id="ytdHrs">—</span></div>
           </div>
         </div>
 
-        <!-- DEDUCTIONS ROW — 3 cards -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" class="ytd-bottom-grid">
+        <!-- DEDUCTIONS CARDS -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px" class="ytd-bottom-grid">
           <div class="card">
             <div class="card-row"><span class="card-label" style="font-weight:700">Tax Deductions</span></div>
             <div class="card-row"><span class="card-label" style="color:var(--red)">– Fed withholding</span><span class="card-value red" id="ytdFed">—</span></div>
             <div class="card-row"><span class="card-label" style="color:var(--red)">– Soc Security (6.2%)</span><span class="card-value red" id="ytdSS">—</span></div>
             <div class="card-row"><span class="card-label" style="color:var(--red)">– Medicare (1.45%)</span><span class="card-value red" id="ytdMed">—</span></div>
+            <div class="card-row"><span class="card-label">Projected fed (YE)</span><span class="card-value amber" id="ytdProjFed">—</span></div>
             <div class="card-row card-total"><span class="card-label">Total taxes</span><span class="card-value red" id="ytdTotalDed">—</span></div>
           </div>
           <div class="card">
@@ -704,6 +736,23 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
             <div class="card-row"><span class="card-label">Combined tax rate</span><span class="card-value amber" id="ytdRate">—</span></div>
             <div class="card-row"><span class="card-label">Avg gross / paycheck</span><span class="card-value" id="ytdAvgGross">—</span></div>
             <div class="card-row card-total"><span class="card-label">Keep rate (net/gross)</span><span class="card-value green" id="ytdKeep">—</span></div>
+          </div>
+        </div>
+
+        <!-- PAYCHECK LIST -->
+        <div class="card card-pad" style="margin-bottom:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Paycheck Detail</div>
+            <input type="search" id="ytdSearch" placeholder="Search date, amount…" style="border:1.5px solid var(--border2);background:var(--bg3);border-radius:var(--radius-sm);padding:5px 10px;font-size:12px;color:var(--text);outline:none;width:200px">
+          </div>
+          <div style="overflow-x:auto">
+            <table class="hist-table" id="ytdDetailTable">
+              <thead><tr>
+                <th>Date</th><th class="num">Rate</th><th class="num">Reg Hrs</th><th class="num">OT Hrs</th>
+                <th class="num">Gross</th><th class="num">Taxes</th><th class="num">Benefits</th><th class="num">Net</th>
+              </tr></thead>
+              <tbody id="ytdDetailBody"></tbody>
+            </table>
           </div>
         </div>
 
@@ -1573,7 +1622,11 @@ function showPage(id, btn, source) {
   sessionStorage.setItem('payday_page', id);
   if(id==='history') buildHistory();
   if(id!=='history' && bulkMode) { bulkMode=false; selectedIds.clear(); const btn=document.getElementById('histBulkToggle'); if(btn) btn.textContent='Select'; updateBulkBar(); }
-  if(id==='ytd') { buildYTDTabs(); buildYTD(); }
+  if(id==='ytd') { buildYTDTabs(); buildYTD();
+    // Wire search box
+    const srch=document.getElementById('ytdSearch');
+    if(srch && !srch._wired){ srch._wired=true; srch.addEventListener('input',buildYTD); }
+  }
   if(id==='settings') { buildSettingsUI(); const el=document.getElementById('settingsWho'); if(el) el.textContent=currentUser?.username||''; }
   if(id==='admin') { if(currentUser?.role!=='admin'){showPage('calc',null,null);return;} buildAdminPage(); }
   if(id==='bulk') initBulk();
@@ -1835,13 +1888,18 @@ function buildYTD() {
     'ytdTotalDed','ytdFedRate','ytdRate','ytdKeep','ytdAvgGross','ytdDental','ytdMedical',
     'ytdVision','ytdRetire','ytdAddl','ytdBenTime','ytdPrem','ytdOTBar','ytdAvgGrossSub',
     'ytdAvgSub','ytdKeepSub','ytdTotalDedHero','ytdRegHrs','ytdOTHrs2','ytdDTHrs',
-    'ytdHolHrs','ytdBenHrs','ytdAvgHrs','ytdOTPct'];
+    'ytdHolHrs','ytdBenHrs','ytdAvgHrs','ytdOTPct','ytdProjGross','ytdProjSub','ytdProjFed',
+    'ytdBestPay','ytdBestDate','ytdMoMVal','ytdMoMSub','ytdWoWGross','ytdWoWNet','ytdWoWPrev',
+    'ytdSSWages','ytdSSRemain','ytdSSPct'];
 
   if(!filtered.length) {
     allIds.forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent='—'; });
-    ['ytdMainChart','ytdCumChart','ytdDonutChart'].forEach(id=>{
+    ['ytdMainChart','ytdCumChart','ytdHrsMonthChart','ytdOTTrendChart','ytdTaxBurdenChart'].forEach(id=>{
       if(window['_chart_'+id]){window['_chart_'+id].destroy();window['_chart_'+id]=null;}
     });
+    const mb=document.getElementById('ytdMonthBody'); if(mb) mb.innerHTML='';
+    const db=document.getElementById('ytdDetailBody'); if(db) db.innerHTML='';
+    const tb=document.getElementById('ytdYOYTable'); if(tb){const b=tb.querySelector('tbody');if(b)b.innerHTML='';}
     return;
   }
 
@@ -1991,6 +2049,11 @@ function buildYTD() {
     options:{...chartDefs,plugins:{...chartDefs.plugins,
       tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)},mode:'index',intersect:false},
       legend:{display:false}
+    },
+    onClick:(evt,els)=>{
+      if(!els.length) return;
+      const s=sorted[els[0].index];
+      if(s){ openDetail(s.id); showPage('history'); }
     }}
   });
 
@@ -2007,25 +2070,190 @@ function buildYTD() {
     options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{callbacks:{label:c=>'Total: '+fmt(c.raw)}}}}
   });
 
-  // Donut — earnings breakdown
-  const donutData=[], donutLabels=[], donutColors=[];
-  const add=(label,val,color)=>{ if(val>0){donutData.push(parseFloat(val.toFixed(2)));donutLabels.push(label);donutColors.push(color);} };
-  add('Regular',tReg,'rgba(59,130,246,0.8)');
-  add('Overtime',Math.max(0,tOT),'rgba(251,191,36,0.85)');
-  add('Double Time',tDT,'rgba(239,68,68,0.8)');
-  add('Holiday',tHol,'rgba(96,165,250,0.8)');
-  add('Benefit Time',tBenTime,'rgba(45,212,191,0.8)');
-  add('Premium',tPrem,'rgba(167,139,250,0.8)');
-  add('Additional',tAddl,'rgba(34,197,94,0.8)');
-  if(window._chart_ytdDonutChart){window._chart_ytdDonutChart.destroy();window._chart_ytdDonutChart=null;}
-  if(donutData.length) window._chart_ytdDonutChart=new Chart(document.getElementById('ytdDonutChart'),{
-    type:'doughnut',
-    data:{labels:donutLabels,datasets:[{data:donutData,backgroundColor:donutColors,borderWidth:2,borderColor:'var(--bg2)',hoverOffset:6}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
-      plugins:{legend:{display:true,position:'right',labels:{font:{size:10},color:'#8a96a3',boxWidth:10,padding:8}},
-        tooltip:{callbacks:{label:c=>{const pct=(c.raw/donutData.reduce((a,v)=>a+v,0)*100).toFixed(1);return c.label+': '+fmt(c.raw)+' ('+pct+'%)';}}}}
-    }
+  // ── Pace / Projections ────────────────────────────────────────────────────
+  const now = new Date();
+  const yearStart = new Date(ytdYear, 0, 1);
+  const yearEnd   = new Date(ytdYear, 11, 31);
+  const daysPassed = Math.max(1, Math.ceil((now - yearStart) / 86400000));
+  const daysInYear = Math.ceil((yearEnd - yearStart) / 86400000) + 1;
+  const grossPerDay = tG / daysPassed;
+  const projGross = grossPerDay * daysInYear;
+  const projFed   = tFed / daysPassed * daysInYear;
+  set('ytdProjGross', fmt(projGross));
+  set('ytdProjSub',   `${daysPassed} of ${daysInYear} days elapsed`);
+  set('ytdProjFed',   fmt(projFed));
+
+  // Best paycheck
+  const bestStub = sorted.reduce((b,s)=>s.gross>b.gross?s:b, sorted[0]);
+  const worstStub = sorted.reduce((b,s)=>s.gross<b.gross?s:b, sorted[0]);
+  set('ytdBestPay',  fmt(bestStub.gross));
+  set('ytdBestDate', new Date(bestStub.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+
+  // MoM comparison
+  const thisMonth = now.getMonth();
+  const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+  const thisMonthGross = filtered.filter(s=>new Date(s.date+'T12:00:00').getMonth()===thisMonth).reduce((a,s)=>a+s.gross,0);
+  const lastMonthGross = filtered.filter(s=>new Date(s.date+'T12:00:00').getMonth()===lastMonth).reduce((a,s)=>a+s.gross,0);
+  const momDiff = thisMonthGross - lastMonthGross;
+  set('ytdMoMVal', thisMonthGross>0?fmt(thisMonthGross):'—');
+  set('ytdMoMSub', lastMonthGross>0?(momDiff>=0?'▲ '+fmt(momDiff)+' vs last month':'▼ '+fmt(Math.abs(momDiff))+' vs last month'):'No prior month data');
+  const momEl = document.getElementById('ytdMoMVal');
+  if(momEl) momEl.style.color = momDiff>=0?'var(--green)':'var(--red)';
+
+  // WoW
+  if(sorted.length>=2){
+    const last2 = sorted[sorted.length-1];
+    const prev2 = sorted[sorted.length-2];
+    const lastNet2 = parseFloat((last2.net||(last2.gross-(last2.fed+last2.ss+last2.med+last2.den+last2.medI+last2.vis+(last2.retire||0)))).toFixed(2));
+    const prevNet2 = parseFloat((prev2.net||(prev2.gross-(prev2.fed+prev2.ss+prev2.med+prev2.den+prev2.medI+prev2.vis+(prev2.retire||0)))).toFixed(2));
+    const gDiff = last2.gross - prev2.gross;
+    const nDiff = lastNet2 - prevNet2;
+    const gEl = document.getElementById('ytdWoWGross');
+    const nEl = document.getElementById('ytdWoWNet');
+    if(gEl){gEl.textContent=(gDiff>=0?'▲ ':'▼ ')+fmt(Math.abs(gDiff));gEl.style.color=gDiff>=0?'var(--green)':'var(--red)';}
+    if(nEl){nEl.textContent=(nDiff>=0?'▲ ':'▼ ')+fmt(Math.abs(nDiff));nEl.style.color=nDiff>=0?'var(--green)':'var(--red)';}
+    set('ytdWoWPrev', new Date(prev2.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})+' ('+fmt(prev2.gross)+')');
+  } else {
+    set('ytdWoWGross','—'); set('ytdWoWNet','—'); set('ytdWoWPrev','Need 2+ checks');
+  }
+
+  // SS Wage Base
+  const SS_LIMIT = 176100;
+  const tSSWages = filtered.reduce((a,s)=>a+s.gross-s.den-s.medI-s.vis,0); // SS taxable wages
+  const ssBarEl = document.getElementById('ytdSSBar');
+  if(ssBarEl) ssBarEl.style.width = Math.min(100, tSSWages/SS_LIMIT*100).toFixed(1)+'%';
+  set('ytdSSWages', fmt(tSSWages)+' earned');
+  set('ytdSSRemain', fmt(Math.max(0,SS_LIMIT-tSSWages))+' remaining');
+  set('ytdSSPct', (tSSWages/SS_LIMIT*100).toFixed(1)+'% of $176,100 SS wage base used');
+
+  // ── Hours by Month chart ──────────────────────────────────────────────────
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const byMonth = {};
+  filtered.forEach(s=>{
+    const m = new Date(s.date+'T12:00:00').getMonth();
+    if(!byMonth[m]) byMonth[m]={reg:0,ot:0,dt:0};
+    byMonth[m].reg += s.reg;
+    byMonth[m].ot  += s.ot||0;
+    byMonth[m].dt  += s.dt||0;
   });
+  const monthKeys = Object.keys(byMonth).sort((a,b)=>a-b);
+  const mLabels = monthKeys.map(m=>MONTHS[m]);
+  if(window._chart_ytdHrsMonthChart){window._chart_ytdHrsMonthChart.destroy();window._chart_ytdHrsMonthChart=null;}
+  window._chart_ytdHrsMonthChart=new Chart(document.getElementById('ytdHrsMonthChart'),{
+    type:'bar',
+    data:{labels:mLabels,datasets:[
+      {label:'Regular',data:monthKeys.map(m=>parseFloat(byMonth[m].reg.toFixed(2))),backgroundColor:'rgba(59,130,246,0.6)',stack:'h'},
+      {label:'Overtime',data:monthKeys.map(m=>parseFloat(byMonth[m].ot.toFixed(2))),backgroundColor:'rgba(251,191,36,0.7)',stack:'h'},
+      {label:'DT',data:monthKeys.map(m=>parseFloat(byMonth[m].dt.toFixed(2))),backgroundColor:'rgba(239,68,68,0.6)',stack:'h'},
+    ]},
+    options:{...chartDefs,plugins:{...chartDefs.plugins,legend:{display:true,labels:{font:{size:9},color:'#8a96a3',boxWidth:10}},tooltip:{mode:'index',intersect:false}},scales:{...chartDefs.scales,x:{...chartDefs.scales.x},y:{...chartDefs.scales.y,ticks:{...chartDefs.scales.y.ticks,callback:v=>v+'h'},stacked:true}}}
+  });
+
+  // ── OT Hours trend ────────────────────────────────────────────────────────
+  if(window._chart_ytdOTTrendChart){window._chart_ytdOTTrendChart.destroy();window._chart_ytdOTTrendChart=null;}
+  window._chart_ytdOTTrendChart=new Chart(document.getElementById('ytdOTTrendChart'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'OT Hrs',data:sorted.map(s=>parseFloat((s.ot||0).toFixed(2))),borderColor:'rgba(251,191,36,0.9)',backgroundColor:'rgba(251,191,36,0.1)',borderWidth:2,pointRadius:2,fill:true,tension:0.3},
+      {label:'Reg Hrs',data:sorted.map(s=>parseFloat(s.reg.toFixed(2))),borderColor:'rgba(59,130,246,0.5)',borderWidth:1.5,borderDash:[3,3],pointRadius:0,fill:false,tension:0}
+    ]},
+    options:{...chartDefs,plugins:{...chartDefs.plugins,legend:{display:true,labels:{font:{size:9},color:'#8a96a3',boxWidth:10}},tooltip:{mode:'index',intersect:false}},scales:{...chartDefs.scales,y:{...chartDefs.scales.y,ticks:{...chartDefs.scales.y.ticks,callback:v=>v+'h'}}}}
+  });
+
+  // ── Tax burden % per paycheck ─────────────────────────────────────────────
+  const taxPcts = sorted.map(s=>s.gross>0?parseFloat(((s.fed+s.ss+s.med)/s.gross*100).toFixed(1)):0);
+  const avgTaxPct = taxPcts.reduce((a,v)=>a+v,0)/taxPcts.length;
+  if(window._chart_ytdTaxBurdenChart){window._chart_ytdTaxBurdenChart.destroy();window._chart_ytdTaxBurdenChart=null;}
+  window._chart_ytdTaxBurdenChart=new Chart(document.getElementById('ytdTaxBurdenChart'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Tax %',data:taxPcts,borderColor:'rgba(239,68,68,0.8)',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2,pointRadius:2,fill:true,tension:0.3},
+      {label:'Avg',data:Array(sorted.length).fill(parseFloat(avgTaxPct.toFixed(1))),borderColor:'rgba(107,114,128,0.5)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
+    ]},
+    options:{...chartDefs,plugins:{...chartDefs.plugins,legend:{display:true,labels:{font:{size:9},color:'#8a96a3',boxWidth:10}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+'%'},mode:'index',intersect:false}},scales:{...chartDefs.scales,y:{...chartDefs.scales.y,ticks:{...chartDefs.scales.y.ticks,callback:v=>v+'%'}}}}
+  });
+
+  // ── Year-over-Year table ──────────────────────────────────────────────────
+  const allYears = [...new Set(stubs.map(s=>s.date.slice(0,4)))].sort();
+  const yoyMetrics = [
+    {label:'Total Gross',   fn:ss=>ss.reduce((a,s)=>a+s.gross,0),   fmt:fmt},
+    {label:'Total Net',     fn:ss=>ss.reduce((a,s)=>a+(s.net||(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)))),0), fmt:fmt},
+    {label:'OT Earnings',   fn:ss=>ss.reduce((a,s)=>a+(s.otPay!=null?s.otPay:payRound(rateRound(s.rate*1.5)*(s.ot||0))),0), fmt:fmt},
+    {label:'Total Taxes',   fn:ss=>ss.reduce((a,s)=>a+s.fed+s.ss+s.med,0), fmt:fmt},
+    {label:'OT Hours',      fn:ss=>ss.reduce((a,s)=>a+(s.ot||0),0),  fmt:v=>fmtH(v)+'h'},
+    {label:'Paychecks',     fn:ss=>ss.length,                          fmt:v=>v},
+    {label:'Avg Gross',     fn:ss=>ss.reduce((a,s)=>a+s.gross,0)/ss.length, fmt:fmt},
+  ];
+  const tbody = document.getElementById('ytdYOYTable')?.querySelector('tbody');
+  if(tbody){
+    const hdr = `<tr><th>Metric</th>${allYears.map(y=>`<th class="${y===String(ytdYear)?'yr-cur':''}">${y}</th>`).join('')}</tr>`;
+    document.getElementById('ytdYOYTable').querySelector('thead') || (document.getElementById('ytdYOYTable').innerHTML='<thead></thead><tbody></tbody>');
+    const thead2 = document.getElementById('ytdYOYTable').querySelector('thead');
+    if(thead2) thead2.innerHTML=hdr;
+    tbody.innerHTML = yoyMetrics.map(m=>{
+      const vals = allYears.map(y=>{ const ss=stubs.filter(s=>s.date.startsWith(y)); return ss.length?m.fn(ss):null; });
+      return `<tr><td>${m.label}</td>${vals.map((v,i)=>{
+        if(v===null) return '<td style="color:var(--text3)">—</td>';
+        const prev=i>0?vals[i-1]:null;
+        let cls='';
+        if(prev!==null&&typeof v==='number'&&typeof prev==='number'){
+          const diff=v-prev; cls=diff>0?'pos':diff<0?'neg':'';
+        }
+        return `<td class="${allYears[i]===String(ytdYear)?'yr-cur':''} ${cls}">${m.fmt(v)}</td>`;
+      }).join('')}</tr>`;
+    }).join('');
+  }
+
+  // ── Month-by-month table ──────────────────────────────────────────────────
+  const monthGroups={};
+  filtered.forEach(s=>{
+    const key=s.date.slice(0,7);
+    if(!monthGroups[key]){monthGroups[key]={gross:0,net:0,tax:0,ben:0,reg:0,ot:0,count:0};}
+    const net=s.net||(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)));
+    monthGroups[key].gross+=s.gross;
+    monthGroups[key].net+=net;
+    monthGroups[key].tax+=s.fed+s.ss+s.med;
+    monthGroups[key].ben+=s.den+s.medI+s.vis+(s.retire||0);
+    monthGroups[key].reg+=s.reg;
+    monthGroups[key].ot+=s.ot||0;
+    monthGroups[key].count++;
+  });
+  const mHead=document.getElementById('ytdMonthHead');
+  const mBody=document.getElementById('ytdMonthBody');
+  if(mHead) mHead.innerHTML='<tr><th>Month</th><th class="num">Checks</th><th class="num">Gross</th><th class="num">Taxes</th><th class="num">Benefits</th><th class="num">Net</th><th class="num">Reg Hrs</th><th class="num">OT Hrs</th></tr>';
+  if(mBody){
+    const mkGroups=Object.entries(monthGroups).sort(([a],[b])=>a.localeCompare(b));
+    mBody.innerHTML=mkGroups.map(([key,g])=>{
+      const d=new Date(key+'-15');
+      const label=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+      return `<tr><td>${label}</td><td class="num">${g.count}</td><td class="num">${fmt(g.gross)}</td><td class="num red">${fmt(g.tax)}</td><td class="num red">${fmt(g.ben)}</td><td class="num green">${fmt(g.net)}</td><td class="num">${fmtH(g.reg)}h</td><td class="num amber">${g.ot>0?fmtH(g.ot)+'h':'—'}</td></tr>`;
+    }).join('');
+  }
+
+  // ── Paycheck detail list ──────────────────────────────────────────────────
+  const searchQ=(document.getElementById('ytdSearch')?.value||'').toLowerCase();
+  const detailBody=document.getElementById('ytdDetailBody');
+  if(detailBody){
+    const rows=sorted.slice().reverse().filter(s=>{
+      if(!searchQ) return true;
+      return s.date.includes(searchQ)||fmt(s.gross).includes(searchQ)||fmt(s.net||0).toLowerCase().includes(searchQ);
+    });
+    detailBody.innerHTML=rows.map(s=>{
+      const net=s.net||(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)));
+      const tax=s.fed+s.ss+s.med;
+      const ben=s.den+s.medI+s.vis+(s.retire||0);
+      const d=new Date(s.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      return `<tr style="cursor:pointer" onclick="openDetail('${s.id}');showPage('history')">
+        <td>${d}</td><td class="num muted">$${parseFloat(s.rate).toFixed(2)}</td>
+        <td class="num">${fmtH(s.reg)}h</td>
+        <td class="num${(s.ot||0)!==0?' amber':''}">${(s.ot||0)!==0?fmtH(s.ot)+'h':'—'}</td>
+        <td class="num">${fmt(s.gross)}</td>
+        <td class="num red">${fmt(tax)}</td>
+        <td class="num red">${fmt(ben)}</td>
+        <td class="num green">${fmt(net)}</td>
+      </tr>`;
+    }).join('');
+  }
 }
 
 // ===== SETTINGS =====
