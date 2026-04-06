@@ -1,5 +1,5 @@
 import { requireAuth } from './_auth.js';
-import { query } from './_db.js';
+import { db } from './_db.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin','*');
@@ -10,30 +10,26 @@ export default async function handler(req, res) {
   const user = await requireAuth(req, res);
   if(!user) return;
 
+  const supabase = db();
+
   if(req.method==='GET') {
-    try {
-      const r = await query('SELECT config FROM dashboards WHERE user_id=$1', [user.username]);
-      return res.status(200).json({ config: r.rows[0]?.config || null });
-    } catch(e) {
-      console.error('Dashboard GET error:', e.message);
-      return res.status(500).json({ error: 'Failed to load dashboard' });
-    }
+    const { data, error } = await supabase
+      .from('dashboards')
+      .select('config')
+      .eq('user_id', user.username)
+      .maybeSingle();
+    if(error) { console.error('Dashboard GET:', error.message); return res.status(500).json({ error: error.message }); }
+    return res.status(200).json({ config: data?.config || null });
   }
 
   if(req.method==='POST') {
     const { config } = req.body;
     if(!Array.isArray(config)) return res.status(400).json({ error: 'config must be array' });
-    try {
-      await query(
-        `INSERT INTO dashboards(user_id,config,updated_at) VALUES($1,$2,now())
-         ON CONFLICT(user_id) DO UPDATE SET config=$2, updated_at=now()`,
-        [user.username, JSON.stringify(config)]
-      );
-      return res.status(200).json({ ok: true });
-    } catch(e) {
-      console.error('Dashboard POST error:', e.message);
-      return res.status(500).json({ error: 'Failed to save dashboard' });
-    }
+    const { error } = await supabase
+      .from('dashboards')
+      .upsert({ user_id: user.username, config, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+    if(error) { console.error('Dashboard POST:', error.message); return res.status(500).json({ error: error.message }); }
+    return res.status(200).json({ ok: true });
   }
 
   res.status(405).end();
