@@ -417,47 +417,83 @@ html{transition:background .2s,color .2s}
 ::-webkit-scrollbar{width:0}
 
 /* ── DASHBOARD ── */
-.dash-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;align-items:start}
-.dash-widget{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .15s}
-.dash-widget:hover .dash-drag-handle{opacity:1}
-.dash-widget-header{display:flex;align-items:center;gap:8px;padding:10px 14px 0;min-height:36px}
-.dash-drag-handle{cursor:grab;color:var(--text3);opacity:0;transition:opacity .15s;flex-shrink:0;touch-action:none}
-.dash-drag-handle:active{cursor:grabbing}
-.dash-widget-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dash-widget-controls{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity .15s}
-.dash-widget:hover .dash-widget-controls{opacity:1}
-.dash-wbtn{background:none;border:1px solid var(--border2);border-radius:5px;padding:2px 6px;font-size:10px;color:var(--text3);cursor:pointer;font-family:var(--sans);transition:all .1s;line-height:1.4}
+/* Page layout */
+.dash-page{display:flex;height:calc(100vh - 120px);overflow:hidden;min-height:400px}
+.dash-canvas-wrap{flex:1;overflow:auto;padding:16px;position:relative;min-height:600px}
+.dash-canvas{position:relative;width:100%;min-height:560px}
+
+/* Side panel */
+.dash-panel{width:260px;flex-shrink:0;background:var(--bg2);border-left:1.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.dash-panel-header{padding:14px 16px 10px;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.dash-panel-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.dash-panel-sub{font-size:11px;color:var(--text3)}
+.dash-panel-body{flex:1;overflow-y:auto;padding:12px}
+.dash-panel-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.dash-panel-section:first-child{margin-top:0}
+
+/* Panel widget items */
+.dash-lib-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg3);cursor:grab;margin-bottom:6px;transition:all .15s;user-select:none}
+.dash-lib-item:hover{border-color:var(--blue);background:var(--blue-dim);transform:translateX(-2px)}
+.dash-lib-item:active{cursor:grabbing;opacity:.8}
+.dash-lib-item.on-canvas{opacity:.45}
+.dash-lib-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center}
+.dash-lib-name{font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:0}
+.dash-lib-desc{font-size:10px;color:var(--text3);margin-top:1px}
+.dash-lib-add{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0;line-height:1;flex-shrink:0}
+.dash-lib-add:hover{color:var(--green)}
+
+/* Canvas widgets */
+.dash-widget{position:absolute;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .15s,border-color .15s;min-width:180px;min-height:120px}
+.dash-widget:hover{box-shadow:var(--shadow-md)}
+.dash-widget.dragging{opacity:.85;box-shadow:0 12px 32px rgba(0,0,0,.18);z-index:100;border-color:var(--blue)}
+.dash-widget.resizing{border-color:var(--blue)}
+.dash-widget-header{display:flex;align-items:center;gap:6px;padding:8px 12px 0;cursor:grab;flex-shrink:0;min-height:32px}
+.dash-widget-header:active{cursor:grabbing}
+.dash-widget-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.dash-widget-actions{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .15s}
+.dash-widget:hover .dash-widget-actions{opacity:1}
+.dash-wbtn{background:none;border:1px solid var(--border2);border-radius:4px;padding:2px 5px;font-size:10px;color:var(--text3);cursor:pointer;font-family:var(--sans);transition:all .1s;line-height:1.4}
 .dash-wbtn:hover{background:var(--bg3);color:var(--text)}
 .dash-wbtn.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(29,78,216,.3)}
 .dash-wbtn.danger:hover{color:var(--red);background:var(--red-dim)}
-.dash-widget-body{padding:12px 14px 14px}
+.dash-widget-body{padding:10px 12px 24px;flex:1;overflow:hidden;position:relative}
+
+/* Resize handle */
+.dash-resize{position:absolute;bottom:0;right:0;width:20px;height:20px;cursor:se-resize;z-index:10;opacity:0;transition:opacity .2s}
+.dash-resize::before{content:'';position:absolute;bottom:3px;right:3px;width:10px;height:10px;border-right:2px solid var(--border2);border-bottom:2px solid var(--border2);border-radius:0 0 2px 0}
+.dash-resize::after{content:'';position:absolute;bottom:5px;right:5px;width:5px;height:5px;border-right:1.5px solid var(--border2);border-bottom:1.5px solid var(--border2)}
+.dash-widget:hover .dash-resize{opacity:1}
+.dash-widget.resizing .dash-resize{opacity:1;border-color:var(--blue)}
+
 /* Stat widget */
-.dash-stat-val{font-family:var(--mono);font-weight:700;color:var(--text);line-height:1;margin-bottom:3px}
-.dash-stat-val.sz-sm{font-size:20px}.dash-stat-val.sz-md{font-size:26px}.dash-stat-val.sz-lg{font-size:32px}
+.dash-stat-val{font-family:var(--mono);font-weight:700;color:var(--text);line-height:1;margin-bottom:3px;font-size:clamp(18px,4cqw,28px)}
 .dash-stat-val.green{color:var(--green)}.dash-stat-val.red{color:var(--red)}.dash-stat-val.amber{color:var(--amber)}
-.dash-stat-sub{font-size:11px;color:var(--text3)}
-.dash-stat-sub2{font-size:12px;color:var(--text2);margin-top:2px}
-/* Chart widget */
-.dash-chart-wrap{position:relative;width:100%}
-/* Size cols */
-.dash-col-3{grid-column:span 3}.dash-col-4{grid-column:span 4}.dash-col-6{grid-column:span 6}.dash-col-12{grid-column:span 12}
-@media(max-width:700px){.dash-col-3,.dash-col-4,.dash-col-6,.dash-col-12{grid-column:span 12}}
-@media(min-width:701px) and (max-width:1000px){.dash-col-3{grid-column:span 6}.dash-col-4{grid-column:span 6}}
-/* Add widget panel */
-.dash-add-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end;justify-content:center}
-.dash-add-panel.open{display:flex}
-@media(min-width:768px){.dash-add-panel{align-items:center}}
-.dash-add-inner{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:20px}
-@media(min-width:768px){.dash-add-inner{border-radius:var(--radius);max-height:80vh}}
-.dash-widget-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:14px}
-.dash-pick-item{background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;cursor:pointer;transition:all .15s}
-.dash-pick-item:hover{border-color:var(--blue);background:var(--blue-dim)}
-.dash-pick-icon{font-size:20px;margin-bottom:6px}
-.dash-pick-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
-.dash-pick-desc{font-size:10px;color:var(--text3)}
+.dash-stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* Grid snap overlay (edit mode) */
+.dash-grid-overlay{display:none;position:absolute;inset:0;pointer-events:none;z-index:0}
+.dash-grid-overlay.show{display:block}
+
+/* Drop zone highlight */
+.dash-drop-hint{position:absolute;background:var(--blue-dim);border:2px dashed var(--blue);border-radius:var(--radius);pointer-events:none;display:none;z-index:5;opacity:.6}
+
 /* Empty state */
-.dash-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px;color:var(--text3)}
-.dash-empty-icon{font-size:40px;opacity:.4}
+.dash-empty-canvas{display:flex;flex-direction:column;align-items:center;justify-content:center;height:400px;gap:12px;color:var(--text3);pointer-events:none}
+.dash-empty-canvas svg{opacity:.25;width:48px;height:48px}
+
+/* Mobile: stacked list */
+@media(max-width:767px){
+  .dash-page{flex-direction:column;height:auto;overflow:visible}
+  .dash-canvas-wrap{padding:12px;overflow:visible}
+  .dash-canvas{position:static;min-height:unset}
+  .dash-widget{position:static!important;width:100%!important;height:auto!important;min-height:0;margin-bottom:10px}
+  .dash-widget-body{padding-bottom:12px}
+  .dash-resize{display:none}
+  .dash-panel{width:100%;border-left:none;border-top:1.5px solid var(--border);height:auto;max-height:260px}
+  .dash-panel-body{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;padding:10px}
+  .dash-panel-section{display:none}
+  .dash-lib-item{margin-bottom:0}
+}
 </style>
 </head>
 <body>
@@ -542,41 +578,43 @@ html{transition:background .2s,color .2s}
 
     <!-- DASHBOARD PAGE -->
     <div id="page-dash" class="page">
-      <div class="page-inner-wide">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Dashboard</div>
-            <div class="page-sub" id="dashSub">Your personal view</div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-secondary btn-sm" onclick="openDashAddPanel()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-              Add widget
-            </button>
-            <button class="btn btn-secondary btn-sm" id="dashEditBtn" onclick="toggleDashEdit()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit layout
-            </button>
-          </div>
+      <!-- Header bar (outside the flex layout) -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1.5px solid var(--border);flex-shrink:0;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.3px">Dashboard</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px">Drag widgets from the panel · drag to move · resize from corner</div>
         </div>
-        <div id="dashGrid" class="dash-grid"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-secondary btn-sm" id="dashClearBtn" onclick="clearDashboard()" style="color:var(--red)">Clear all</button>
+          <div style="font-size:11px;color:var(--text3);padding:0 4px">|</div>
+          <button class="btn btn-secondary btn-sm" id="dashPanelToggle" onclick="toggleDashPanel()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Widgets
+          </button>
+        </div>
       </div>
-    </div>
-
-    <!-- ADD WIDGET PANEL -->
-    <div class="dash-add-panel" id="dashAddPanel" onclick="if(event.target===this)closeDashAddPanel()">
-      <div class="dash-add-inner">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-          <div style="font-size:16px;font-weight:700">Add a widget</div>
-          <button onclick="closeDashAddPanel()" style="background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:0 4px">✕</button>
+      <!-- Flex body: canvas + side panel -->
+      <div class="dash-page" id="dashPageBody">
+        <!-- Canvas -->
+        <div class="dash-canvas-wrap" id="dashCanvasWrap">
+          <div class="dash-canvas" id="dashCanvas">
+            <div class="dash-drop-hint" id="dashDropHint"></div>
+            <div id="dashWidgets"></div>
+            <div class="dash-empty-canvas" id="dashEmpty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <div style="font-size:14px;font-weight:600">Drag widgets here to build your dashboard</div>
+              <div style="font-size:12px;text-align:center">Pick from the panel on the right →</div>
+            </div>
+          </div>
         </div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Choose from your paycheck data. Widgets live-update as you log new paychecks.</div>
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:14px 0 6px">Stat Cards</div>
-        <div class="dash-widget-picker" id="dashPickerMetrics"></div>
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 6px">Charts</div>
-        <div class="dash-widget-picker" id="dashPickerCharts"></div>
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 6px">Trackers</div>
-        <div class="dash-widget-picker" id="dashPickerTrackers"></div>
+        <!-- Side panel -->
+        <div class="dash-panel" id="dashPanel">
+          <div class="dash-panel-header">
+            <div class="dash-panel-title">Widget Library</div>
+            <div class="dash-panel-sub">Drag onto canvas or click +</div>
+          </div>
+          <div class="dash-panel-body" id="dashPanelBody"></div>
+        </div>
       </div>
     </div>
 
@@ -1807,7 +1845,10 @@ function showPage(id, btn, source) {
   sessionStorage.setItem('payday_page', id);
   if(id==='history') buildHistory();
   if(id!=='history' && bulkMode) { bulkMode=false; selectedIds.clear(); const btn=document.getElementById('histBulkToggle'); if(btn) btn.textContent='Select'; updateBulkBar(); }
-  if(id==='dash') { computeDashData(); renderDashboard(); }
+  if(id==='dash') {
+    computeDashData(); renderDashboard();
+    requestAnimationFrame(()=>{ initCanvasDrop(); initDashResizeObserver(); });
+  }
   if(id==='ytd') { buildYTDTabs(); buildYTD();
     // Wire search box
     const srch=document.getElementById('ytdSearch');
@@ -2656,115 +2697,90 @@ function updateYTDGoal() {
 }
 
 // ===== DASHBOARD =====
-// Widget catalog — defines every available widget type
+// Config format: [{id, widgetId, x, y, w, h, chartType}]
+// x,y,w,h are in grid units (col/row). Grid: 12 cols, rows ~80px each.
+
+const GRID_COLS = 12;
+const GRID_ROW_H = 80; // px per row unit
+const GRID_GAP   = 8;  // px gap
+
 const DASH_CATALOG = {
   metrics: [
-    // ── Income ──
-    { type:'stat', id:'total-gross',    icon:'💵', name:'Total Gross',           desc:'YTD gross earnings',                 color:'',       fn:d=>fmt(d.tG),                         sub:d=>`avg ${fmt(d.avgG)} / check` },
-    { type:'stat', id:'total-net',      icon:'💰', name:'Total Net',             desc:'YTD take-home pay',                  color:'green',  fn:d=>fmt(d.tNet),                       sub:d=>`avg ${fmt(d.avgNet)} / check` },
-    { type:'stat', id:'avg-gross',      icon:'📈', name:'Avg Gross / Check',     desc:'Mean gross per paycheck',            color:'',       fn:d=>fmt(d.avgG),                       sub:d=>`${d.n} paychecks so far` },
-    { type:'stat', id:'avg-net',        icon:'💚', name:'Avg Net / Check',       desc:'Mean take-home per check',           color:'green',  fn:d=>fmt(d.avgNet),                     sub:d=>`keep rate ${d.keepRate.toFixed(1)}%` },
-    { type:'stat', id:'best-check',     icon:'🏆', name:'Best Paycheck',         desc:'Highest gross single check',         color:'green',  fn:d=>d.bestStub?fmt(d.bestStub.gross):'—', sub:d=>d.bestStub?new Date(d.bestStub.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'' },
-    { type:'stat', id:'worst-check',    icon:'📉', name:'Worst Paycheck',        desc:'Lowest gross single check',          color:'red',    fn:d=>d.worstStub?fmt(d.worstStub.gross):'—', sub:d=>d.worstStub?new Date(d.worstStub.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'' },
-    { type:'stat', id:'proj-gross',     icon:'🎯', name:'Projected Year-End',    desc:'Gross at current pace',              color:'',       fn:d=>fmt(d.projGross),                  sub:d=>`${d.daysPassed} of ${d.daysInYear} days elapsed` },
-    { type:'stat', id:'proj-net',       icon:'🔮', name:'Projected Net (YE)',    desc:'Take-home at current pace',          color:'green',  fn:d=>fmt(d.tNet/d.daysPassed*d.daysInYear), sub:d=>`from ${fmt(d.tNet)} earned so far` },
-    { type:'stat', id:'paycheck-count', icon:'📋', name:'Paychecks',             desc:'Number of paychecks logged',         color:'',       fn:d=>d.n,                               sub:d=>`${d.yr} year to date` },
-    // ── Overtime ──
-    { type:'stat', id:'ot-earnings',    icon:'⚡', name:'OT Earnings',           desc:'Overtime pay earned',                color:'amber',  fn:d=>d.tOT>0?fmt(d.tOT):'—',            sub:d=>`${fmtH(d.tOTHrs)}h OT worked` },
-    { type:'stat', id:'ot-hours',       icon:'⏱',  name:'OT Hours',              desc:'Total overtime hours',               color:'amber',  fn:d=>d.tOTHrs>0?fmtH(d.tOTHrs)+'h':'—', sub:d=>`${d.tHrs>0?(d.tOTHrs/d.tHrs*100).toFixed(0):0}% of total hours` },
-    { type:'stat', id:'ot-dep',         icon:'⚠️', name:'OT Dependency',         desc:'% of income from OT',               color:'amber',  fn:d=>d.tG>0?(Math.max(0,d.tOT)/d.tG*100).toFixed(1)+'%':'—', sub:d=>`${fmt(Math.max(0,d.tOT))} from OT` },
-    { type:'stat', id:'avg-ot-hrs',     icon:'⏰', name:'Avg OT Hrs / Check',    desc:'Mean OT hours per paycheck',         color:'amber',  fn:d=>d.n>0?fmtH(d.tOTHrs/d.n)+'h':'—', sub:d=>`${d.tOTHrs>0?((d.tOTHrs/d.n).toFixed(1)):0}h per check` },
-    // ── Hours ──
-    { type:'stat', id:'total-hours',    icon:'🕐', name:'Total Hours',           desc:'All hours worked',                   color:'',       fn:d=>fmtH(d.tHrs)+'h',                 sub:d=>`avg ${fmtH(d.tHrs/d.n)} / check` },
-    { type:'stat', id:'avg-hours',      icon:'📅', name:'Avg Hours / Check',     desc:'Mean total hours per paycheck',      color:'',       fn:d=>d.n>0?fmtH(d.tHrs/d.n)+'h':'—',  sub:d=>`${fmtH(d.tHrs)} total hours` },
-    // ── Tax & deductions ──
-    { type:'stat', id:'total-tax',      icon:'🏛',  name:'Total Taxes',           desc:'Fed + SS + Medicare withheld',       color:'red',    fn:d=>fmt(d.tTax),                       sub:d=>`${d.taxRate.toFixed(1)}% of gross` },
-    { type:'stat', id:'total-deducted', icon:'➖', name:'Total Deducted',        desc:'Taxes + all benefits',               color:'red',    fn:d=>fmt(d.tDed),                       sub:d=>`${(d.tDed/d.tG*100).toFixed(1)}% of gross` },
-    { type:'stat', id:'fed-withheld',   icon:'🏛',  name:'Fed Withheld',          desc:'Federal income tax YTD',             color:'red',    fn:d=>fmt(d.tFed),                       sub:d=>`${d.fedRate.toFixed(1)}% effective rate` },
-    { type:'stat', id:'fed-rate',       icon:'📉', name:'Effective Fed Rate',    desc:'Fed withholding ÷ gross',            color:'amber',  fn:d=>d.fedRate.toFixed(1)+'%',          sub:d=>`${fmt(d.tFed)} withheld so far` },
-    { type:'stat', id:'keep-rate',      icon:'📊', name:'Keep Rate',             desc:'Net ÷ Gross — how much you keep',    color:'green',  fn:d=>d.keepRate.toFixed(1)+'%',         sub:d=>`${(100-d.keepRate).toFixed(1)}% to taxes/benefits` },
-    { type:'stat', id:'benefits-total', icon:'🏥', name:'Benefits Total',        desc:'Dental + Medical + Vision + 401k',   color:'red',    fn:d=>fmt(d.tBen),                       sub:d=>`${fmt(d.tBen/d.n)} avg / check` },
-    { type:'stat', id:'fica-total',     icon:'💳', name:'FICA (SS + Medicare)',  desc:'Social Security + Medicare YTD',     color:'red',    fn:d=>fmt(d.tSS+d.tMed),                 sub:d=>`7.65% flat rate` },
-    // ── Pace ──
-    { type:'stat', id:'net-per-day',    icon:'📆', name:'Net Per Day',           desc:'Average daily take-home pace',       color:'green',  fn:d=>fmt(d.tNet/d.daysPassed),          sub:d=>`${d.daysPassed} days in ${d.yr}` },
-    { type:'stat', id:'gross-per-day',  icon:'📆', name:'Gross Per Day',         desc:'Average daily gross earnings pace',  color:'',       fn:d=>fmt(d.tG/d.daysPassed),            sub:d=>`at current pace` },
-    { type:'stat', id:'pay-rate',       icon:'💲', name:'Current Pay Rate',      desc:'Most recent hourly rate on file',    color:'',       fn:d=>d.filtered&&d.filtered.length?'$'+[...d.filtered].sort((a,b)=>b.date.localeCompare(a.date))[0].rate.toFixed(4)+'/hr':'—', sub:d=>`from most recent paycheck` },
+    { type:'stat', id:'total-gross',    icon:'💵', name:'Total Gross',        desc:'YTD gross earnings',              color:'',      fn:d=>fmt(d.tG),                              sub:d=>`avg ${fmt(d.avgG)} / check` },
+    { type:'stat', id:'total-net',      icon:'💰', name:'Total Net',          desc:'YTD take-home pay',               color:'green', fn:d=>fmt(d.tNet),                            sub:d=>`avg ${fmt(d.avgNet)} / check` },
+    { type:'stat', id:'avg-gross',      icon:'📈', name:'Avg Gross/Check',    desc:'Mean gross per paycheck',         color:'',      fn:d=>fmt(d.avgG),                            sub:d=>`${d.n} paychecks` },
+    { type:'stat', id:'avg-net',        icon:'💚', name:'Avg Net/Check',      desc:'Mean take-home per check',        color:'green', fn:d=>fmt(d.avgNet),                          sub:d=>`keep rate ${d.keepRate.toFixed(1)}%` },
+    { type:'stat', id:'best-check',     icon:'🏆', name:'Best Paycheck',      desc:'Highest gross single check',      color:'green', fn:d=>d.bestStub?fmt(d.bestStub.gross):'—',   sub:d=>d.bestStub?new Date(d.bestStub.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'' },
+    { type:'stat', id:'worst-check',    icon:'📉', name:'Worst Paycheck',     desc:'Lowest gross single check',       color:'red',   fn:d=>d.worstStub?fmt(d.worstStub.gross):'—', sub:d=>d.worstStub?new Date(d.worstStub.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'' },
+    { type:'stat', id:'proj-gross',     icon:'🎯', name:'Projected Gross YE', desc:'Gross at current pace',           color:'',      fn:d=>fmt(d.projGross),                       sub:d=>`${d.daysPassed} of ${d.daysInYear} days elapsed` },
+    { type:'stat', id:'proj-net',       icon:'🔮', name:'Projected Net YE',   desc:'Take-home at current pace',       color:'green', fn:d=>fmt(d.tNet/d.daysPassed*d.daysInYear),  sub:d=>`from ${fmt(d.tNet)} earned` },
+    { type:'stat', id:'paycheck-count', icon:'📋', name:'Paychecks',          desc:'Number of paychecks logged',      color:'',      fn:d=>d.n,                                    sub:d=>`${d.yr} year to date` },
+    { type:'stat', id:'ot-earnings',    icon:'⚡', name:'OT Earnings',         desc:'Overtime pay earned',             color:'amber', fn:d=>d.tOT>0?fmt(d.tOT):'—',                sub:d=>`${fmtH(d.tOTHrs)}h OT worked` },
+    { type:'stat', id:'ot-hours',       icon:'⏱',  name:'OT Hours',           desc:'Total overtime hours',            color:'amber', fn:d=>d.tOTHrs>0?fmtH(d.tOTHrs)+'h':'—',    sub:d=>`${d.tHrs>0?(d.tOTHrs/d.tHrs*100).toFixed(0):0}% of total` },
+    { type:'stat', id:'ot-dep',         icon:'⚠️', name:'OT Dependency',       desc:'% of income from overtime',       color:'amber', fn:d=>d.tG>0?(Math.max(0,d.tOT)/d.tG*100).toFixed(1)+'%':'—', sub:d=>`${fmt(Math.max(0,d.tOT))} from OT` },
+    { type:'stat', id:'total-hours',    icon:'🕐', name:'Total Hours',         desc:'All hours worked',                color:'',      fn:d=>fmtH(d.tHrs)+'h',                      sub:d=>`avg ${fmtH(d.tHrs/d.n)} / check` },
+    { type:'stat', id:'total-tax',      icon:'🏛',  name:'Total Taxes',        desc:'Fed + SS + Medicare',             color:'red',   fn:d=>fmt(d.tTax),                            sub:d=>`${d.taxRate.toFixed(1)}% of gross` },
+    { type:'stat', id:'total-deducted', icon:'➖', name:'Total Deducted',      desc:'Taxes + all benefits',            color:'red',   fn:d=>fmt(d.tDed),                            sub:d=>`${(d.tDed/d.tG*100).toFixed(1)}% of gross` },
+    { type:'stat', id:'fed-rate',       icon:'📉', name:'Effective Fed Rate',  desc:'Federal rate on gross',           color:'amber', fn:d=>d.fedRate.toFixed(1)+'%',               sub:d=>`${fmt(d.tFed)} withheld` },
+    { type:'stat', id:'keep-rate',      icon:'📊', name:'Keep Rate',           desc:'Net ÷ Gross',                     color:'green', fn:d=>d.keepRate.toFixed(1)+'%',              sub:d=>`${(100-d.keepRate).toFixed(1)}% to deductions` },
+    { type:'stat', id:'net-per-day',    icon:'📆', name:'Net Per Day',         desc:'Average daily net',               color:'green', fn:d=>fmt(d.tNet/d.daysPassed),               sub:d=>`${d.daysPassed} days elapsed` },
+    { type:'stat', id:'pay-rate',       icon:'💲', name:'Current Pay Rate',    desc:'Most recent hourly rate',         color:'',      fn:d=>d.filtered&&d.filtered.length?'$'+[...d.filtered].sort((a,b)=>b.date.localeCompare(a.date))[0].rate.toFixed(4)+'/hr':'—', sub:d=>`from most recent check` },
+    { type:'stat', id:'fica-total',     icon:'💳', name:'FICA Total',          desc:'SS + Medicare YTD',               color:'red',   fn:d=>fmt(d.tSS+d.tMed),                     sub:d=>`7.65% flat rate` },
   ],
   charts: [
-    { type:'chart', id:'chart-gross',     icon:'📊', name:'Gross Trend',          desc:'Gross + running avg per check',    chartType:'bar',  defaultSize:6 },
-    { type:'chart', id:'chart-net',       icon:'📈', name:'Net Trend',            desc:'Take-home per paycheck over time', chartType:'line', defaultSize:6 },
-    { type:'chart', id:'chart-cum',       icon:'📉', name:'Cumulative Net',       desc:'Running total of take-home pay',   chartType:'line', defaultSize:6 },
-    { type:'chart', id:'chart-earnings',  icon:'🥧', name:'Earnings Mix',         desc:'Breakdown by Regular/OT/Holiday',  chartType:'doughnut', defaultSize:4 },
-    { type:'chart', id:'chart-hrs-month', icon:'📅', name:'Hours by Month',       desc:'Stacked Reg/OT hours per month',   chartType:'bar',  defaultSize:6 },
-    { type:'chart', id:'chart-ot-trend',  icon:'⚡', name:'OT Trend',             desc:'OT hours per paycheck over time',  chartType:'line', defaultSize:6 },
-    { type:'chart', id:'chart-tax-burden',icon:'🏛',  name:'Tax Burden %',        desc:'Tax % each check with avg line',   chartType:'line', defaultSize:6 },
-    { type:'chart', id:'chart-gross-net', icon:'📊', name:'Gross vs Net',         desc:'Both gross and net side by side',  chartType:'bar',  defaultSize:12 },
-    { type:'chart', id:'chart-deductions',icon:'💸', name:'Deductions Breakdown', desc:'Where your money goes (donut)',     chartType:'doughnut', defaultSize:4 },
-    { type:'chart', id:'chart-monthly',   icon:'📅', name:'Monthly Gross',        desc:'Total gross earnings per month',   chartType:'bar',  defaultSize:6 },
-    { type:'chart', id:'chart-hours-pie', icon:'🕐', name:'Hours Mix',            desc:'Reg vs OT vs other hours split',   chartType:'doughnut', defaultSize:3 },
+    { type:'chart', id:'chart-gross',      icon:'📊', name:'Gross Trend',         desc:'Gross + running avg per check',   chartType:'bar',      defW:6, defH:3 },
+    { type:'chart', id:'chart-net',        icon:'📈', name:'Net Trend',           desc:'Take-home per paycheck',          chartType:'line',     defW:6, defH:3 },
+    { type:'chart', id:'chart-cum',        icon:'📉', name:'Cumulative Net',      desc:'Running total of take-home',      chartType:'line',     defW:6, defH:3 },
+    { type:'chart', id:'chart-earnings',   icon:'🥧', name:'Earnings Mix',        desc:'Regular / OT / Holiday split',    chartType:'doughnut', defW:4, defH:4 },
+    { type:'chart', id:'chart-hrs-month',  icon:'📅', name:'Hours by Month',      desc:'Stacked hours per month',         chartType:'bar',      defW:6, defH:3 },
+    { type:'chart', id:'chart-ot-trend',   icon:'⚡', name:'OT Trend',            desc:'OT hours per paycheck',           chartType:'line',     defW:6, defH:3 },
+    { type:'chart', id:'chart-tax-burden', icon:'🏛',  name:'Tax Burden %',       desc:'Tax % per check with avg',        chartType:'line',     defW:6, defH:3 },
+    { type:'chart', id:'chart-gross-net',  icon:'📊', name:'Gross vs Net',        desc:'Both side by side',               chartType:'bar',      defW:12, defH:3 },
+    { type:'chart', id:'chart-deductions', icon:'💸', name:'Deductions Mix',      desc:'Where your money goes',           chartType:'doughnut', defW:4, defH:4 },
+    { type:'chart', id:'chart-monthly',    icon:'📅', name:'Monthly Gross',       desc:'Total per month bar chart',       chartType:'bar',      defW:6, defH:3 },
   ],
   trackers: [
-    { type:'tracker', id:'track-ss',     icon:'🏛',  name:'SS Wage Base',         desc:'Progress toward $176,100 SS limit', defaultSize:4 },
-    { type:'tracker', id:'track-goal',   icon:'🎯',  name:'Net Pay Goal',         desc:'Annual net pay goal tracker',        defaultSize:6 },
-    { type:'tracker', id:'track-streak', icon:'🔥',  name:'OT Streak',            desc:'Consecutive OT paychecks',           defaultSize:3 },
-    { type:'tracker', id:'track-mom',    icon:'📅',  name:'Month vs Last',        desc:'This month gross vs last month',     defaultSize:3 },
-    { type:'tracker', id:'track-rate',   icon:'💰',  name:'Pay Rate History',     desc:'Hourly rate changes over time',      defaultSize:4 },
-    { type:'tracker', id:'track-pace',   icon:'🏃',  name:'Earning Pace',         desc:'Daily/weekly pace with projection',  defaultSize:4 },
-    { type:'tracker', id:'track-recent', icon:'📋',  name:'Recent Paychecks',     desc:'Last 3 paychecks at a glance',       defaultSize:6 },
+    { type:'tracker', id:'track-ss',     icon:'🏛',  name:'SS Wage Base',        desc:'Progress to $176,100 SS limit',   defW:4, defH:3 },
+    { type:'tracker', id:'track-goal',   icon:'🎯',  name:'Net Pay Goal',        desc:'Annual net pay goal tracker',     defW:6, defH:3 },
+    { type:'tracker', id:'track-streak', icon:'🔥',  name:'OT Streak',           desc:'Consecutive OT paychecks',        defW:3, defH:2 },
+    { type:'tracker', id:'track-mom',    icon:'📅',  name:'Month vs Last',       desc:'This month vs prior month',       defW:3, defH:2 },
+    { type:'tracker', id:'track-rate',   icon:'💰',  name:'Pay Rate History',    desc:'Every rate change on file',       defW:4, defH:3 },
+    { type:'tracker', id:'track-pace',   icon:'🏃',  name:'Earning Pace',        desc:'Daily/weekly pace + projection',  defW:4, defH:3 },
+    { type:'tracker', id:'track-recent', icon:'📋',  name:'Recent Paychecks',    desc:'Last 3 paychecks at a glance',    defW:6, defH:3 },
   ]
 };
 
-const SIZE_COLS = { sm:3, md:4, lg:6, xl:12 };
-const SIZE_LABELS = { sm:'S', md:'M', lg:'L', xl:'Full' };
 const CHART_TYPES_FOR = {
-  'chart-gross':      ['bar','line'],
-  'chart-net':        ['bar','line'],
-  'chart-cum':        ['line'],
-  'chart-earnings':   ['doughnut','pie','bar'],
-  'chart-hrs-month':  ['bar'],
-  'chart-ot-trend':   ['line','bar'],
-  'chart-tax-burden': ['line','bar'],
-  'chart-gross-net':  ['bar'],
-  'chart-deductions': ['doughnut','pie','bar'],
-  'chart-monthly':    ['bar','line'],
-  'chart-hours-pie':  ['doughnut','pie'],
+  'chart-gross':['bar','line'],'chart-net':['bar','line'],'chart-cum':['line'],
+  'chart-earnings':['doughnut','pie','bar'],'chart-hrs-month':['bar'],
+  'chart-ot-trend':['line','bar'],'chart-tax-burden':['line','bar'],
+  'chart-gross-net':['bar'],'chart-deductions':['doughnut','pie','bar'],'chart-monthly':['bar','line'],
 };
 
-let dashConfig = [];   // [{id, widgetId, size, chartType, year}]
-let dashEditMode = false;
-let dashCharts = {};   // widgetId → Chart instance
+let dashConfig = [];
+let dashCharts = {};
 let dashSaveTimer = null;
-let dashData = {};     // computed stats for current year
+let dashData = {};
+let dashPanelVisible = true;
+let _dashDragState = null;  // {type:'move'|'resize', id, startX, startY, startW, startH, startLeft, startTop}
 
 function dashUID(){ return Math.random().toString(36).slice(2,9); }
 
-async function loadDashboard() {
-  try {
-    const r = await apiFetch('/api/dashboard');
-    dashConfig = r.config || [];
-    if(!dashConfig.length) dashConfig = getDefaultDashConfig();
-  } catch(e) { dashConfig = getDefaultDashConfig(); }
-  computeDashData();
-  renderDashboard();
-}
-
-function getDefaultDashConfig() {
-  return [
-    { id:dashUID(), widgetId:'total-gross',   size:'md', year:'current' },
-    { id:dashUID(), widgetId:'total-net',     size:'md', year:'current' },
-    { id:dashUID(), widgetId:'keep-rate',     size:'md', year:'current' },
-    { id:dashUID(), widgetId:'ot-earnings',   size:'md', year:'current' },
-    { id:dashUID(), widgetId:'chart-gross',   size:'lg', chartType:'bar',  year:'current' },
-    { id:dashUID(), widgetId:'chart-earnings',size:'md', chartType:'doughnut', year:'current' },
-    { id:dashUID(), widgetId:'track-ss',      size:'md', year:'current' },
-    { id:dashUID(), widgetId:'track-goal',    size:'lg', year:'current' },
-  ];
+function findDef(widgetId){
+  for(const cat of Object.values(DASH_CATALOG)){
+    const found = cat.find(d=>d.id===widgetId);
+    if(found) return found;
+  }
+  return null;
 }
 
 function computeDashData(yr) {
   const year = yr || ytdYear;
   const filtered = stubs.filter(s=>s.date.startsWith(year+''));
-  if(!filtered.length){ dashData={yr:year,n:0,tG:0,tNet:0,tTax:0,tDed:0,tFed:0,tSS:0,tMed:0,tOT:0,tOTHrs:0,tHrs:0,avgG:0,avgNet:0,fedRate:0,taxRate:0,keepRate:0,projGross:0,bestStub:null,daysPassed:1,daysInYear:365}; return; }
+  if(!filtered.length){
+    dashData={yr:year,n:0,tG:0,tNet:0,tTax:0,tDed:0,tFed:0,tSS:0,tMed:0,tBen:0,tOT:0,tOTHrs:0,tHrs:0,avgG:0,avgNet:0,fedRate:0,taxRate:0,keepRate:0,projGross:0,bestStub:null,worstStub:null,daysPassed:1,daysInYear:365,filtered:[],nets:[]};
+    return;
+  }
   const tG=filtered.reduce((a,s)=>a+s.gross,0);
   const tFed=filtered.reduce((a,s)=>a+s.fed,0);
   const tSS=filtered.reduce((a,s)=>a+s.ss,0);
@@ -2774,388 +2790,593 @@ function computeDashData(yr) {
   const tOT=filtered.reduce((a,s)=>a+(s.otPay!=null?s.otPay:payRound(rateRound(s.rate*1.5)*(s.ot||0))),0);
   const tOTHrs=filtered.reduce((a,s)=>a+(s.ot||0),0);
   const tHrs=filtered.reduce((a,s)=>a+s.reg+(s.ot||0)+(s.dt||0)+(s.hol||0)+(s.sick||0)+(s.vac||0)+(s.fltHol||0),0);
-  const nets=filtered.map(s=>s.net||(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0))));
+  const nets=filtered.map(s=>{const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net||(s.gross-d)).toFixed(2));});
   const tNet=nets.reduce((a,v)=>a+v,0);
   const n=filtered.length, avgG=tG/n, avgNet=tNet/n;
   const now=new Date(), yearStart=new Date(year,0,1), yearEnd=new Date(year,11,31);
   const daysPassed=Math.max(1,Math.ceil((now-yearStart)/86400000));
   const daysInYear=Math.ceil((yearEnd-yearStart)/86400000)+1;
-  const projGross=tG/daysPassed*daysInYear;
   const bestStub=filtered.reduce((b,s)=>s.gross>b.gross?s:b,filtered[0]);
   const worstStub=filtered.reduce((b,s)=>s.gross<b.gross?s:b,filtered[0]);
   dashData={yr:year,n,tG,tFed,tSS,tMed,tBen,tTax,tDed,tOT,tOTHrs,tHrs,tNet,avgG,avgNet,
     fedRate:tG>0?(tFed/tG)*100:0, taxRate:tG>0?(tTax/tG)*100:0, keepRate:tG>0?(tNet/tG)*100:0,
-    projGross, bestStub, worstStub, daysPassed, daysInYear, filtered,
+    projGross:tG/daysPassed*daysInYear, bestStub, worstStub, daysPassed, daysInYear, filtered,
     nets: filtered.map(s=>{const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net||(s.gross-d)).toFixed(2));})
   };
 }
 
-function renderDashboard() {
-  const grid = document.getElementById('dashGrid');
-  if(!grid) return;
-  // Destroy old chart instances
-  Object.values(dashCharts).forEach(c=>{try{c.destroy();}catch(e){}});
-  dashCharts={};
+// ── Load / Save ──────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const r = await apiFetch('/api/dashboard');
+    dashConfig = (r.config && r.config.length) ? r.config : getDefaultDashConfig();
+  } catch(e) { dashConfig = getDefaultDashConfig(); }
+  computeDashData();
+  renderDashboard();
+  buildDashPanel();
+  requestAnimationFrame(()=>{ initCanvasDrop(); initDashResizeObserver(); });
+}
 
-  if(!dashConfig.length){
-    grid.innerHTML=`<div class="dash-empty" style="grid-column:span 12"><div class="dash-empty-icon">✦</div><div style="font-size:14px;font-weight:600">Your dashboard is empty</div><div style="font-size:12px;text-align:center">Click <strong>Add widget</strong> to start customising your personal view</div></div>`;
+function getDefaultDashConfig() {
+  return [
+    { id:dashUID(), widgetId:'total-gross',   x:0,  y:0, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'total-net',     x:3,  y:0, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'keep-rate',     x:6,  y:0, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'ot-earnings',   x:9,  y:0, w:3, h:2, chartType:null },
+    { id:dashUID(), widgetId:'chart-gross',   x:0,  y:2, w:8, h:3, chartType:'bar' },
+    { id:dashUID(), widgetId:'chart-earnings',x:8,  y:2, w:4, h:3, chartType:'doughnut' },
+    { id:dashUID(), widgetId:'track-ss',      x:0,  y:5, w:4, h:3, chartType:null },
+    { id:dashUID(), widgetId:'track-recent',  x:4,  y:5, w:8, h:3, chartType:null },
+  ];
+}
+
+async function saveDashConfig() {
+  clearTimeout(dashSaveTimer);
+  dashSaveTimer = setTimeout(async()=>{
+    try { await apiFetch('/api/dashboard',{method:'POST',body:JSON.stringify({config:dashConfig})}); }
+    catch(e){ console.warn('Dashboard save failed',e); }
+  }, 600);
+}
+
+// ── Render canvas ────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const canvas = document.getElementById('dashCanvas');
+  const container = document.getElementById('dashWidgets');
+  const emptyEl = document.getElementById('dashEmpty');
+  if(!canvas||!container) return;
+
+  // Destroy old charts
+  Object.values(dashCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+  dashCharts = {};
+
+  if(!dashConfig.length) {
+    container.innerHTML = '';
+    if(emptyEl) emptyEl.style.display = 'flex';
     return;
   }
+  if(emptyEl) emptyEl.style.display = 'none';
 
-  grid.innerHTML = dashConfig.map(w=>renderWidgetShell(w)).join('');
+  // Compute canvas height needed
+  const maxRow = dashConfig.reduce((m,w)=>Math.max(m, w.y+(w.h||2)),0);
+  canvas.style.minHeight = (Math.max(maxRow, 8)*(GRID_ROW_H+GRID_GAP)+40)+'px';
 
-  // Populate charts after DOM update
+  container.innerHTML = dashConfig.map(w=>buildWidgetHTML(w)).join('');
+
+  // Position all widgets
+  dashConfig.forEach(w=>positionWidget(w));
+
+  // Attach drag/resize events
+  dashConfig.forEach(w=>attachWidgetEvents(w.id));
+
+  // Render chart/tracker content after layout
   requestAnimationFrame(()=>{
-    dashConfig.forEach(w=>{ if(w.widgetId.startsWith('chart-')) renderDashChart(w); });
-    dashConfig.forEach(w=>{ if(w.widgetId.startsWith('track-')) renderDashTracker(w); });
+    dashConfig.forEach(w=>{
+      if(w.widgetId.startsWith('chart-')) renderDashChart(w);
+      else if(w.widgetId.startsWith('track-')) renderDashTracker(w);
+      else renderStatWidget(w);
+    });
+    buildDashPanel();
   });
 }
 
-function renderWidgetShell(w) {
-  const def = findDef(w.widgetId);
-  if(!def) return '';
-  const sizeClass = 'dash-col-'+(SIZE_COLS[w.size]||6);
-  const isEditing = dashEditMode ? 'style="outline:2px dashed var(--border2);outline-offset:2px"' : '';
-
-  // Chart type toggle buttons
-  const chartTypes = CHART_TYPES_FOR[w.widgetId]||[];
-  const chartBtns = chartTypes.length>1 ? chartTypes.map(t=>
-    `<button class="dash-wbtn${w.chartType===t?' active':''}" onclick="setDashChartType('${w.id}','${t}')">${t==='bar'?'Bar':t==='line'?'Line':t==='doughnut'?'Donut':t==='pie'?'Pie':t}</button>`
-  ).join('') : '';
-
-  // Size buttons
-  const sizeBtns = Object.entries(SIZE_COLS).map(([sz,cols])=>
-    `<button class="dash-wbtn${w.size===sz?' active':''}" onclick="setDashSize('${w.id}','${sz}')">${SIZE_LABELS[sz]}</button>`
-  ).join('');
-
-  const editControls = dashEditMode ? `
-    <div class="dash-widget-controls" style="opacity:1">
-      ${chartBtns}
-      ${sizeBtns}
-      <button class="dash-wbtn danger" onclick="removeDashWidget('${w.id}')" title="Remove">✕</button>
-    </div>` : `
-    <div class="dash-widget-controls">
-      ${chartBtns}
-      ${sizeBtns}
-      <button class="dash-wbtn danger" onclick="removeDashWidget('${w.id}')" title="Remove">✕</button>
-    </div>`;
-
-  let body = '';
-  if(def.type==='stat')    body = renderStatBody(w, def);
-  else if(def.type==='chart')   body = `<div class="dash-chart-wrap"><canvas id="dc-${w.id}" style="height:${w.size==='sm'?120:w.size==='md'?150:200}px;max-height:200px"></canvas></div>`;
-  else if(def.type==='tracker') body = `<div id="dt-${w.id}"></div>`;
-
-  return `<div class="dash-widget ${sizeClass}" id="dw-${w.id}" ${isEditing}>
-    <div class="dash-widget-header">
-      <span class="dash-widget-title">${def.name}</span>
-      ${editControls}
-    </div>
-    <div class="dash-widget-body">${body}</div>
-  </div>`;
+function getCanvasColWidth() {
+  const canvas = document.getElementById('dashCanvas');
+  if(!canvas) return 80;
+  return (canvas.offsetWidth - GRID_GAP*(GRID_COLS-1)) / GRID_COLS;
 }
 
-function renderStatBody(w, def) {
+function positionWidget(w) {
+  const el = document.getElementById('dw-'+w.id);
+  if(!el) return;
+  const colW = getCanvasColWidth();
+  const left = w.x * (colW + GRID_GAP);
+  const top  = w.y * (GRID_ROW_H + GRID_GAP);
+  const width  = w.w * colW + (w.w-1)*GRID_GAP;
+  const height = w.h * GRID_ROW_H + (w.h-1)*GRID_GAP;
+  el.style.left   = left + 'px';
+  el.style.top    = top  + 'px';
+  el.style.width  = width  + 'px';
+  el.style.height = height + 'px';
+}
+
+function buildWidgetHTML(w) {
+  const def = findDef(w.widgetId);
+  if(!def) return '';
+  const chartTypes = CHART_TYPES_FOR[w.widgetId]||[];
+  const chartBtns = chartTypes.length>1 ? chartTypes.map(t=>{
+    const lbl=t==='bar'?'Bar':t==='line'?'Line':t==='doughnut'?'Donut':t==='pie'?'Pie':t;
+    return '<button class="dash-wbtn'+(w.chartType===t?' active':'')+'" onclick="setDashChartType(\''+w.id+'\',\''+t+'\')">'+lbl+'</button>';
+  }).join('') : '';
+  return '<div class="dash-widget" id="dw-'+w.id+'">'
+    +'<div class="dash-widget-header">'
+      +'<span class="dash-widget-title">'+def.name+'</span>'
+      +'<div class="dash-widget-actions">'
+        +chartBtns
+        +'<button class="dash-wbtn danger" data-action="remove" data-id="'+w.id+'">✕</button>'
+      +'</div>'
+    +'</div>'
+    +'<div class="dash-widget-body" id="dwb-'+w.id+'"></div>'
+    +'<div class="dash-resize" id="dwr-'+w.id+'"></div>'
+  +'</div>';
+}
+
+// ── Stat / Chart / Tracker renderers ─────────────────────────────────────────
+function renderStatWidget(w) {
+  const el = document.getElementById('dwb-'+w.id);
+  if(!el) return;
+  const def = findDef(w.widgetId);
+  if(!def||def.type!=='stat') return;
   const d = dashData;
   const val = d.n>0 ? def.fn(d) : '—';
-  const sub = d.n>0 ? (def.sub ? def.sub(d) : '') : 'No data';
-  const sz = w.size==='xl'||w.size==='lg' ? 'sz-lg' : w.size==='md' ? 'sz-md' : 'sz-sm';
-  return `<div class="dash-stat-val ${sz} ${def.color||''}">${val}</div>
-    <div class="dash-stat-sub">${sub}</div>`;
+  const sub = d.n>0 && def.sub ? def.sub(d) : 'No data yet';
+  el.innerHTML = '<div class="dash-stat-val '+(def.color||'')+'">'+val+'</div><div class="dash-stat-sub">'+sub+'</div>';
 }
 
 function renderDashChart(w) {
-  const canvas = document.getElementById('dc-'+w.id);
-  if(!canvas) return;
+  const bodyEl = document.getElementById('dwb-'+w.id);
+  if(!bodyEl) return;
   const d = dashData;
-  if(!d.filtered||!d.filtered.length){ canvas.parentElement.innerHTML='<div style="height:120px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3)">No data for this year</div>'; return; }
+  if(!d.filtered||!d.filtered.length){
+    bodyEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:var(--text3)">No data</div>';
+    return;
+  }
+  // Ensure canvas
+  if(!bodyEl.querySelector('canvas')){
+    bodyEl.innerHTML='<canvas id="dc-'+w.id+'" style="display:block;width:100%;height:100%"></canvas>';
+  }
+  const canvas = bodyEl.querySelector('canvas');
+  if(!canvas) return;
 
   const sorted=[...d.filtered].sort((a,b)=>a.date.localeCompare(b.date));
   const labels=sorted.map(s=>new Date(s.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-  const chartDefs={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+  const cd={responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
     scales:{x:{ticks:{font:{size:8},color:'#8a96a3',autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},
             y:{ticks:{font:{size:8},color:'#8a96a3',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(128,128,128,.08)'},border:{display:false}}}};
-
-  let cfg = {};
   const ct = w.chartType||'bar';
+  let cfg = null;
 
-  if(w.widgetId==='chart-gross'){
-    const gd=sorted.map(s=>s.gross);
-    const avg=gd.map((_,i)=>parseFloat((gd.slice(0,i+1).reduce((a,v)=>a+v,0)/(i+1)).toFixed(2)));
+  if(w.widgetId==='chart-gross'||w.widgetId==='chart-net'){
+    const isGross = w.widgetId==='chart-gross';
+    const raw = isGross ? sorted.map(s=>s.gross) : d.nets;
+    const color = isGross ? 'rgba(251,191,36,' : 'rgba(22,163,74,';
+    const avg = raw.map((_,i)=>parseFloat((raw.slice(0,i+1).reduce((a,v)=>a+v,0)/(i+1)).toFixed(2)));
     cfg={type:ct==='line'?'line':'bar',data:{labels,datasets:[
-      {label:'Gross',data:gd,backgroundColor:'rgba(251,191,36,.5)',borderColor:'rgba(251,191,36,.8)',borderWidth:1,borderRadius:3,borderSkipped:false},
-      {label:'Avg',data:avg,type:'line',borderColor:'rgba(251,191,36,.7)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
-    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{mode:'index',intersect:false}}}};
-  } else if(w.widgetId==='chart-net'){
-    const nd=d.nets;
-    const avg=nd.map((_,i)=>parseFloat((nd.slice(0,i+1).reduce((a,v)=>a+v,0)/(i+1)).toFixed(2)));
-    cfg={type:ct==='bar'?'bar':'line',data:{labels,datasets:[
-      {label:'Net',data:nd,backgroundColor:'rgba(22,163,74,.45)',borderColor:'rgba(22,163,74,.8)',borderWidth:ct==='bar'?1:2,borderRadius:3,fill:ct==='line',tension:0.3},
-      {label:'Avg',data:avg,type:'line',borderColor:'rgba(22,163,74,.6)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
-    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{mode:'index',intersect:false}}}};
+      {label:isGross?'Gross':'Net',data:raw,backgroundColor:color+'.5)',borderColor:color+'.8)',borderWidth:1,borderRadius:3,fill:ct==='line',tension:0.3},
+      {label:'Avg',data:avg,type:'line',borderColor:color+'.6)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
+    ]},options:{...cd,plugins:{...cd.plugins,tooltip:{mode:'index',intersect:false}}}};
   } else if(w.widgetId==='chart-cum'){
     let run=0; const cum=d.nets.map(v=>parseFloat((run+=v,run).toFixed(2)));
-    cfg={type:'line',data:{labels,datasets:[{label:'Cumulative net',data:cum,borderColor:'rgba(22,163,74,.9)',backgroundColor:'rgba(22,163,74,.08)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{callbacks:{label:c=>'Total: '+fmt(c.raw)}}}}};
-  } else if(w.widgetId==='chart-earnings'){
-    const vals=[
-      Math.round(d.filtered.reduce((a,s)=>a+(s.regPay!=null?s.regPay:payRound(rateRound(s.rate)*s.reg)),0)),
-      Math.max(0,Math.round(d.tOT)),
-      Math.round(d.filtered.reduce((a,s)=>a+payRound(rateRound(s.rate)*(s.hol||0)),0)),
-    ].filter(v=>v>0);
-    const labls=['Regular','Overtime','Holiday'].filter((_,i)=>[d.filtered.reduce((a,s)=>a+(s.regPay!=null?s.regPay:payRound(rateRound(s.rate)*s.reg)),0),Math.max(0,d.tOT),d.filtered.reduce((a,s)=>a+payRound(rateRound(s.rate)*(s.hol||0)),0)][i]>0);
-    const colors=['rgba(59,130,246,.7)','rgba(251,191,36,.8)','rgba(96,165,250,.7)'];
-    if(ct==='bar'){ cfg={type:'bar',data:{labels:labls,datasets:[{data:vals,backgroundColor:colors}]},options:{...chartDefs,indexAxis:'y',plugins:{legend:{display:false}}}}; }
-    else { cfg={type:ct,data:{labels:labls,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'var(--bg2)',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:ct==='doughnut'?'62%':'0',plugins:{legend:{display:true,position:'right',labels:{font:{size:9},boxWidth:10}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)}`}}}}}; }
+    cfg={type:'line',data:{labels,datasets:[{label:'Cumulative net',data:cum,borderColor:'rgba(22,163,74,.9)',backgroundColor:'rgba(22,163,74,.08)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{...cd}};
+  } else if(w.widgetId==='chart-earnings'||w.widgetId==='chart-deductions'){
+    const isEarn = w.widgetId==='chart-earnings';
+    let vals,labls,colors;
+    if(isEarn){
+      const regT=d.filtered.reduce((a,s)=>a+(s.regPay!=null?s.regPay:payRound(rateRound(s.rate)*s.reg)),0);
+      const otT=Math.max(0,d.tOT);
+      const holT=d.filtered.reduce((a,s)=>a+payRound(rateRound(s.rate)*(s.hol||0)),0);
+      vals=[regT,otT,holT].filter(v=>v>0);
+      labls=['Regular','OT','Holiday'].filter((_,i)=>[regT,otT,holT][i]>0);
+      colors=['rgba(59,130,246,.7)','rgba(251,191,36,.8)','rgba(96,165,250,.7)'];
+    } else {
+      vals=[d.tFed,d.tSS,d.tMed,d.tBen].filter(v=>v>0);
+      labls=['Fed Tax','SS','Medicare','Benefits'].filter((_,i)=>[d.tFed,d.tSS,d.tMed,d.tBen][i]>0);
+      colors=['rgba(239,68,68,.7)','rgba(251,191,36,.7)','rgba(245,158,11,.6)','rgba(59,130,246,.6)'];
+    }
+    if(ct==='bar') cfg={type:'bar',data:{labels:labls,datasets:[{data:vals,backgroundColor:colors}]},options:{...cd,indexAxis:'y',plugins:{legend:{display:false}}}};
+    else cfg={type:ct,data:{labels:labls,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'var(--bg2)',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:ct==='doughnut'?'60%':'0',plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9},boxWidth:10,padding:6}}}}};
   } else if(w.widgetId==='chart-hrs-month'){
     const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const bm={}; d.filtered.forEach(s=>{const m=new Date(s.date+'T12:00:00').getMonth();if(!bm[m])bm[m]={reg:0,ot:0};bm[m].reg+=s.reg;bm[m].ot+=s.ot||0;});
     const mk=Object.keys(bm).sort((a,b)=>a-b);
     cfg={type:'bar',data:{labels:mk.map(m=>MONTHS[m]),datasets:[
-      {label:'Regular',data:mk.map(m=>parseFloat(bm[m].reg.toFixed(2))),backgroundColor:'rgba(59,130,246,.6)',stack:'h'},
-      {label:'OT',data:mk.map(m=>parseFloat(bm[m].ot.toFixed(2))),backgroundColor:'rgba(251,191,36,.7)',stack:'h'},
-    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{...chartDefs.scales,y:{...chartDefs.scales.y,ticks:{...chartDefs.scales.y.ticks,callback:v=>v+'h'},stacked:true}}}};
+      {label:'Reg',data:mk.map(m=>+bm[m].reg.toFixed(2)),backgroundColor:'rgba(59,130,246,.6)',stack:'h'},
+      {label:'OT',data:mk.map(m=>+bm[m].ot.toFixed(2)),backgroundColor:'rgba(251,191,36,.7)',stack:'h'},
+    ]},options:{...cd,plugins:{...cd.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{...cd.scales,y:{...cd.scales.y,ticks:{...cd.scales.y.ticks,callback:v=>v+'h'},stacked:true}}}};
   } else if(w.widgetId==='chart-ot-trend'){
-    cfg={type:ct==='bar'?'bar':'line',data:{labels,datasets:[{label:'OT Hrs',data:sorted.map(s=>parseFloat((s.ot||0).toFixed(2))),borderColor:'rgba(251,191,36,.9)',backgroundColor:'rgba(251,191,36,.12)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{...chartDefs,scales:{...chartDefs.scales,y:{...chartDefs.scales.y,ticks:{...chartDefs.scales.y.ticks,callback:v=>v+'h'}}}}};
+    cfg={type:ct==='bar'?'bar':'line',data:{labels,datasets:[{label:'OT Hrs',data:sorted.map(s=>+(s.ot||0).toFixed(2)),borderColor:'rgba(251,191,36,.9)',backgroundColor:'rgba(251,191,36,.12)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{...cd,scales:{...cd.scales,y:{...cd.scales.y,ticks:{...cd.scales.y.ticks,callback:v=>v+'h'}}}}};
   } else if(w.widgetId==='chart-tax-burden'){
-    const taxPcts=sorted.map(s=>s.gross>0?parseFloat(((s.fed+s.ss+s.med)/s.gross*100).toFixed(1)):0);
-    const avgTax=parseFloat((taxPcts.reduce((a,v)=>a+v,0)/taxPcts.length).toFixed(1));
+    const tp=sorted.map(s=>s.gross>0?+((s.fed+s.ss+s.med)/s.gross*100).toFixed(1):0);
+    const at=+(tp.reduce((a,v)=>a+v,0)/tp.length).toFixed(1);
     cfg={type:ct==='bar'?'bar':'line',data:{labels,datasets:[
-      {label:'Tax %',data:taxPcts,borderColor:'rgba(239,68,68,.8)',backgroundColor:'rgba(239,68,68,.08)',borderWidth:2,pointRadius:2,fill:true,tension:0.3},
-      {label:'Avg',data:Array(sorted.length).fill(avgTax),type:'line',borderColor:'rgba(107,114,128,.5)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
-    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}}},scales:{...chartDefs.scales,y:{...chartDefs.scales.y,ticks:{...chartDefs.scales.y.ticks,callback:v=>v+'%'}}}}};
+      {label:'Tax %',data:tp,borderColor:'rgba(239,68,68,.8)',backgroundColor:'rgba(239,68,68,.08)',borderWidth:2,pointRadius:2,fill:true,tension:0.3},
+      {label:'Avg',data:Array(sorted.length).fill(at),type:'line',borderColor:'rgba(107,114,128,.5)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
+    ]},options:{...cd,scales:{...cd.scales,y:{...cd.scales.y,ticks:{...cd.scales.y.ticks,callback:v=>v+'%'}}}}};
   } else if(w.widgetId==='chart-gross-net'){
-    const gd=sorted.map(s=>s.gross);
-    const nd=d.nets;
     cfg={type:'bar',data:{labels,datasets:[
-      {label:'Gross',data:gd,backgroundColor:'rgba(251,191,36,.5)',borderColor:'rgba(251,191,36,.8)',borderWidth:1,borderRadius:3,borderSkipped:false,order:2},
-      {label:'Net',data:nd,type:'line',borderColor:'rgba(22,163,74,.9)',borderWidth:2,pointRadius:2,fill:false,tension:0.3,order:1}
-    ]},options:{...chartDefs,plugins:{...chartDefs.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false}}}};
-  } else if(w.widgetId==='chart-deductions'){
-    const tFed2=d.filtered.reduce((a,s)=>a+s.fed,0);
-    const tSS2=d.filtered.reduce((a,s)=>a+s.ss,0);
-    const tMed2=d.filtered.reduce((a,s)=>a+s.med,0);
-    const tDen=d.filtered.reduce((a,s)=>a+s.den,0);
-    const tMedI=d.filtered.reduce((a,s)=>a+s.medI,0);
-    const tVis=d.filtered.reduce((a,s)=>a+s.vis,0);
-    const tRet=d.filtered.reduce((a,s)=>a+(s.retire||0),0);
-    const vals=[tFed2,tSS2,tMed2,tDen+tMedI+tVis+tRet].filter(v=>v>0);
-    const labls=['Fed Tax','Soc Security','Medicare','Benefits'].filter((_,i)=>[tFed2,tSS2,tMed2,tDen+tMedI+tVis+tRet][i]>0);
-    const colors=['rgba(239,68,68,.8)','rgba(251,146,60,.7)','rgba(251,191,36,.7)','rgba(59,130,246,.6)'];
-    if(ct==='bar'){cfg={type:'bar',data:{labels:labls,datasets:[{data:vals,backgroundColor:colors}]},options:{...chartDefs,indexAxis:'y',plugins:{legend:{display:false}}}};}
-    else{cfg={type:ct,data:{labels:labls,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'var(--bg2)',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:ct==='doughnut'?'62%':'0',plugins:{legend:{display:true,position:'right',labels:{font:{size:9},boxWidth:10}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)}`}}}}};}
+      {label:'Gross',data:sorted.map(s=>s.gross),backgroundColor:'rgba(251,191,36,.5)',borderColor:'rgba(251,191,36,.8)',borderWidth:1,borderRadius:2},
+      {label:'Net',data:d.nets,backgroundColor:'rgba(22,163,74,.4)',borderColor:'rgba(22,163,74,.7)',borderWidth:1,borderRadius:2},
+    ]},options:{...cd,plugins:{...cd.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false}}}};
   } else if(w.widgetId==='chart-monthly'){
     const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const bm={}; d.filtered.forEach(s=>{const m=new Date(s.date+'T12:00:00').getMonth();if(!bm[m])bm[m]=0;bm[m]+=s.gross;});
     const mk=Object.keys(bm).sort((a,b)=>a-b);
-    cfg={type:ct==='line'?'line':'bar',data:{labels:mk.map(m=>MONTHS[m]),datasets:[{label:'Monthly Gross',data:mk.map(m=>parseFloat(bm[m].toFixed(2))),backgroundColor:'rgba(59,130,246,.55)',borderColor:'rgba(59,130,246,.8)',borderWidth:1,borderRadius:4,fill:ct==='line',tension:0.3}]},options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{callbacks:{label:c=>'Total: '+fmt(c.raw)}}}}};
-  } else if(w.widgetId==='chart-hours-pie'){
-    const regH=d.filtered.reduce((a,s)=>a+s.reg,0);
-    const otH=d.filtered.reduce((a,s)=>a+(s.ot||0),0);
-    const benH=d.filtered.reduce((a,s)=>a+(s.sick||0)+(s.vac||0)+(s.fltHol||0)+(s.hol||0),0);
-    const vals=[regH,otH,benH].filter(v=>v>0);
-    const labls=['Regular','Overtime','Benefit/Hol'].filter((_,i)=>[regH,otH,benH][i]>0);
-    const colors=['rgba(59,130,246,.7)','rgba(251,191,36,.8)','rgba(45,212,191,.7)'];
-    cfg={type:ct==='bar'?'bar':'doughnut',data:{labels:labls,datasets:[{data:vals,backgroundColor:colors.filter((_,i)=>[regH,otH,benH][i]>0),borderWidth:2,borderColor:'var(--bg2)',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'right',labels:{font:{size:9},boxWidth:10}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmtH(c.raw)}h`}}}}};
+    cfg={type:ct==='line'?'line':'bar',data:{labels:mk.map(m=>MONTHS[m]),datasets:[{label:'Gross',data:mk.map(m=>+bm[m].toFixed(2)),backgroundColor:'rgba(59,130,246,.55)',borderColor:'rgba(59,130,246,.8)',borderWidth:1,borderRadius:3}]},options:{...cd}};
   }
 
-  if(cfg.type) {
-    try { if(dashCharts[w.id]){dashCharts[w.id].destroy();} dashCharts[w.id]=new Chart(canvas,cfg); }
-    catch(e){ console.error('Chart error',e); }
+  if(cfg) {
+    try {
+      if(dashCharts[w.id]) { dashCharts[w.id].destroy(); delete dashCharts[w.id]; }
+      dashCharts[w.id] = new Chart(canvas, cfg);
+    } catch(e) { console.error('Chart err',e); }
   }
 }
 
 function renderDashTracker(w) {
-  const el = document.getElementById('dt-'+w.id);
+  const el = document.getElementById('dwb-'+w.id);
   if(!el) return;
   const d = dashData;
-  if(!d.n){ el.innerHTML='<div style="font-size:12px;color:var(--text3)">No data for this year</div>'; return; }
+  if(!d.n){ el.innerHTML='<div style="font-size:12px;color:var(--text3)">No data yet</div>'; return; }
 
   if(w.widgetId==='track-ss'){
-    const SS_LIMIT=176100, tSSW=d.filtered.reduce((a,s)=>a+s.gross-s.den-s.medI-s.vis,0);
-    const pct=Math.min(100,tSSW/SS_LIMIT*100);
-    el.innerHTML=`
-      <div style="font-family:var(--mono);font-size:20px;font-weight:700;margin-bottom:2px">${pct.toFixed(1)}%</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">${fmt(tSSW)} of $176,100 SS wage base</div>
-      <div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct.toFixed(1)}%;background:var(--blue);border-radius:4px;transition:width .4s"></div></div>
-      <div style="font-size:11px;color:var(--text3);margin-top:5px">${fmt(Math.max(0,SS_LIMIT-tSSW))} remaining</div>`;
+    const SS=176100, tw=d.filtered.reduce((a,s)=>a+s.gross-s.den-s.medI-s.vis,0);
+    const pct=Math.min(100,tw/SS*100);
+    el.innerHTML='<div style="font-family:var(--mono);font-size:22px;font-weight:700;margin-bottom:2px">'+pct.toFixed(1)+'%</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-bottom:8px">'+fmt(tw)+' of $176,100</div>'
+      +'<div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pct.toFixed(1)+'%;background:var(--blue);border-radius:4px;transition:width .4s"></div></div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:5px">'+fmt(Math.max(0,SS-tw))+' remaining</div>';
   } else if(w.widgetId==='track-streak'){
-    const sorted=[...d.filtered].sort((a,b)=>b.date.localeCompare(a.date));
-    let streak=0; for(const s of sorted){if((s.ot||0)>0)streak++;else break;}
+    const s2=[...d.filtered].sort((a,b)=>b.date.localeCompare(a.date));
+    let cur=0; for(const s of s2){if((s.ot||0)>0)cur++;else break;}
     let best=0,tmp=0; for(const s of [...d.filtered].sort((a,b)=>a.date.localeCompare(b.date))){if((s.ot||0)>0){tmp++;if(tmp>best)best=tmp;}else tmp=0;}
-    el.innerHTML=`<div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--amber)">${streak}</div><div style="font-size:11px;color:var(--text3)">consecutive OT paychecks</div><div style="font-size:11px;color:var(--text3);margin-top:4px">Best streak this year: ${best}</div>`;
+    el.innerHTML='<div style="font-family:var(--mono);font-size:32px;font-weight:700;color:var(--amber)">'+cur+'</div>'
+      +'<div style="font-size:11px;color:var(--text3)">consecutive OT paychecks</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:4px">Best streak: '+best+'</div>';
   } else if(w.widgetId==='track-mom'){
-    const now=new Date(); const tm=now.getMonth(); const lm=tm===0?11:tm-1;
+    const now=new Date(),tm=now.getMonth(),lm=tm===0?11:tm-1;
     const tg=d.filtered.filter(s=>new Date(s.date+'T12:00:00').getMonth()===tm).reduce((a,s)=>a+s.gross,0);
     const lg=d.filtered.filter(s=>new Date(s.date+'T12:00:00').getMonth()===lm).reduce((a,s)=>a+s.gross,0);
     const diff=tg-lg;
-    el.innerHTML=`<div style="font-family:var(--mono);font-size:20px;font-weight:700;margin-bottom:2px">${tg>0?fmt(tg):'—'}</div><div style="font-size:11px;color:var(--text3)">this month gross</div>${lg>0?`<div style="font-size:13px;font-weight:600;color:${diff>=0?'var(--green)':'var(--red)'};margin-top:6px">${diff>=0?'▲':'▼'} ${fmt(Math.abs(diff))} vs last month</div>`:''}`;
+    el.innerHTML='<div style="font-family:var(--mono);font-size:22px;font-weight:700;margin-bottom:2px">'+(tg>0?fmt(tg):'—')+'</div>'
+      +'<div style="font-size:11px;color:var(--text3)">this month gross</div>'
+      +(lg>0?'<div style="font-size:13px;font-weight:600;color:'+(diff>=0?'var(--green)':'var(--red)')+';margin-top:6px">'+(diff>=0?'▲':'▼')+' '+fmt(Math.abs(diff))+' vs last month</div>':'');
   } else if(w.widgetId==='track-rate'){
-    const rateChanges=[];let lastR=null;
-    [...(d.filtered||[])].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
-      if(lastR===null||Math.abs(s.rate-lastR)>0.0001){rateChanges.push({date:s.date,rate:s.rate});lastR=s.rate;}
-    });
-    // also check prior years
-    const allRates=[];let lr2=null;
-    [...stubs].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
-      if(lr2===null||Math.abs(s.rate-lr2)>0.0001){allRates.push({date:s.date,rate:s.rate});lr2=s.rate;}
-    });
-    el.innerHTML=allRates.length===0?'<div style="font-size:12px;color:var(--text3)">No data</div>':
-      allRates.map((r,i)=>{
-        const isNow=r.date.startsWith(String(d.yr));
-        const arrow=i>0&&r.rate>allRates[i-1].rate?'<span style="color:var(--green)">▲</span>':i>0?'<span style="color:var(--red)">▼</span>':'<span style="color:var(--text3)">●</span>';
-        const dt=new Date(r.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-        return `<div style="font-size:12px;${isNow?'':'opacity:.55'};margin-bottom:3px;display:flex;align-items:center;gap:6px">${arrow}<strong>$${r.rate.toFixed(4)}/hr</strong><span style="font-size:10px;color:var(--text3)">since ${dt}</span></div>`;
-      }).join('');
+    const allRates=[];let lr=null;
+    [...stubs].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{if(lr===null||Math.abs(s.rate-lr)>0.0001){allRates.push({date:s.date,rate:s.rate});lr=s.rate;}});
+    el.innerHTML=allRates.map((r,i)=>{
+      const isNow=r.date.startsWith(String(d.yr));
+      const arrow=i>0&&r.rate>allRates[i-1].rate?'<span style="color:var(--green)">▲</span>':i>0?'<span style="color:var(--red)">▼</span>':'<span style="color:var(--text3)">●</span>';
+      const dt=new Date(r.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      return '<div style="font-size:12px;'+(isNow?'':'opacity:.55')+';margin-bottom:4px;display:flex;align-items:center;gap:6px">'+arrow+'<strong>$'+r.rate.toFixed(4)+'/hr</strong><span style="font-size:10px;color:var(--text3)">since '+dt+'</span></div>';
+    }).join('');
   } else if(w.widgetId==='track-pace'){
-    const projG=d.tG/d.daysPassed*d.daysInYear;
-    const projN=d.tNet/d.daysPassed*d.daysInYear;
-    const gPerDay=d.tG/d.daysPassed, gPerWeek=gPerDay*7;
-    const nPerDay=d.tNet/d.daysPassed, nPerWeek=nPerDay*7;
-    el.innerHTML=`
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div style="background:var(--bg3);border-radius:6px;padding:8px">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Gross/day</div>
-          <div style="font-family:var(--mono);font-size:15px;font-weight:700">${fmt(gPerDay)}</div>
-        </div>
-        <div style="background:var(--bg3);border-radius:6px;padding:8px">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Gross/week</div>
-          <div style="font-family:var(--mono);font-size:15px;font-weight:700">${fmt(gPerWeek)}</div>
-        </div>
-        <div style="background:var(--bg3);border-radius:6px;padding:8px">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Net/day</div>
-          <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">${fmt(nPerDay)}</div>
-        </div>
-        <div style="background:var(--bg3);border-radius:6px;padding:8px">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Proj. net YE</div>
-          <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">${fmt(projN)}</div>
-        </div>
-      </div>`;
+    const gD=d.tG/d.daysPassed, nD=d.tNet/d.daysPassed;
+    el.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Gross/day</div><div style="font-family:var(--mono);font-size:15px;font-weight:700">'+fmt(gD)+'</div></div>'
+      +'<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Gross/week</div><div style="font-family:var(--mono);font-size:15px;font-weight:700">'+fmt(gD*7)+'</div></div>'
+      +'<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Net/day</div><div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">'+fmt(nD)+'</div></div>'
+      +'<div style="background:var(--bg3);border-radius:6px;padding:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Proj. net YE</div><div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">'+fmt(nD*d.daysInYear)+'</div></div>'
+      +'</div>';
   } else if(w.widgetId==='track-recent'){
     const recent=[...d.filtered].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
     el.innerHTML=recent.map(s=>{
       const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
       const net=parseFloat((s.net||(s.gross-ded)).toFixed(2));
       const dt=new Date(s.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-      const otBadge=(s.ot||0)>0?'<span style="font-size:9px;background:rgba(251,191,36,.15);color:#92400e;padding:1px 5px;border-radius:10px;font-weight:600">OT '+fmtH(s.ot||0)+'h</span>':'';
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'
-        +'<div><div style="font-size:11px;font-weight:600;color:var(--text2)">'+dt+'</div><div style="display:flex;gap:4px;margin-top:2px">'+otBadge+'</div></div>'
+      const ot=(s.ot||0)>0?'<span style="font-size:9px;background:rgba(251,191,36,.15);color:#92400e;padding:1px 5px;border-radius:10px;font-weight:600">OT '+fmtH(s.ot||0)+'h</span>':'';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">'
+        +'<div><div style="font-size:11px;font-weight:600;color:var(--text2)">'+dt+'</div><div style="margin-top:2px">'+ot+'</div></div>'
         +'<div style="text-align:right"><div style="font-family:var(--mono);font-size:13px;font-weight:700">'+fmt(s.gross)+'</div><div style="font-family:var(--mono);font-size:11px;color:var(--green)">'+fmt(net)+' net</div></div>'
         +'</div>';
-    }).join('')+'<div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Last 3 paychecks</div>';
+    }).join('');
   } else if(w.widgetId==='track-goal'){
     const goal=parseFloat(localStorage.getItem('dash-goal-'+d.yr)||0);
-    const projNet=d.tNet/d.daysPassed*d.daysInYear;
+    const projN=d.tNet/d.daysPassed*d.daysInYear;
     const pct=goal>0?Math.min(100,d.tNet/goal*100):0;
-    const onTrack=goal>0?projNet>=goal:true;
-    const barColor=onTrack?'var(--green)':'var(--amber)';
-    const progressBar=goal>0
-      ?'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span>'+fmt(d.tNet)+' of '+fmt(goal)+'</span><span style="color:'+barColor+'">'+pct.toFixed(0)+'%</span></div>'
-       +'<div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+barColor+';border-radius:4px;transition:width .4s"></div></div>'
-      :'';
+    const onTrack=goal>0?projN>=goal:true;
+    const bc=onTrack?'var(--green)':'var(--amber)';
     const wid=w.id, yr=d.yr;
-    el.innerHTML=progressBar
+    el.innerHTML=(goal>0?'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span>'+fmt(d.tNet)+' of '+fmt(goal)+'</span><span style="color:'+bc+'">'+pct.toFixed(0)+'%</span></div>'
+      +'<div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+bc+';border-radius:4px;transition:width .4s"></div></div>':'')
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-        +'<div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Earned</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)">'+fmt(d.tNet)+'</div></div>'
-        +'<div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Projected</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:'+barColor+'">'+fmt(projNet)+'</div></div>'
+        +'<div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--text3)">Earned</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)">'+fmt(d.tNet)+'</div></div>'
+        +'<div style="background:var(--bg3);border-radius:6px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--text3)">Projected</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:'+bc+'">'+fmt(projN)+'</div></div>'
       +'</div>'
-      +'<div style="display:flex;align-items:center;gap:6px"><label style="font-size:11px;color:var(--text3);white-space:nowrap">Goal $</label>'
-      +'<input type="number" step="500" value="'+(goal||'')+'" placeholder="Set annual target" '
-      +'style="flex:1;padding:5px 8px;font-family:var(--mono);font-size:12px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:6px;color:var(--text);outline:none" '
-      +'oninput="setDashGoal(\''+wid+'\',this.value,\''+yr+'\')"></div>';
+      +'<div style="display:flex;align-items:center;gap:6px"><label style="font-size:11px;color:var(--text3)">Goal $</label>'
+      +'<input type="number" step="500" value="'+(goal||'')+'" placeholder="Annual target" '
+      +'data-action="set-goal" data-id="'+wid+'" data-yr="'+yr+'" '
+      +'style="flex:1;padding:5px 8px;font-family:var(--mono);font-size:12px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:6px;color:var(--text);outline:none">'
+      +'</div>';
   }
 }
 
-function setDashGoal(wid, val, yr){
-  localStorage.setItem('dash-goal-'+yr, val);
-  renderDashTracker(dashConfig.find(w=>w.id===wid));
+function setDashGoal(wid,val,yr){
+  localStorage.setItem('dash-goal-'+yr,val);
+  const w=dashConfig.find(x=>x.id===wid);
+  if(w) renderDashTracker(w);
 }
 
-function findDef(widgetId){
-  for(const cat of Object.values(DASH_CATALOG)){
-    const found=cat.find(d=>d.id===widgetId);
-    if(found) return found;
-  }
-  return null;
+// ── Side panel ───────────────────────────────────────────────────────────────
+function buildDashPanel(){
+  const body = document.getElementById('dashPanelBody');
+  if(!body) return;
+  const onCanvas = new Set(dashConfig.map(w=>w.widgetId));
+
+  const sections = [
+    { label:'Stat Cards', key:'metrics' },
+    { label:'Charts',     key:'charts' },
+    { label:'Trackers',   key:'trackers' },
+  ];
+
+  body.innerHTML = sections.map(({label,key})=>{
+    const items = DASH_CATALOG[key].map(def=>{
+      const isOn = onCanvas.has(def.id);
+      return '<div class="dash-lib-item'+(isOn?' on-canvas':'')+'" '
+        +'draggable="true" '
+        +'draggable="true" data-lib-id="'+def.id+'" '
+        +'id="dlib-'+def.id+'">'
+        +'<div style="flex:1;min-width:0">'
+          +'<div class="dash-lib-name">'+def.icon+' '+def.name+'</div>'
+          +'<div class="dash-lib-desc">'+def.desc+'</div>'
+        +'</div>'
+        +'<button class="dash-lib-add" data-action="add-widget" data-lib-id="'+def.id+'">'+(isOn?'✓':'+')+'</button>'
+        +'</div>';
+    }).join('');
+    return '<div class="dash-panel-section">'+label+'</div>'+items;
+  }).join('');
 }
 
-function openDashAddPanel(){
-  populateDashPicker();
-  document.getElementById('dashAddPanel').classList.add('open');
-}
-function closeDashAddPanel(){ document.getElementById('dashAddPanel').classList.remove('open'); }
-
-function populateDashPicker(){
-  const existing=new Set(dashConfig.map(w=>w.widgetId));
-  ['Metrics','Charts','Trackers'].forEach(cat=>{
-    const key=cat.toLowerCase();
-    const el=document.getElementById('dashPicker'+cat);
-    if(!el) return;
-    el.innerHTML=DASH_CATALOG[key].map(def=>`
-      <div class="dash-pick-item${existing.has(def.id)?' ytd-bar--teal':''}" onclick="addDashWidget('${def.id}');closeDashAddPanel()">
-        <div class="dash-pick-icon">${def.icon}</div>
-        <div class="dash-pick-name">${def.name}</div>
-        <div class="dash-pick-desc">${def.desc}</div>
-        ${existing.has(def.id)?'<div style="font-size:9px;color:var(--text3);margin-top:4px">Already added</div>':''}
-      </div>`).join('');
-  });
+function toggleDashPanel(){
+  dashPanelVisible = !dashPanelVisible;
+  const panel = document.getElementById('dashPanel');
+  if(panel) panel.style.display = dashPanelVisible?'':'none';
 }
 
+// ── Add / Remove widgets ──────────────────────────────────────────────────────
 function addDashWidget(widgetId){
-  const def=findDef(widgetId);
+  const def = findDef(widgetId);
   if(!def) return;
-  const w={ id:dashUID(), widgetId, size:def.defaultSize?Object.entries(SIZE_COLS).find(([,v])=>v===def.defaultSize)?.[0]||'md':'md', chartType:def.chartType||null, year:'current' };
+  // Find a free position
+  const occupied = new Set();
+  dashConfig.forEach(w=>{ for(let r=w.y;r<w.y+w.h;r++) for(let c=w.x;c<w.x+w.w;c++) occupied.add(r+','+c); });
+  let px=0, py=0;
+  outer: for(let row=0;row<100;row++){
+    for(let col=0;col<=GRID_COLS-(def.defW||4);col++){
+      let fits=true;
+      for(let r=row;r<row+(def.defH||2);r++) for(let c=col;c<col+(def.defW||4);c++){
+        if(occupied.has(r+','+c)){fits=false;break;}
+      }
+      if(fits){px=col;py=row;break outer;}
+    }
+  }
+  const w={id:dashUID(),widgetId,x:px,y:py,w:def.defW||4,h:def.defH||2,chartType:def.chartType||def.defChartType||null};
   dashConfig.push(w);
   saveDashConfig();
   renderDashboard();
-  showToast('Widget added');
+  showToast(def.name+' added');
 }
 
 function removeDashWidget(id){
-  if(dashCharts[id]){ try{dashCharts[id].destroy();}catch(e){} delete dashCharts[id]; }
+  if(dashCharts[id]){try{dashCharts[id].destroy();}catch(e){}delete dashCharts[id];}
   dashConfig=dashConfig.filter(w=>w.id!==id);
+  const el=document.getElementById('dw-'+id);
+  if(el) el.remove();
+  // Update canvas height
+  const maxRow=dashConfig.reduce((m,w)=>Math.max(m,w.y+(w.h||2)),0);
+  const canvas=document.getElementById('dashCanvas');
+  if(canvas) canvas.style.minHeight=(maxRow*(GRID_ROW_H+GRID_GAP)+40)+'px';
+  const emptyEl=document.getElementById('dashEmpty');
+  if(emptyEl) emptyEl.style.display=dashConfig.length?'none':'flex';
   saveDashConfig();
-  renderDashboard();
-}
-
-function setDashSize(id, size){
-  const w=dashConfig.find(w=>w.id===id);
-  if(!w) return;
-  w.size=size;
-  saveDashConfig();
-  renderDashboard();
+  buildDashPanel();
 }
 
 function setDashChartType(id, chartType){
   const w=dashConfig.find(w=>w.id===id);
   if(!w) return;
   w.chartType=chartType;
-  saveDashConfig();
   if(dashCharts[id]){try{dashCharts[id].destroy();}catch(e){}delete dashCharts[id];}
-  requestAnimationFrame(()=>renderDashChart(w));
-  // Re-render just the controls
-  const ctrl=document.querySelector(`#dw-${id} .dash-widget-controls`);
-  if(ctrl){
-    const types=CHART_TYPES_FOR[w.widgetId]||[];
-    ctrl.querySelectorAll('.dash-wbtn:not(.danger)').forEach(b=>{
-      const t=b.textContent.trim().toLowerCase();
-      const match={bar:'bar',line:'line',donut:'doughnut',pie:'pie'}[t]||t;
-      if(types.includes(match)) b.classList.toggle('active',match===chartType||t===chartType);
-    });
-  }
+  const bodyEl=document.getElementById('dwb-'+id);
+  if(bodyEl) bodyEl.innerHTML='<canvas style="width:100%;height:100%"></canvas>';
+  renderDashChart(w);
+  saveDashConfig();
+  // Update button states
+  const wEl=document.getElementById('dw-'+id);
+  if(wEl) wEl.querySelectorAll('.dash-wbtn:not(.danger)').forEach(b=>{
+    const t=b.textContent.trim().toLowerCase();
+    const map={bar:'bar',line:'line',donut:'doughnut',pie:'pie'};
+    b.classList.toggle('active',(map[t]||t)===chartType);
+  });
 }
 
-function toggleDashEdit(){
-  dashEditMode=!dashEditMode;
-  const btn=document.getElementById('dashEditBtn');
-  if(btn){ btn.style.background=dashEditMode?'var(--amber-dim)':''; btn.style.color=dashEditMode?'var(--amber)':''; btn.style.borderColor=dashEditMode?'var(--amber)':''; }
+function clearDashboard(){
+  if(!confirm('Remove all widgets from your dashboard?')) return;
+  Object.values(dashCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+  dashCharts={};
+  dashConfig=[];
+  saveDashConfig();
   renderDashboard();
 }
 
-async function saveDashConfig(){
-  clearTimeout(dashSaveTimer);
-  dashSaveTimer=setTimeout(async()=>{
-    try { await apiFetch('/api/dashboard',{method:'POST',body:JSON.stringify({config:dashConfig})}); }
-    catch(e){ console.warn('Dashboard save failed',e); }
-  }, 800);
+// ── Event delegation for dashboard ───────────────────────────────────────────
+document.addEventListener('click', e=>{
+  const action = e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action;
+  if(!action) return;
+  const el = e.target.dataset.action ? e.target : e.target.closest('[data-action]');
+  if(action==='remove')      { removeDashWidget(el.dataset.id); }
+  if(action==='chart-type')  { setDashChartType(el.dataset.id, el.dataset.ct); }
+  if(action==='add-widget')  { addDashWidget(el.dataset.libId); }
+});
+
+document.addEventListener('input', e=>{
+  if(e.target.dataset.action==='set-goal'){
+    setDashGoal(e.target.dataset.id, e.target.value, e.target.dataset.yr);
+  }
+});
+
+// ── Drag from library ─────────────────────────────────────────────────────────
+let _libDragId = null;
+function dashLibDragStart(e, widgetId){
+  _libDragId = widgetId;
+  e.dataTransfer.effectAllowed='copy';
+  e.dataTransfer.setData('text/plain', widgetId);
+}
+
+// Panel items use data-lib-id for drag; wire dragstart via delegation
+document.addEventListener('dragstart', e=>{
+  const item = e.target.closest('[data-lib-id]');
+  if(item && item.classList.contains('dash-lib-item')){
+    _libDragId = item.dataset.libId;
+    e.dataTransfer.effectAllowed='copy';
+    e.dataTransfer.setData('text/plain', _libDragId);
+  }
+});
+
+function initCanvasDrop(){
+  const canvas = document.getElementById('dashCanvasWrap');
+  if(!canvas || canvas._dropInited) return;
+  canvas._dropInited = true;
+  canvas.addEventListener('dragover', e=>{ e.preventDefault(); e.dataTransfer.dropEffect='copy'; });
+  canvas.addEventListener('drop', e=>{
+    e.preventDefault();
+    if(!_libDragId) return;
+    addDashWidget(_libDragId);
+    _libDragId = null;
+  });
+}
+
+// ── Widget drag (move) ────────────────────────────────────────────────────────
+function attachWidgetEvents(id){
+  const el  = document.getElementById('dw-'+id);
+  const hdr = el?.querySelector('.dash-widget-header');
+  const rsz = document.getElementById('dwr-'+id);
+  if(!el||!hdr) return;
+
+  // Move — drag from header
+  hdr.addEventListener('mousedown', e=>{
+    if(e.target.closest('.dash-widget-actions')) return;
+    e.preventDefault();
+    const rect = el.getBoundingClientRect();
+    _dashDragState={type:'move',id,
+      startX:e.clientX, startY:e.clientY,
+      origLeft:el.offsetLeft, origTop:el.offsetTop};
+    el.classList.add('dragging');
+    el.style.zIndex=50;
+  });
+
+  // Resize — drag from handle
+  if(rsz) rsz.addEventListener('mousedown', e=>{
+    e.preventDefault(); e.stopPropagation();
+    _dashDragState={type:'resize',id,
+      startX:e.clientX, startY:e.clientY,
+      origW:el.offsetWidth, origH:el.offsetHeight};
+    el.classList.add('resizing');
+    el.style.zIndex=50;
+  });
+
+  // Touch move
+  hdr.addEventListener('touchstart', e=>{
+    if(e.target.closest('.dash-widget-actions')) return;
+    const t=e.touches[0];
+    _dashDragState={type:'move',id,startX:t.clientX,startY:t.clientY,origLeft:el.offsetLeft,origTop:el.offsetTop};
+    el.classList.add('dragging');
+  },{passive:true});
+
+  if(rsz) rsz.addEventListener('touchstart', e=>{
+    e.preventDefault();
+    const t=e.touches[0];
+    _dashDragState={type:'resize',id,startX:t.clientX,startY:t.clientY,origW:el.offsetWidth,origH:el.offsetHeight};
+    el.classList.add('resizing');
+  },{passive:false});
+}
+
+// Global mouse/touch move & up handlers
+function _dashMouseMove(e){
+  if(!_dashDragState) return;
+  const {type,id,startX,startY} = _dashDragState;
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  const el = document.getElementById('dw-'+id);
+  if(!el) return;
+
+  if(type==='move'){
+    el.style.left = (_dashDragState.origLeft + dx)+'px';
+    el.style.top  = (_dashDragState.origTop  + dy)+'px';
+  } else {
+    const nw = Math.max(180, _dashDragState.origW + dx);
+    const nh = Math.max(100, _dashDragState.origH + dy);
+    el.style.width  = nw+'px';
+    el.style.height = nh+'px';
+    // Update chart
+    if(dashCharts[id]) dashCharts[id].resize();
+  }
+}
+function _dashTouchMove(e){
+  if(!_dashDragState) return;
+  e.preventDefault();
+  _dashMouseMove(e.touches[0]);
+}
+
+function _dashMouseUp(e){
+  if(!_dashDragState) return;
+  const {type,id} = _dashDragState;
+  const el = document.getElementById('dw-'+id);
+  if(el){
+    el.classList.remove('dragging','resizing');
+    el.style.zIndex='';
+    // Snap to grid
+    const colW = getCanvasColWidth();
+    const w = dashConfig.find(x=>x.id===id);
+    if(w && type==='move'){
+      const snapX = Math.round(el.offsetLeft / (colW+GRID_GAP));
+      const snapY = Math.round(el.offsetTop  / (GRID_ROW_H+GRID_GAP));
+      w.x = Math.max(0, Math.min(GRID_COLS-w.w, snapX));
+      w.y = Math.max(0, snapY);
+      positionWidget(w);
+    } else if(w && type==='resize'){
+      const snapW = Math.max(1, Math.round((el.offsetWidth+GRID_GAP)  / (colW+GRID_GAP)));
+      const snapH = Math.max(1, Math.round((el.offsetHeight+GRID_GAP) / (GRID_ROW_H+GRID_GAP)));
+      w.w = Math.min(GRID_COLS - w.x, snapW);
+      w.h = Math.max(1, snapH);
+      positionWidget(w);
+      // Update canvas height
+      const maxRow = dashConfig.reduce((m,x)=>Math.max(m,x.y+(x.h||2)),0);
+      const canvas = document.getElementById('dashCanvas');
+      if(canvas) canvas.style.minHeight=(maxRow*(GRID_ROW_H+GRID_GAP)+40)+'px';
+      // Re-render chart after resize
+      if(dashCharts[id]){ try{dashCharts[id].resize();}catch(e){} }
+    }
+    saveDashConfig();
+  }
+  _dashDragState = null;
+}
+
+document.addEventListener('mousemove', _dashMouseMove);
+document.addEventListener('mouseup',   _dashMouseUp);
+document.addEventListener('touchmove', _dashTouchMove, {passive:false});
+document.addEventListener('touchend',  _dashMouseUp);
+
+// ── Canvas resize observer (reflows widgets on window resize) ────────────────
+let _dashResizeObs = null;
+function initDashResizeObserver() {
+  const canvas = document.getElementById('dashCanvasWrap');
+  if(!canvas || _dashResizeObs) return;
+  _dashResizeObs = new ResizeObserver(()=>{
+    if(!dashConfig.length) return;
+    dashConfig.forEach(w=>positionWidget(w));
+    Object.values(dashCharts).forEach(c=>{ try{c.resize();}catch(e){} });
+  });
+  _dashResizeObs.observe(canvas);
 }
 
 // ===== DARK MODE (cross-device via settings API) =====
