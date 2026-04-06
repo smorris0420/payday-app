@@ -491,6 +491,9 @@ html{transition:background .2s,color .2s}
       </div>
     </div>
     <div class="sidebar-nav" id="sidebarNav">
+      <button class="sidebar-nav-btn" onclick="showPage('dash',this,'sb')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+      </button>
       <button class="sidebar-nav-btn active" onclick="showPage('calc',this,'sb')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8M12 8v8"/></svg>Calculator
       </button>
@@ -535,46 +538,6 @@ html{transition:background .2s,color .2s}
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       Viewing as <strong id="viewAsName" style="margin-left:4px"></strong>
       <button onclick="exitViewAs()">Exit view</button>
-    </div>
-
-    <!-- DASHBOARD PAGE -->
-    <div id="page-dash" class="page">
-      <div class="page-inner-wide">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Dashboard</div>
-            <div class="page-sub" id="dashSub">Your personal view</div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-secondary btn-sm" onclick="openDashAddPanel()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-              Add widget
-            </button>
-            <button class="btn btn-secondary btn-sm" id="dashEditBtn" onclick="toggleDashEdit()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit
-            </button>
-          </div>
-        </div>
-        <div id="dashGrid" class="dash-grid"></div>
-      </div>
-    </div>
-
-    <!-- ADD WIDGET PANEL -->
-    <div class="dash-add-panel" id="dashAddPanel" onclick="if(event.target===this)closeDashAddPanel()">
-      <div class="dash-add-inner">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-          <div style="font-size:16px;font-weight:700">Add a widget</div>
-          <button onclick="closeDashAddPanel()" style="background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:0 4px">✕</button>
-        </div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Choose from your paycheck data. Widgets are live — they update as you log new paychecks.</div>
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:14px 0 6px">Metrics</div>
-        <div class="dash-widget-picker" id="dashPickerMetrics"></div>
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 6px">Charts</div>
-        <div class="dash-widget-picker" id="dashPickerCharts"></div>
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 6px">Trackers</div>
-        <div class="dash-widget-picker" id="dashPickerTrackers"></div>
-      </div>
     </div>
 
     <!-- DASHBOARD PAGE -->
@@ -1073,6 +1036,9 @@ html{transition:background .2s,color .2s}
 
   <!-- MOBILE BOTTOM NAV -->
   <nav class="bottom-nav">
+    <button class="nav-btn" onclick="showPage('dash',this,'mb')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dash
+    </button>
     <button class="nav-btn active" onclick="showPage('calc',this,'mb')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8M12 8v8"/></svg>Calc
     </button>
