@@ -318,9 +318,31 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
 /* Chart tooltip */
 .ytd-mono{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text)}
 .ytd-mono.red{color:var(--red)}.ytd-mono.green{color:var(--green)}.ytd-mono.amber{color:var(--amber)}.ytd-mono.blue{color:var(--blue)}
-.ytd-mono{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text)}
-.ytd-mono.red{color:var(--red)}.ytd-mono.green{color:var(--green)}.ytd-mono.amber{color:var(--amber)}.ytd-mono.blue{color:var(--blue)}
 .ytd-chart-tooltip{position:absolute;background:var(--bg);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:8px 10px;font-size:11px;pointer-events:none;box-shadow:var(--shadow);z-index:10;min-width:140px}
+/* Paycheck card grid */
+.ytd-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.ytd-pc-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.ytd-pc-card:hover{border-color:var(--border2);box-shadow:0 0 0 3px rgba(59,130,246,.07)}
+.ytd-pc-card.active{border:2px solid var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1);background:var(--bg2)}
+.ytd-pc-date{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.ytd-pc-gross{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);line-height:1.1;margin-bottom:2px}
+.ytd-pc-net{font-family:var(--mono);font-size:13px;color:var(--green);font-weight:600;margin-bottom:10px}
+.ytd-pc-bar{height:5px;display:flex;border-radius:3px;overflow:hidden;gap:2px;margin-bottom:8px}
+.ytd-pc-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.ytd-pc-pill{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px}
+.ytd-pc-pill--ot{background:rgba(251,191,36,.18);color:#92400e}
+.ytd-pc-pill--dt{background:rgba(239,68,68,.12);color:#991b1b}
+.ytd-pc-pill--hol{background:rgba(59,130,246,.12);color:#1e40af}
+.ytd-pc-pill--ben{background:rgba(45,212,191,.15);color:#065f46}
+.ytd-pc-foot{font-size:11px;color:var(--text3)}
+/* Inline expand */
+.ytd-pc-expand{border-top:1px solid var(--border);margin-top:10px;padding-top:10px}
+.ytd-pc-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
+.ytd-pc-row-label{color:var(--text2)}
+.ytd-pc-row-val{font-family:var(--mono);font-weight:600;color:var(--text)}
+.ytd-pc-row-val.red{color:var(--red)}.ytd-pc-row-val.amber{color:var(--amber)}.ytd-pc-row-val.green{color:var(--green)}
+.ytd-pc-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:8px 0 4px}
+.ytd-pc-takehome{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-top:8px;border-radius:6px;background:var(--green-dim);border:1.5px solid var(--green-border)}
 
 /* CHART */
 .chart-wrap{position:relative;width:100%;height:200px;margin-bottom:14px}
@@ -634,29 +656,27 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           </div>
         </div>
 
-        </div>
-
-        <!-- WoW CHANGE + SS TRACKER -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px" class="ytd-two-col">
-          <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:8px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">Week-over-Week Change</div>
-            <div style="display:flex;gap:20px;flex-wrap:wrap">
-              <div><div style="font-size:10px;color:var(--text3)">Gross change</div><div class="ytd-pace-value" id="ytdWoWGross">—</div></div>
-              <div><div style="font-size:10px;color:var(--text3)">Net change</div><div class="ytd-pace-value" id="ytdWoWNet">—</div></div>
-              <div><div style="font-size:10px;color:var(--text3)">Previous check</div><div style="font-size:12px;color:var(--text3)" id="ytdWoWPrev">—</div></div>
+        <!-- WoW CHANGE + SS TRACKER — same 3-col grid as pace section -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" class="ytd-bottom-grid">
+          <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:8px;grid-column:span 2">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">📊 Week-over-Week Change</div>
+            <div style="display:flex;gap:24px;flex-wrap:wrap;width:100%">
+              <div><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Gross change</div><div class="ytd-pace-value" id="ytdWoWGross">—</div></div>
+              <div><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Net change</div><div class="ytd-pace-value" id="ytdWoWNet">—</div></div>
+              <div style="margin-left:auto"><div style="font-size:10px;color:var(--text3);margin-bottom:2px">Previous check</div><div style="font-size:12px;color:var(--text3);font-family:var(--mono)" id="ytdWoWPrev">—</div></div>
             </div>
           </div>
           <div class="ytd-pace-card" style="flex-direction:column;align-items:flex-start;gap:8px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">SS Wage Base Tracker <span style="font-weight:400;color:var(--text3);font-size:10px">($176,100 limit)</span></div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">🏛 SS Wage Base <span style="font-weight:400;font-size:9px">($176,100)</span></div>
             <div style="width:100%">
-              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
-                <span id="ytdSSWages">—</span>
-                <span id="ytdSSRemain" style="color:var(--text3)">— remaining</span>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px">
+                <span style="font-family:var(--mono);font-weight:600" id="ytdSSWages">—</span>
+                <span style="font-size:10px;color:var(--text3)" id="ytdSSRemain">—</span>
               </div>
-              <div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden">
-                <div id="ytdSSBar" style="height:100%;border-radius:4px;background:var(--blue);transition:width .4s;width:0%"></div>
+              <div style="height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
+                <div id="ytdSSBar" style="height:100%;border-radius:3px;background:var(--blue);transition:width .4s;width:0%"></div>
               </div>
-              <div style="font-size:10px;color:var(--text3);margin-top:4px" id="ytdSSPct">—% of annual SS wage base used</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:3px" id="ytdSSPct">—</div>
             </div>
           </div>
         </div>
@@ -765,34 +785,24 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           </div>
         </div>
 
-        <!-- PAYCHECK LIST + INLINE MODAL -->
+        <!-- PAYCHECK CARD GRID + INLINE MODAL -->
         <div class="card card-pad" style="margin-bottom:0">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap">
-            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Paycheck Detail</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Paychecks</div>
             <div style="display:flex;gap:8px;align-items:center">
-              <button class="btn btn-secondary btn-sm" onclick="exportYTDCSV()" title="Export CSV">
+              <button class="btn btn-secondary btn-sm" onclick="exportYTDCSV()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export CSV
+                CSV
               </button>
               <input type="search" id="ytdSearch" placeholder="Search date, amount…" style="border:1.5px solid var(--border2);background:var(--bg3);border-radius:var(--radius-sm);padding:5px 10px;font-size:12px;color:var(--text);outline:none;width:180px">
             </div>
           </div>
-          <div style="overflow-x:auto">
-            <table class="hist-table" id="ytdDetailTable">
-              <thead><tr>
-                <th>Date</th><th class="num">Rate</th><th class="num">Reg Hrs</th><th class="num">OT Hrs</th>
-                <th class="num">Gross</th><th class="num">Taxes</th><th class="num">Benefits</th><th class="num">Net</th>
-              </tr></thead>
-              <tbody id="ytdDetailBody"></tbody>
-            </table>
-          </div>
-          <!-- Inline paycheck detail slide-in -->
-          <div id="ytdInlineDetail" style="display:none;border-top:1.5px solid var(--border2);margin-top:12px;padding-top:12px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <div style="font-size:13px;font-weight:700;color:var(--text)" id="ytdInlineTitle">—</div>
-              <button onclick="closeYTDInline()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px;line-height:1">✕</button>
-            </div>
-            <div id="ytdInlineContent"></div>
+          <div id="ytdDetailBody" class="ytd-card-grid"></div>
+          <div style="display:flex;gap:14px;font-size:11px;color:var(--text3);margin-top:10px;flex-wrap:wrap;align-items:center">
+            <span style="color:var(--text3)">Tap any card to see full breakdown</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:4px;background:rgba(59,130,246,.7);border-radius:2px;display:inline-block"></span>Regular</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:4px;background:rgba(251,191,36,.8);border-radius:2px;display:inline-block"></span>OT</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:4px;background:rgba(239,68,68,.45);border-radius:2px;display:inline-block"></span>Deductions</span>
           </div>
         </div>
 
@@ -804,13 +814,11 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
               <label style="font-size:11px;color:var(--text3)">Annual net goal</label>
               <div style="display:flex;align-items:center;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:4px 8px;gap:4px">
                 <span style="font-size:12px;color:var(--text3)">$</span>
-                <input type="number" id="ytdGoalInput" placeholder="e.g. 40000" step="1000" min="0" style="border:none;background:transparent;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;width:90px" oninput="updateYTDGoal()">
+                <input type="number" id="ytdGoalInput" placeholder="e.g. 40000" step="500" min="0" style="border:none;background:transparent;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;width:90px" oninput="updateYTDGoal()">
               </div>
             </div>
           </div>
-          <div id="ytdGoalContent">
-            <div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Enter an annual net pay goal above to track your progress</div>
-          </div>
+          <div id="ytdGoalContent"></div>
         </div>
 
       </div>
@@ -2347,86 +2355,106 @@ function buildYTD() {
     }).join('');
   }
 
-  // ── Paycheck detail list ──────────────────────────────────────────────────
+  // ── Paycheck card grid ────────────────────────────────────────────────────
   const searchQ=(document.getElementById('ytdSearch')?.value||'').toLowerCase();
   const detailBody=document.getElementById('ytdDetailBody');
   if(detailBody){
     const rows=sorted.slice().reverse().filter(s=>{
       if(!searchQ) return true;
-      return s.date.includes(searchQ)||fmt(s.gross).includes(searchQ)||fmt(s.net||0).toLowerCase().includes(searchQ);
+      const dl=new Date(s.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}).toLowerCase();
+      return dl.includes(searchQ)||s.gross.toFixed(2).includes(searchQ)||(s.net||0).toFixed(2).includes(searchQ)||String(s.ot||0).includes(searchQ);
     });
     detailBody.innerHTML=rows.map(s=>{
-      const net=s.net||(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)));
-      const tax=s.fed+s.ss+s.med;
-      const ben=s.den+s.medI+s.vis+(s.retire||0);
-      const d=new Date(s.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      return `<tr style="cursor:pointer" class="ytd-row-${s.id}" onclick="openYTDInline('${s.id}')">
-        <td>${d}</td><td class="num muted">$${parseFloat(s.rate).toFixed(2)}</td>
-        <td class="num">${fmtH(s.reg)}h</td>
-        <td class="num${(s.ot||0)!==0?' amber':''}">${(s.ot||0)!==0?fmtH(s.ot)+'h':'—'}</td>
-        <td class="num">${fmt(s.gross)}</td>
-        <td class="num red">${fmt(tax)}</td>
-        <td class="num red">${fmt(ben)}</td>
-        <td class="num green">${fmt(net)}</td>
-      </tr>`;
+      const ded  = s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
+      const net  = parseFloat((s.net||(s.gross-ded)).toFixed(2));
+      const tax  = s.fed+s.ss+s.med;
+      const regP = s.regPay!=null ? s.regPay : payRound(rateRound(s.rate)*s.reg);
+      const otP  = s.otPay!=null  ? s.otPay  : (s.ot ? payRound(rateRound(s.rate*1.5)*(s.ot||0)) : 0);
+      const dtP  = payRound(rateRound(s.rate*2)*(s.dt||0));
+      const holP = payRound(rateRound(s.rate)*(s.hol||0));
+      const benP = payRound(rateRound(s.rate)*((s.sick||0)+(s.vac||0)+(s.fltHol||0)));
+      const d    = new Date(s.date+'T12:00:00');
+      const dateStr = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const taxPct  = s.gross>0?(tax/s.gross*100).toFixed(0):'0';
+      const keepPct = s.gross>0?(net/s.gross*100).toFixed(0):'0';
+      const hasOT=(s.ot||0)!==0, hasDT=(s.dt||0)>0, hasHol=(s.hol||0)>0;
+      const hasBen=(s.sick||0)+(s.vac||0)+(s.fltHol||0)>0;
+      // Bar segments: reg | ot | deductions (proportional to gross)
+      const barReg = s.gross>0?Math.max(0,regP/s.gross*100).toFixed(1):0;
+      const barOT  = s.gross>0?Math.max(0,Math.max(0,otP)/s.gross*100).toFixed(1):0;
+      const barDed = s.gross>0?Math.max(0,ded/s.gross*100).toFixed(1):0;
+      // Expand detail rows
+      const row=(label,val,cls='')=>`<div class="ytd-pc-row"><span class="ytd-pc-row-label">${label}</span><span class="ytd-pc-row-val ${cls}">${val}</span></div>`;
+      const expandHTML=`
+        <div class="ytd-pc-expand" id="exp-${s.id}" style="display:none">
+          <div class="ytd-pc-section">Earnings</div>
+          ${row('Hourly rate','$'+s.rate.toFixed(2)+'/hr')}
+          ${row(`Regular (${fmtH(s.reg)}h)`,fmt(regP))}
+          ${hasOT?row(`OT (${fmtH(s.ot||0)}h × 1.5)`,fmt(otP),'amber'):''}
+          ${hasDT?row(`Double time (${fmtH(s.dt||0)}h × 2)`,fmt(dtP),'amber'):''}
+          ${hasHol?row(`Holiday (${fmtH(s.hol||0)}h)`,fmt(holP)):''}
+          ${hasBen?row('Benefit time',fmt(benP)):''}
+          ${(s.addl||0)!==0?row('Additional',fmt(s.addl)):''}
+          ${row('Gross',fmt(s.gross))}
+          <div class="ytd-pc-section">Deductions</div>
+          ${row('Fed withholding','-'+fmt(s.fed),'red')}
+          ${row('Soc security (6.2%)','-'+fmt(s.ss),'red')}
+          ${row('Medicare (1.45%)','-'+fmt(s.med),'red')}
+          ${s.den>0?row('Dental','-'+fmt(s.den),'red'):''}
+          ${s.medI>0?row('Medical','-'+fmt(s.medI),'red'):''}
+          ${s.vis>0?row('Vision','-'+fmt(s.vis),'red'):''}
+          ${(s.retire||0)>0?row('401k','-'+fmt(s.retire||0),'red'):''}
+          ${row('Tax rate',taxPct+'%','amber')}
+          <div class="ytd-pc-takehome">
+            <span style="font-size:13px;font-weight:700;color:var(--green)">Take-home</span>
+            <span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">${fmt(net)}</span>
+          </div>
+        </div>`;
+      return `<div class="ytd-pc-card ytd-row-${s.id}" onclick="toggleYTDCard('${s.id}')">
+        <div class="ytd-pc-date">${dateStr}</div>
+        <div class="ytd-pc-gross">${fmt(s.gross)}</div>
+        <div class="ytd-pc-net">${fmt(net)} net</div>
+        <div class="ytd-pc-bar">
+          <div style="flex:${barReg};background:rgba(59,130,246,.7);border-radius:3px 0 0 3px"></div>
+          <div style="flex:${barOT};background:rgba(251,191,36,.8)"></div>
+          <div style="flex:${barDed};background:rgba(239,68,68,.45);border-radius:0 3px 3px 0"></div>
+        </div>
+        <div class="ytd-pc-pills">
+          ${hasOT?`<span class="ytd-pc-pill ytd-pc-pill--ot">OT ${fmtH(s.ot||0)}h</span>`:''}
+          ${hasDT?`<span class="ytd-pc-pill ytd-pc-pill--dt">DT ${fmtH(s.dt||0)}h</span>`:''}
+          ${hasHol?`<span class="ytd-pc-pill ytd-pc-pill--hol">HOL</span>`:''}
+          ${hasBen?`<span class="ytd-pc-pill ytd-pc-pill--ben">BEN</span>`:''}
+        </div>
+        <div class="ytd-pc-foot">${fmtH(s.reg)}h reg · ${taxPct}% tax · ${keepPct}% kept</div>
+        ${expandHTML}
+      </div>`;
     }).join('');
   }
+  // Auto-render goal tracker
+  updateYTDGoal();
 }
 
 // ===== YTD INLINE DETAIL =====
-function openYTDInline(id) {
-  const s = stubs.find(x=>x.id===id);
-  if(!s) return;
-  // Highlight row
-  document.querySelectorAll('[class^="ytd-row-"]').forEach(r=>r.style.background='');
-  const row = document.querySelector('.ytd-row-'+id);
-  if(row) row.style.background='var(--green-dim)';
-
-  const d = new Date(s.date+'T12:00:00');
-  document.getElementById('ytdInlineTitle').textContent =
-    d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-
-  const ded  = s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
-  const net  = s.net||(s.gross-ded);
-  const tax  = s.fed+s.ss+s.med;
-  const ben  = s.den+s.medI+s.vis+(s.retire||0);
-  const _rr  = Math.round(s.rate*10000)/10000;
-  const regP = s.regPay||Math.round(_rr*s.reg*100)/100;
-  const otP  = s.otPay||(s.ot?Math.round(_rr*1.5*(s.ot||0)*100)/100:null);
-
-  const row2=(label,val,cls='')=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--text2)">${label}</span><span class="ytd-mono ${cls}">${val}</span></div>`;
-  const sep=(label)=>`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:10px 0 4px">${label}</div>`;
-
-  let html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="ytd-two-col">
-  <div>
-    ${sep('Earnings')}
-    ${row2('Hourly Rate','$'+s.rate.toFixed(2)+'/hr')}
-    ${row2(`Regular (${s.reg}h)`,fmt(regP))}
-    ${(s.ot||0)!==0?row2(`OT (${s.ot}h × 1.5)`,fmt(otP??0),'amber'):''}
-    ${(s.dt||0)>0?row2(`Double Time (${s.dt}h × 2)`,fmt(Math.round(_rr*2*(s.dt||0)*100)/100),'amber'):''}
-    ${(s.hol||0)>0?row2(`Holiday (${s.hol}h)`,fmt(Math.round(_rr*(s.hol||0)*100)/100),'blue'):''}
-    ${(s.sick||0)>0||(s.vac||0)>0||(s.fltHol||0)>0?row2('Benefit Time',fmt(Math.round(_rr*((s.sick||0)+(s.vac||0)+(s.fltHol||0))*100)/100)):''}
-    ${(s.addl||0)!==0?row2('Additional',fmt(s.addl)):''}
-    <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:12px;font-weight:700;border-top:1.5px solid var(--border2)"><span>Gross</span><span style="font-family:var(--mono)">${fmt(s.gross)}</span></div>
-  </div>
-  <div>
-    ${sep('Deductions')}
-    ${row2('Fed Withholding',fmt(s.fed),'red')}
-    ${row2('Soc Security',fmt(s.ss),'red')}
-    ${row2('Medicare',fmt(s.med),'red')}
-    ${ben>0?row2('Benefits',fmt(ben),'red'):''}
-    ${(s.retire||0)>0?row2('401k',fmt(s.retire),'red'):''}
-    <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">Tax rate</span><span style="font-family:var(--mono);color:var(--amber)">${s.gross>0?(tax/s.gross*100).toFixed(1)+'%':'—'}</span></div>
-    <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;font-weight:700;border-top:1.5px solid var(--green-border);background:var(--green-dim);margin:0 -2px;padding:8px;border-radius:4px;margin-top:4px"><span style="color:var(--green)">Take-home</span><span style="font-family:var(--mono);color:var(--green)">${fmt(net)}</span></div>
-  </div></div>`;
-
-  document.getElementById('ytdInlineContent').innerHTML = html;
-  document.getElementById('ytdInlineDetail').style.display = 'block';
-  document.getElementById('ytdInlineDetail').scrollIntoView({behavior:'smooth',block:'nearest'});
+function toggleYTDCard(id) {
+  const card = document.querySelector('.ytd-row-'+id);
+  const exp  = document.getElementById('exp-'+id);
+  if(!card||!exp) return;
+  const isOpen = card.classList.contains('active');
+  // Close all
+  document.querySelectorAll('.ytd-pc-card.active').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('[id^="exp-"]').forEach(e=>e.style.display='none');
+  // Open this one if it was closed
+  if(!isOpen){
+    card.classList.add('active');
+    exp.style.display='block';
+    card.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
 }
+// Keep openYTDInline as alias for chart click
+function openYTDInline(id){ toggleYTDCard(id); }
 function closeYTDInline() {
-  document.getElementById('ytdInlineDetail').style.display='none';
-  document.querySelectorAll('[class^="ytd-row-"]').forEach(r=>r.style.background='');
+  document.querySelectorAll('.ytd-pc-card.active').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('[id^="exp-"]').forEach(e=>e.style.display='none');
 }
 
 // ===== CSV EXPORT =====
@@ -2453,50 +2481,55 @@ function exportYTDCSV() {
 
 // ===== NET PAY GOAL TRACKER =====
 function updateYTDGoal() {
-  const goal = parseFloat(document.getElementById('ytdGoalInput')?.value)||0;
   const gc = document.getElementById('ytdGoalContent');
   if(!gc) return;
-  if(!goal) {gc.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Enter an annual net pay goal above to track your progress</div>';return;}
 
-  const cutoff=document.getElementById('ytdCutoff')?.value||'';
-  const filtered=stubs.filter(s=>s.date.startsWith(ytdYear+'')&&(!cutoff||s.date<=cutoff));
-  const tNet=filtered.reduce((a,s)=>{const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return a+(s.net||(s.gross-d));},0);
-  const pct=Math.min(100,tNet/goal*100);
-  const remain=Math.max(0,goal-tNet);
+  const cutoff = document.getElementById('ytdCutoff')?.value||'';
+  const filtered = stubs.filter(s=>s.date.startsWith(ytdYear+'')&&(!cutoff||s.date<=cutoff));
+  if(!filtered.length) { gc.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">No paychecks for this year yet</div>'; return; }
 
-  const now=new Date();
-  const daysPassed=Math.max(1,Math.ceil((now-new Date(ytdYear,0,1))/86400000));
-  const daysInYear=365;
-  const daysLeft=daysInYear-daysPassed;
-  const netPerDay=tNet/daysPassed;
-  const projNet=netPerDay*daysInYear;
-  const onTrack=projNet>=goal;
+  const tNet = filtered.reduce((a,s)=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return a+(s.net||(s.gross-d)); }, 0);
+  const now = new Date();
+  const daysPassed = Math.max(1, Math.ceil((now - new Date(ytdYear,0,1)) / 86400000));
+  const daysInYear = (ytdYear%4===0&&(ytdYear%100!==0||ytdYear%400===0))?366:365;
+  const daysLeft   = Math.max(0, daysInYear - daysPassed);
+  const projNet    = tNet / daysPassed * daysInYear;
+
+  // Auto-populate input with projected net rounded to nearest $500 if empty
+  const inp = document.getElementById('ytdGoalInput');
+  if(inp && !inp.value) inp.value = Math.round(projNet/500)*500;
+
+  const goal = parseFloat(inp?.value)||0;
+  const pct    = goal>0 ? Math.min(100, tNet/goal*100) : 0;
+  const remain = goal>0 ? Math.max(0, goal-tNet) : 0;
+  const onTrack = goal>0 ? projNet>=goal : true;
+
+  const stat=(label,val,color='var(--text)')=>`
+    <div style="text-align:center;padding:10px 8px;background:var(--bg3);border-radius:8px;border:1.5px solid var(--border)">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:4px">${label}</div>
+      <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:${color}">${val}</div>
+    </div>`;
 
   gc.innerHTML=`
-    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
-      <span style="color:var(--text3)">Progress: <strong style="color:var(--text)">${fmt(tNet)}</strong> of ${fmt(goal)}</span>
-      <span style="color:var(--text3)">${pct.toFixed(1)}%</span>
+    ${goal>0?`
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+      <span style="color:var(--text2);font-weight:600">${fmt(tNet)} <span style="color:var(--text3);font-weight:400">of ${fmt(goal)} goal</span></span>
+      <span style="color:${onTrack?'var(--green)':'var(--amber)'};font-weight:700">${pct.toFixed(1)}%</span>
     </div>
-    <div style="height:10px;background:var(--bg4);border-radius:5px;overflow:hidden;margin-bottom:10px">
-      <div style="height:100%;width:${pct.toFixed(1)}%;background:${onTrack?'var(--green)':'var(--amber)'};border-radius:5px;transition:width .4s"></div>
+    <div style="height:10px;background:var(--bg4);border-radius:5px;overflow:hidden;margin-bottom:14px">
+      <div style="height:100%;width:${pct.toFixed(1)}%;background:${onTrack?'var(--green)':'var(--amber)'};border-radius:5px;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
+    </div>`:''}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px" class="ytd-goal-stats">
+      ${stat('Earned to Date', fmt(tNet), 'var(--green)')}
+      ${stat('Projected Year-End', fmt(projNet), onTrack?'var(--green)':'var(--amber)')}
+      ${goal>0?stat('Remaining', fmt(remain), remain>0?'var(--red)':'var(--green)'):''}
+      ${stat('Net / Day', fmt(tNet/daysPassed))}
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:11px">
-      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:6px">
-        <div style="color:var(--text3);margin-bottom:2px">Remaining</div>
-        <div style="font-family:var(--mono);font-weight:700;color:var(--red)">${fmt(remain)}</div>
-      </div>
-      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:6px">
-        <div style="color:var(--text3);margin-bottom:2px">Projected YE</div>
-        <div style="font-family:var(--mono);font-weight:700;color:${onTrack?'var(--green)':'var(--amber)'}">${fmt(projNet)}</div>
-      </div>
-      <div style="text-align:center;padding:8px;background:var(--bg3);border-radius:6px">
-        <div style="color:var(--text3);margin-bottom:2px">Needed/day</div>
-        <div style="font-family:var(--mono);font-weight:700">${daysLeft>0?fmt(remain/daysLeft):'—'}</div>
-      </div>
-    </div>
-    <div style="margin-top:8px;font-size:11px;color:${onTrack?'var(--green)':'var(--amber)'};text-align:center">
-      ${onTrack?'✓ On track to meet your goal':'⚠ Behind pace — need '+fmt(remain/Math.max(1,daysLeft))+'/day to catch up'}
-    </div>`;
+    ${goal>0?`<div style="font-size:11px;padding:8px 12px;border-radius:6px;background:${onTrack?'rgba(34,197,94,.08)':'rgba(251,191,36,.08)'};border:1px solid ${onTrack?'var(--green-border)':'rgba(251,191,36,.3)'};color:${onTrack?'var(--green)':'var(--amber)'}">
+      ${onTrack
+        ? `✓ On track — projected to finish <strong>${fmt(projNet - goal)}</strong> above goal`
+        : `⚠ Behind pace — need <strong>${fmt(remain/Math.max(1,daysLeft))}/day</strong> to reach ${fmt(goal)} by year end`}
+    </div>`:'<div style="font-size:11px;color:var(--text3);text-align:center">Enter a goal above to track your progress against a target</div>'}`;
 }
 
 // ===== SETTINGS =====
