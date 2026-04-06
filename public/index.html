@@ -408,8 +408,8 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
           <div class="card-row" id="rowPrem" style="display:none"><span class="card-label">Shift / Premium</span><span class="card-value" id="bPremPay">—</span></div>
           <div class="card-row" id="rowAddl" style="display:none"><span class="card-label">Additional pay</span><span class="card-value" id="bAddlPay">—</span></div>
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Fed withholding</span><span class="card-value red" id="bFed">—</span></div>
-          <div class="card-row"><span class="card-label" style="color:var(--red)">– Soc Security (6.2%)</span><span class="card-value red" id="bSS">—</span></div>
-          <div class="card-row"><span class="card-label" style="color:var(--red)">– Medicare (1.45%)</span><span class="card-value red" id="bMed">—</span></div>
+          <div class="card-row"><span class="card-label" style="color:var(--red)">– Soc Security (6.2% of taxable)</span><span class="card-value red" id="bSS">—</span></div>
+          <div class="card-row"><span class="card-label" style="color:var(--red)">– Medicare (1.45% of taxable)</span><span class="card-value red" id="bMed">—</span></div>
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Dental</span><span class="card-value red" id="bDen">—</span></div>
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Medical</span><span class="card-value red" id="bMedI">—</span></div>
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Vision</span><span class="card-value red" id="bVis">—</span></div>
@@ -613,10 +613,15 @@ body{font-family:var(--sans);color:var(--text);line-height:1.5}
         <button class="btn btn-primary" style="margin-bottom:8px" onclick="saveSettings()">Save defaults</button>
         <div class="section-title">Federal withholding</div>
         <div class="card card-pad">
-          <p style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">Learned from logged paychecks: <span id="sEffRate" style="color:var(--amber);font-family:var(--mono)">—</span><br>Override to pin manually (blank = auto-learn).</p>
+          <p style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">Calculator uses IRS 2026 weekly withholding tables (Single filer). Override to pin a flat % rate instead (blank = IRS tables).</p>
           <div class="input-row"><label>Override (%)</label><div class="input-wrap"><input type="number" id="sFedRate" placeholder="auto" step="0.1" min="0" max="50" class="no-prefix"></div></div>
         </div>
-        <button class="btn btn-secondary" style="margin-bottom:16px" onclick="saveFedRate()">Apply override</button>
+        <button class="btn btn-secondary" style="margin-bottom:8px" onclick="saveFedRate()">Apply override</button>
+        <div class="card card-pad" style="margin-top:8px">
+          <p style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">If Disney withholds more than estimated, enter the extra fixed dollar amount per paycheck here (e.g. from W-4 Step 4c or Step 2 adjustment).</p>
+          <div class="input-row"><label>Extra withholding ($/check)</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sFedExtra" placeholder="0.00" step="0.01" min="0" class="no-prefix"></div></div>
+        </div>
+        <button class="btn btn-secondary" style="margin-bottom:16px" onclick="saveFedExtra()">Apply extra</button>
 
         <div class="section-title">My account</div>
         <div class="card card-pad" style="margin-bottom:8px">
@@ -1287,10 +1292,37 @@ function unsubscribeRealtime() {
 }
 function mostRecentRate() { return stubs.length ? stubs[0].rate : null; }
 function effFedRate() {
+  // Kept for backward compat — returns a flat rate estimate
   if(appSettings.fedOverride) return appSettings.fedOverride/100;
   const u=stubs.filter(s=>s.fed>0&&s.gross>100);
   if(!u.length) return 0.1228;
   return u.reduce((a,s)=>a+s.fed,0)/u.reduce((a,s)=>a+s.gross,0);
+}
+
+// Federal withholding using IRS Publication 15-T 2026
+// Percentage Method, Weekly payroll, Single filer, Step 2 checkbox checked
+// Annualizes weekly taxable wage, looks up annual tax, divides by 52
+function irsWithholding(taxableGross) {
+  // Flat % override (Settings > Fed rate override)
+  if(appSettings.fedOverride) {
+    const extra = parseFloat(appSettings.fedExtra)||0;
+    return parseFloat(Math.max(0, (taxableGross * appSettings.fedOverride / 100) + extra).toFixed(2));
+  }
+  // IRS Pub 15-T 2026, Single/MFS, Step 2 checkbox checked, annual brackets
+  const annual = Math.max(0, taxableGross * 52);
+  let annualTax;
+  if      (annual <= 6300)    annualTax = 0;
+  else if (annual <= 17800)   annualTax = (annual - 6300)   * 0.10;
+  else if (annual <= 33475)   annualTax = (annual - 17800)  * 0.12 + 1150;
+  else if (annual <= 58175)   annualTax = (annual - 33475)  * 0.22 + 3031;
+  else if (annual <= 105650)  annualTax = (annual - 58175)  * 0.24 + 8465;
+  else if (annual <= 132650)  annualTax = (annual - 105650) * 0.32 + 19859;
+  else if (annual <= 317650)  annualTax = (annual - 132650) * 0.35 + 28499;
+  else                        annualTax = (annual - 317650) * 0.37 + 93249;
+  const weekly = annualTax / 52;
+  // Optional fixed extra per paycheck (Settings > Extra withholding $)
+  const extra = parseFloat(appSettings.fedExtra)||0;
+  return parseFloat(Math.max(0, weekly + extra).toFixed(2));
 }
 
 // ===== CALCULATOR =====
@@ -1315,7 +1347,10 @@ function calc() {
   const holPay=payRound(regRate*hol), sickPay=payRound(regRate*sick), vacPay=payRound(regRate*vac), fltHolPay=payRound(regRate*fltHol);
   const premPay=premRate*premHrs;
   const gross=regPay+otPay+dtPay+holPay+sickPay+vacPay+fltHolPay+premPay+addl;
-  const fr=effFedRate(), fed=gross*fr, ss=gross*0.062, med=gross*0.0145;
+  // Pre-tax deductions (dental, medical, vision, 401k) reduce FICA taxable base
+  const preTax=den+medI+vis+retire;
+  const taxableGross=Math.max(0, gross-preTax);
+  const fed=irsWithholding(taxableGross), ss=parseFloat((taxableGross*0.062).toFixed(2)), med=parseFloat((taxableGross*0.0145).toFixed(2));
   const totalDed=fed+ss+med+den+medI+vis+retire, net=gross-totalDed;
   document.getElementById('mGross').textContent=fmt(gross);
   document.getElementById('mDeduct').textContent=fmt(totalDed);
@@ -1329,9 +1364,9 @@ function calc() {
   document.getElementById('bFltHolPay').textContent=fmt(fltHolPay);
   document.getElementById('bPremPay').textContent=fmt(premPay)+' ($'+premRate.toFixed(2)+'/hr × '+fmtH(premHrs)+'h)';
   document.getElementById('bAddlPay').textContent=fmt(addl);
-  document.getElementById('bFed').textContent=fmt(fed)+' ('+(fr*100).toFixed(1)+'%)';
-  document.getElementById('bSS').textContent=fmt(ss);
-  document.getElementById('bMed').textContent=fmt(med);
+  document.getElementById('bFed').textContent=fmt(fed)+(taxableGross>0?' ('+(fed/taxableGross*100).toFixed(1)+'%)':'');
+  document.getElementById('bSS').textContent=fmt(ss)+(preTax>0?' (on '+fmt(taxableGross)+')':'');
+  document.getElementById('bMed').textContent=fmt(med)+(preTax>0?' (on '+fmt(taxableGross)+')':'');
   document.getElementById('bDen').textContent=fmt(den);
   document.getElementById('bMedI').textContent=fmt(medI);
   document.getElementById('bVis').textContent=fmt(vis);
@@ -1788,6 +1823,7 @@ function buildSettingsUI() {
   if(appSettings.den) document.getElementById('sDen').value=parseFloat(appSettings.den).toFixed(2);
   if(appSettings.medI) document.getElementById('sMedI').value=parseFloat(appSettings.medI).toFixed(2);
   if(appSettings.vis) document.getElementById('sVis').value=parseFloat(appSettings.vis).toFixed(2);
+  if(appSettings.fedExtra) document.getElementById('sFedExtra').value=parseFloat(appSettings.fedExtra).toFixed(2);
   if(appSettings.retire) document.getElementById('sRetire').value=parseFloat(appSettings.retire).toFixed(2);
   if(appSettings.fedOverride) document.getElementById('sFedRate').value=appSettings.fedOverride;
   document.getElementById('sEffRate').textContent=(effFedRate()*100).toFixed(2)+'%';
@@ -2018,6 +2054,14 @@ async function saveFedRate() {
   catch { setSyncDot('err'); showToast('Save failed',true); }
   calc();
 }
+async function saveFedExtra() {
+  const v=parseFloat(document.getElementById('sFedExtra').value)||0;
+  const payload={fedExtra:v>=0?v:0};
+  appSettings.fedExtra=payload.fedExtra;
+  try { setSyncDot('syncing'); await apiFetch('/api/settings',{method:'POST',body:JSON.stringify(payload)}); setSyncDot('ok'); showToast('Extra withholding saved'); }
+  catch { setSyncDot('err'); showToast('Save failed',true); }
+  calc();
+}
 function exportData() { const b=new Blob([JSON.stringify({stubs},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='payday-export-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); }
 async function confirmClear() {
   if(!confirm('Delete all paycheck history? Cannot be undone.')) return;
@@ -2079,14 +2123,20 @@ async function saveLog() {
   const premRate=parseFloat(document.getElementById('lPremRate').value)||0;
   const premHrs=parseFloat(document.getElementById('lPremHrs').value)||0;
   const addl=parseFloat(document.getElementById('lAddl').value)||0;
-  const _regR=rateRound(rate),_otR=rateRound(rate*1.5),_dtR=rateRound(rate*2);
-  const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
-  const fedRaw=parseFloat(document.getElementById('lFed').value), fed=isNaN(fedRaw)?parseFloat((gross*effFedRate()).toFixed(2)):fedRaw;
-  const ssRaw=parseFloat(document.getElementById('lSS').value), ss=isNaN(ssRaw)?parseFloat((gross*0.062).toFixed(2)):ssRaw;
-  const medRaw=parseFloat(document.getElementById('lMed').value), med=isNaN(medRaw)?parseFloat((gross*0.0145).toFixed(2)):medRaw;
   const den=parseFloat(document.getElementById('lDen').value)||0;
   const medI=parseFloat(document.getElementById('lMedI').value)||0;
   const vis=parseFloat(document.getElementById('lVis').value)||0;
+  const retire=parseFloat(document.getElementById('lRetire').value)||0;
+  const _regR=rateRound(rate),_otR=rateRound(rate*1.5),_dtR=rateRound(rate*2);
+  const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
+  // Pre-tax deductions reduce FICA and fed taxable base
+  const _lPreTax=den+medI+vis+retire;
+  const _lTaxable=Math.max(0,gross-_lPreTax);
+  const fedRaw=parseFloat(document.getElementById('lFed').value), fed=isNaN(fedRaw)?irsWithholding(_lTaxable):fedRaw;
+  const ssRaw=parseFloat(document.getElementById('lSS').value);
+  const medRaw=parseFloat(document.getElementById('lMed').value);
+  const ss=isNaN(ssRaw)?parseFloat((_lTaxable*0.062).toFixed(2)):ssRaw;
+  const med=isNaN(medRaw)?parseFloat((_lTaxable*0.0145).toFixed(2)):medRaw;
   // Use exact paystub values if entered, otherwise use calculated
   const regPayRaw=parseFloat(document.getElementById('lRegPay').value);
   const otPayRaw=parseFloat(document.getElementById('lOTPay').value);
@@ -2573,9 +2623,11 @@ async function bulkSave() {
     const fedRaw=parseFloat(document.getElementById('bc-fed-'+i)?.value);
     const ssRaw=parseFloat(document.getElementById('bc-ss-'+i)?.value);
     const medRaw=parseFloat(document.getElementById('bc-med-'+i)?.value);
-    const fed=isNaN(fedRaw)?parseFloat((gross*effFedRate()).toFixed(2)):fedRaw;
-    const ss=isNaN(ssRaw)?parseFloat((gross*0.062).toFixed(2)):ssRaw;
-    const med=isNaN(medRaw)?parseFloat((gross*0.0145).toFixed(2)):medRaw;
+    const fed=isNaN(fedRaw)?irsWithholding(taxableG):fedRaw;
+    const _bPreTax=den+medI+vis+(retireVal||0);
+    const _bTaxable=Math.max(0,gross-_bPreTax);
+    const ss=isNaN(ssRaw)?parseFloat((_bTaxable*0.062).toFixed(2)):ssRaw;
+    const med=isNaN(medRaw)?parseFloat((_bTaxable*0.0145).toFixed(2)):medRaw;
     const retireVal=parseFloat(document.getElementById('bc-retire-'+i)?.value)||0;
     const _denRaw=document.getElementById('bc-den-'+i)?.value;
     const _medIRaw=document.getElementById('bc-medi-'+i)?.value;
