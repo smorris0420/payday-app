@@ -4,8 +4,8 @@
   "description": "IncomeOS \u2014 Personal income and paycheck tracker",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#060d1a",
-  "theme_color": "#1B6EF3",
+  "background_color": "#081008",
+  "theme_color": "#16A34A",
   "orientation": "portrait-primary",
   "icons": [
     {
