@@ -16,33 +16,40 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* IncomeOS Brand — blue-primary system */
-  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#f4f7fb;--bg4:#e4eaf3;
-  --border:rgba(13,59,142,0.09);--border2:rgba(13,59,142,0.16);
-  --text:#0A1628;--text2:#3a5070;--text3:#7a90aa;
-  /* Primary: IncomeOS blue */
-  --green:#1B6EF3;--green-mid:#4DA3FF;--green-dim:rgba(27,110,243,0.10);--green-border:rgba(27,110,243,0.25);--green-btn:#1B6EF3;
-  /* Accent colors */
-  --red:#e03e3e;--red-dim:rgba(224,62,62,0.08);
-  --amber:#c07800;--amber-dim:rgba(192,120,0,0.09);
-  --blue:#1565C0;--blue-dim:rgba(21,101,192,0.09);
-  /* Brand blues for charts/data */
-  --brand-light:#4DA3FF;--brand-mid:#1B6EF3;--brand-dark:#0D3B8E;
-  --shadow:0 1px 3px rgba(13,59,142,0.08),0 1px 2px rgba(13,59,142,0.04);
-  --shadow-md:0 4px 16px rgba(13,59,142,0.12);
+  /* IncomeOS — refined, less saturated palette */
+  --bg:#f1f3f8;--bg2:#ffffff;--bg3:#f5f6fa;--bg4:#e8eaf2;
+  --border:rgba(30,40,80,0.08);--border2:rgba(30,40,80,0.14);
+  --text:#111827;--text2:#4b5675;--text3:#8b95b0;
+  /* Primary: IncomeOS blue (slightly desaturated) */
+  --green:#2563EB;--green-mid:#60A5FA;--green-dim:rgba(37,99,235,0.09);--green-border:rgba(37,99,235,0.22);--green-btn:#2563EB;
+  /* Accent: teal for positive/earnings (replaces pure green) */
+  --teal:#0891B2;--teal-dim:rgba(8,145,178,0.09);
+  /* Accent: slate-indigo for secondary actions */
+  --indigo:#4F46E5;--indigo-dim:rgba(79,70,229,0.09);
+  /* Status */
+  --red:#DC2626;--red-dim:rgba(220,38,38,0.08);
+  --amber:#D97706;--amber-dim:rgba(217,119,6,0.09);
+  /* Neutrals */
+  --blue:#1E3A8A;--blue-dim:rgba(30,58,138,0.08);
+  /* Brand family */
+  --brand-light:#93C5FD;--brand-mid:#2563EB;--brand-dark:#1E3A8A;
+  --shadow:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.10);
   --radius:12px;--radius-sm:8px;
   --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
   --sidebar-w:220px;--content-max:960px;
 }
 [data-theme="dark"] {
-  --bg:#060d1a;--bg2:#0d1729;--bg3:#111e33;--bg4:#172540;
-  --border:rgba(77,163,255,0.09);--border2:rgba(77,163,255,0.15);
-  --text:#e4edf8;--text2:#7da8d4;--text3:#3d6080;
-  --green:#4DA3FF;--green-mid:#6fb8ff;--green-dim:rgba(77,163,255,0.13);--green-border:rgba(77,163,255,0.28);--green-btn:#1B6EF3;
-  --red:#f87171;--red-dim:rgba(248,113,113,0.10);
-  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
-  --blue:#60a5fa;--blue-dim:rgba(96,165,250,0.10);
-  --brand-light:#6fb8ff;--brand-mid:#4DA3FF;--brand-dark:#1B6EF3;
+  --bg:#0a0f1e;--bg2:#111827;--bg3:#1a2235;--bg4:#1f2d44;
+  --border:rgba(148,197,253,0.08);--border2:rgba(148,197,253,0.13);
+  --text:#e2e8f8;--text2:#8ba3cc;--text3:#4a6080;
+  --green:#60A5FA;--green-mid:#93C5FD;--green-dim:rgba(96,165,250,0.12);--green-border:rgba(96,165,250,0.25);--green-btn:#2563EB;
+  --teal:#22D3EE;--teal-dim:rgba(34,211,238,0.10);
+  --indigo:#818CF8;--indigo-dim:rgba(129,140,248,0.10);
+  --red:#F87171;--red-dim:rgba(248,113,113,0.10);
+  --amber:#FBBF24;--amber-dim:rgba(251,191,36,0.10);
+  --blue:#93C5FD;--blue-dim:rgba(147,197,253,0.10);
+  --brand-light:#BFDBFE;--brand-mid:#60A5FA;--brand-dark:#2563EB;
   --shadow:0 1px 3px rgba(0,0,0,0.4),0 1px 2px rgba(0,0,0,0.25);
   --shadow-md:0 4px 16px rgba(0,0,0,0.5);
 }
@@ -77,7 +84,7 @@ html{transition:background 300ms ease,color 300ms ease}
 }
 .login-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.10);display:flex;flex-direction:column;align-items:center;gap:0}
 [data-theme="dark"] .login-card{box-shadow:0 8px 40px rgba(0,0,0,.4)}
-.login-mark{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#1B6EF3,#0D3B8E);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:26px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(27,110,243,0.4);margin-bottom:16px}
+.login-mark{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#2563EB,#1E3A8A);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:26px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(37,99,235,0.35);margin-bottom:16px}
 .login-title{font-size:22px;font-weight:700;letter-spacing:-.4px;text-align:center;margin-bottom:4px}
 .login-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:24px}
 /* Option buttons (biometric / password) */
@@ -120,7 +127,7 @@ html{transition:background 300ms ease,color 300ms ease}
   padding:max(24px,env(safe-area-inset-top)) 0 max(24px,env(safe-area-inset-bottom));
 }
 .sidebar-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid var(--border)}
-.sidebar-logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#1B6EF3,#0D3B8E);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;color:#fff;font-weight:500}
+.sidebar-logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#2563EB,#1E3A8A);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;color:#fff;font-weight:500}
 .sidebar-logo-text{font-size:16px;font-weight:700;color:var(--text)}
 .sidebar-logo-sub{font-size:11px;color:var(--text3)}
 .sidebar-nav{padding:16px 10px;flex:1}
@@ -222,14 +229,13 @@ html{transition:background 300ms ease,color 300ms ease}
 /* Buttons — immediate feedback, no layout shift */
 .btn{transition:background-color 180ms ease,border-color 180ms ease,color 180ms ease,box-shadow 180ms ease}
 .btn:active{transform:scale(0.975);transition-duration:60ms}
-.btn-primary:hover{filter:brightness(1.08);box-shadow:0 4px 14px rgba(27,110,243,0.35)}
-.btn-primary:active{filter:brightness(0.96)}
+.btn-primary:active{opacity:0.92}
 
 /* Cards & metrics — shadow on hover */
 .metric,.card{transition:box-shadow 220ms ease,border-color 220ms ease}
 .card:hover{box-shadow:var(--shadow-md)}
 .stub-item{transition:border-color 220ms ease,box-shadow 220ms ease}
-.stub-item:hover{box-shadow:0 2px 12px rgba(22,163,74,.10)}
+.stub-item:hover{box-shadow:0 2px 8px rgba(37,99,235,0.12)}
 .stub-item:active{transform:scale(0.994);transition-duration:80ms}
 
 /* Sidebar nav */
@@ -282,7 +288,7 @@ html{transition:background 300ms ease,color 300ms ease}
 .card-row:last-child{border-bottom:none}
 .card-label{font-size:13px;color:var(--text2);font-weight:500}
 .card-value{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text)}
-.card-value.green{color:var(--green)}.card-value.red{color:var(--red)}.card-value.amber{color:var(--amber)}
+.card-value.green{color:var(--teal)}.card-value.red{color:var(--red)}.card-value.amber{color:var(--amber)}
 .card-total{background:var(--green-dim);border-top:1px solid var(--green-border)!important}
 .card-total .card-label{color:var(--text);font-weight:600}
 .card-total .card-value{color:var(--green);font-size:15px}
@@ -298,7 +304,7 @@ html{transition:background 300ms ease,color 300ms ease}
 .metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 12px;box-shadow:var(--shadow)}
 .metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;font-weight:600}
 .metric-value{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--text);white-space:nowrap}
-.metric-value.green{color:var(--green)}
+.metric-value.green{color:var(--teal)}
 .metric-value.red{color:var(--red)}
 .metric-value.amber{color:var(--amber)}
 .metric-value.blue{color:var(--blue)}
@@ -317,7 +323,7 @@ html{transition:background 300ms ease,color 300ms ease}
 /* BUTTONS */
 .btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:var(--radius-sm);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;width:100%}
 .btn-primary{background:var(--green-btn);color:#fff}
-.btn-primary:hover{background:#14803e}
+.btn-primary:hover{background:#1d4ed8;box-shadow:0 4px 14px rgba(37,99,235,0.30)}
 .btn-primary:active{opacity:.88;transform:scale(.98)}
 .btn-secondary{background:var(--bg3);color:var(--text2);border:1.5px solid var(--border2)}
 .btn-secondary:hover{background:var(--bg4);color:var(--text)}
@@ -327,7 +333,7 @@ html{transition:background 300ms ease,color 300ms ease}
 
 /* HISTORY */
 .stub-item{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:13px 16px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,box-shadow .15s;box-shadow:var(--shadow)}
-.stub-item:hover{border-color:var(--green-border);box-shadow:0 2px 8px rgba(22,163,74,.10)}
+.stub-item:hover{border-color:var(--green-border);box-shadow:0 2px 8px rgba(37,99,235,0.12)}
 .stub-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .stub-date{font-size:14px;font-weight:600;color:var(--text)}
 .stub-net{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--green)}
@@ -431,7 +437,7 @@ html{transition:background 300ms ease,color 300ms ease}
 .hist-table tr:last-child td{border-bottom:none}
 .hist-table tr:hover td{background:var(--bg3);cursor:pointer}
 .hist-table td.num{text-align:right;font-family:var(--mono);font-size:12px}
-.hist-table td.green{color:var(--green);font-weight:600}
+.hist-table td.green{color:var(--teal);font-weight:600}
 .hist-table td.amber{color:var(--amber)}
 .hist-table td.red{color:var(--red)}
 .hist-table td.muted{color:var(--text3)}
@@ -461,7 +467,7 @@ html{transition:background 300ms ease,color 300ms ease}
 .ytd-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
 @media(max-width:600px){.ytd-hero{grid-template-columns:1fr}}
 .ytd-hero-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
-.ytd-hero-card--green{border-color:var(--green-border);background:var(--green-dim)}
+.ytd-hero-card--green{border-color:var(--teal);background:var(--teal-dim)}
 .ytd-hero-card--red{border-color:rgba(239,68,68,.2);background:rgba(239,68,68,.04)}
 .ytd-hero-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:6px}
 .ytd-hero-value{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--text);line-height:1;margin-bottom:4px}
@@ -478,7 +484,7 @@ html{transition:background 300ms ease,color 300ms ease}
 .ytd-bar--blue2{background:#60a5fa}
 .ytd-bar--amber{background:var(--amber)}
 .ytd-bar--red{background:var(--red)}
-.ytd-bar--green{background:var(--green)}
+.ytd-bar--green{background:var(--teal)}
 .ytd-bar--teal{background:#2dd4bf}
 .ytd-bar--purple{background:#a78bfa}
 .ytd-stat-divider{border-top:1px solid var(--border);margin:6px 0}
@@ -500,7 +506,7 @@ html{transition:background 300ms ease,color 300ms ease}
 
 /* Chart tooltip */
 .ytd-mono{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text)}
-.ytd-mono.red{color:var(--red)}.ytd-mono.green{color:var(--green)}.ytd-mono.amber{color:var(--amber)}.ytd-mono.blue{color:var(--blue)}
+.ytd-mono.red{color:var(--red)}.ytd-mono.green{color:var(--teal)}.ytd-mono.amber{color:var(--amber)}.ytd-mono.blue{color:var(--blue)}
 .ytd-chart-tooltip{position:absolute;background:var(--bg);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:8px 10px;font-size:11px;pointer-events:none;box-shadow:var(--shadow);z-index:10;min-width:140px}
 /* Paycheck card grid */
 .ytd-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
@@ -523,7 +529,7 @@ html{transition:background 300ms ease,color 300ms ease}
 .ytd-pc-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
 .ytd-pc-row-label{color:var(--text2)}
 .ytd-pc-row-val{font-family:var(--mono);font-weight:600;color:var(--text)}
-.ytd-pc-row-val.red{color:var(--red)}.ytd-pc-row-val.amber{color:var(--amber)}.ytd-pc-row-val.green{color:var(--green)}
+.ytd-pc-row-val.red{color:var(--red)}.ytd-pc-row-val.amber{color:var(--amber)}.ytd-pc-row-val.green{color:var(--teal)}
 .ytd-pc-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:8px 0 4px}
 .ytd-pc-takehome{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-top:8px;border-radius:6px;background:var(--green-dim);border:1.5px solid var(--green-border)}
 
@@ -625,7 +631,7 @@ html{transition:background 300ms ease,color 300ms ease}
 
 /* Stat widget */
 .dash-stat-val{font-family:var(--mono);font-weight:700;color:var(--text);line-height:1;margin-bottom:3px;font-size:clamp(18px,4cqw,28px)}
-.dash-stat-val.green{color:var(--green)}.dash-stat-val.red{color:var(--red)}.dash-stat-val.amber{color:var(--amber)}
+.dash-stat-val.green{color:var(--teal)}.dash-stat-val.red{color:var(--red)}.dash-stat-val.amber{color:var(--amber)}
 .dash-stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
 
 /* Grid snap overlay (edit mode) */
@@ -658,12 +664,12 @@ html{transition:background 300ms ease,color 300ms ease}
 
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-mark" style="background:linear-gradient(135deg,#1B6EF3,#0D3B8E);width:72px;height:72px;border-radius:20px;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center">
+    <div class="login-mark" style="background:linear-gradient(135deg,#2563EB,#1E3A8A);width:72px;height:72px;border-radius:20px;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center">
       <svg width="44" height="44" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="29" height="29" rx="6" fill="#0D3B8E"/>
-        <rect x="35" y="0" width="29" height="29" rx="6" fill="#4DA3FF"/>
-        <rect x="0" y="35" width="29" height="29" rx="6" fill="#1565C0" opacity="0.8"/>
-        <rect x="35" y="35" width="29" height="29" rx="6" fill="#1B6EF3" opacity="0.9"/>
+        <rect x="0" y="0" width="29" height="29" rx="6" fill="#1E3A8A"/>
+        <rect x="35" y="0" width="29" height="29" rx="6" fill="#60A5FA"/>
+        <rect x="0" y="35" width="29" height="29" rx="6" fill="#1D4ED8" opacity="0.8"/>
+        <rect x="35" y="35" width="29" height="29" rx="6" fill="#2563EB" opacity="0.9"/>
       </svg>
     </div>
     <div class="login-title" style="font-size:24px;letter-spacing:-.5px">Income<span style="color:var(--green-btn);background:var(--green-dim);padding:0 6px;border-radius:6px;margin-left:2px">OS</span></div>
@@ -730,8 +736,8 @@ html{transition:background 300ms ease,color 300ms ease}
   <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-mark" style="background:linear-gradient(135deg,#1B6EF3,#0D3B8E);border-radius:10px;padding:4px;overflow:hidden">
-        <svg width="28" height="28" viewBox="0 0 64 64" fill="none"><rect x="0" y="0" width="29" height="29" rx="6" fill="#0D3B8E"/><rect x="35" y="0" width="29" height="29" rx="6" fill="#4DA3FF"/><rect x="0" y="35" width="29" height="29" rx="6" fill="#1565C0" opacity="0.75"/><rect x="35" y="35" width="29" height="29" rx="6" fill="#1B6EF3" opacity="0.9"/></svg>
+      <div class="sidebar-logo-mark" style="background:linear-gradient(135deg,#2563EB,#1E3A8A);border-radius:10px;padding:4px;overflow:hidden">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none"><rect x="0" y="0" width="29" height="29" rx="6" fill="#1E3A8A"/><rect x="35" y="0" width="29" height="29" rx="6" fill="#60A5FA"/><rect x="0" y="35" width="29" height="29" rx="6" fill="#1D4ED8" opacity="0.75"/><rect x="35" y="35" width="29" height="29" rx="6" fill="#2563EB" opacity="0.9"/></svg>
       </div>
       <div>
         <div class="sidebar-logo-text">Income<span style="color:var(--green-btn);font-weight:800">OS</span></div>
@@ -2204,8 +2210,8 @@ function buildHistory() {
     if(s.ot>0) badges+='<span class="badge badge-ot">OT</span> ';
     if((s.dt||0)>0) badges+='<span class="badge" style="background:rgba(220,38,38,0.1);color:var(--red)">DT</span> ';
     if(s.hol>0) badges+='<span class="badge badge-hol">HOL</span> ';
-    if((s.sick||0)>0) badges+='<span class="badge" style="background:rgba(22,163,74,0.1);color:var(--green)">SICK</span> ';
-    if((s.vac||0)>0) badges+='<span class="badge" style="background:rgba(22,163,74,0.1);color:var(--green)">VAC</span> ';
+    if((s.sick||0)>0) badges+='<span class="badge" style="background:rgba(37,99,235,0.10);color:var(--green)">SICK</span> ';
+    if((s.vac||0)>0) badges+='<span class="badge" style="background:rgba(37,99,235,0.10);color:var(--green)">VAC</span> ';
     if((s.fltHol||0)>0) badges+='<span class="badge badge-hol">FLTHOL</span> ';
     if((s.premHrs||0)>0) badges+='<span class="badge" style="background:rgba(29,78,216,0.08);color:var(--blue)">PREM</span> ';
     if((s.addl||0)>0) badges+='<span class="badge" style="background:rgba(29,78,216,0.08);color:var(--blue)">+PAY</span>';
@@ -2515,12 +2521,12 @@ function buildYTD() {
   });
   if(showNet) mainDatasets.push({
     label:'Net',data:netData,type:'line',
-    borderColor:'rgba(22,163,74,0.9)',backgroundColor:'rgba(22,163,74,0.08)',
+    borderColor:'rgba(37,99,235,0.10)',backgroundColor:'rgba(37,99,235,0.10)',
     borderWidth:2,pointRadius:3,pointHoverRadius:6,fill:showNet&&!showGross,tension:0.3,order:0
   });
   if(showNet) mainDatasets.push({
     label:'Net Avg',data:runAvgNet,type:'line',
-    borderColor:'rgba(22,163,74,0.6)',borderWidth:1.5,borderDash:[4,3],
+    borderColor:'rgba(37,99,235,0.10)',borderWidth:1.5,borderDash:[4,3],
     pointRadius:0,fill:false,tension:0.3,order:-1
   });
   set('ytdMainChartLabel', ytdChartMode==='gross'?'Gross Pay Per Paycheck':ytdChartMode==='net'?'Net Pay Per Paycheck':'Gross & Net Pay Per Paycheck');
@@ -2529,7 +2535,7 @@ function buildYTD() {
   const legendEl = document.getElementById('ytdChartLegend');
   if(legendEl) {
     legendEl.innerHTML = (showGross?'<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(251,191,36,0.7);border-radius:2px;display:inline-block"></span>Gross</span>':'')
-      +(showNet?'<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:2px;background:rgba(22,163,74,0.9);display:inline-block"></span>Net</span>':'');
+      +(showNet?'<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:2px;background:rgba(37,99,235,0.10);display:inline-block"></span>Net</span>':'');
   }
 
   window._chart_ytdMainChart = new Chart(_mc, {
@@ -2552,7 +2558,7 @@ function buildYTD() {
   window._chart_ytdCumChart=new Chart(document.getElementById('ytdCumChart'),{
     type:'line',data:{labels,datasets:[{
       label:'Cumulative net',data:cumData,
-      borderColor:'rgba(22,163,74,0.9)',backgroundColor:'rgba(22,163,74,0.08)',
+      borderColor:'rgba(37,99,235,0.10)',backgroundColor:'rgba(37,99,235,0.10)',
       borderWidth:2,pointRadius:2,pointHoverRadius:5,fill:true,tension:0.3
     }]},
     options:{...chartDefs,plugins:{...chartDefs.plugins,tooltip:{callbacks:{label:c=>'Total: '+fmt(c.raw)}}}}
@@ -3285,15 +3291,15 @@ function renderDashChart(w) {
   if(w.widgetId==='chart-gross'||w.widgetId==='chart-net'){
     const isGross = w.widgetId==='chart-gross';
     const raw = isGross ? sorted.map(s=>s.gross) : d.nets;
-    const color = isGross ? 'rgba(251,191,36,' : 'rgba(22,163,74,';
     const avg = raw.map((_,i)=>parseFloat((raw.slice(0,i+1).reduce((a,v)=>a+v,0)/(i+1)).toFixed(2)));
+    const color = isGross ? 'rgba(251,191,36,' : 'rgba(37,99,235,';
     cfg={type:ct==='line'?'line':'bar',data:{labels,datasets:[
       {label:isGross?'Gross':'Net',data:raw,backgroundColor:color+'.5)',borderColor:color+'.8)',borderWidth:1,borderRadius:3,fill:ct==='line',tension:0.3},
       {label:'Avg',data:avg,type:'line',borderColor:color+'.6)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
     ]},options:{...cd,plugins:{...cd.plugins,tooltip:{mode:'index',intersect:false}}}};
   } else if(w.widgetId==='chart-cum'){
     let run=0; const cum=d.nets.map(v=>parseFloat((run+=v,run).toFixed(2)));
-    cfg={type:'line',data:{labels,datasets:[{label:'Cumulative net',data:cum,borderColor:'rgba(22,163,74,.9)',backgroundColor:'rgba(22,163,74,.08)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{...cd}};
+    cfg={type:'line',data:{labels,datasets:[{label:'Cumulative net',data:cum,borderColor:'rgba(37,99,235,0.10)',backgroundColor:'rgba(37,99,235,0.10)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{...cd}};
   } else if(w.widgetId==='chart-earnings'||w.widgetId==='chart-deductions'){
     const isEarn = w.widgetId==='chart-earnings';
     let vals,labls,colors;
@@ -3331,7 +3337,7 @@ function renderDashChart(w) {
   } else if(w.widgetId==='chart-gross-net'){
     cfg={type:'bar',data:{labels,datasets:[
       {label:'Gross',data:sorted.map(s=>s.gross),backgroundColor:'rgba(251,191,36,.5)',borderColor:'rgba(251,191,36,.8)',borderWidth:1,borderRadius:2},
-      {label:'Net',data:d.nets,backgroundColor:'rgba(22,163,74,.4)',borderColor:'rgba(22,163,74,.7)',borderWidth:1,borderRadius:2},
+      {label:'Net',data:d.nets,backgroundColor:'rgba(37,99,235,0.10)',borderColor:'rgba(37,99,235,0.10)',borderWidth:1,borderRadius:2},
     ]},options:{...cd,plugins:{...cd.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false}}}};
   } else if(w.widgetId==='chart-monthly'){
     const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -3803,7 +3809,7 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', resolved);
   localStorage.setItem('payday-theme-pref', theme); // remember preference type
   const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.content = resolved==='dark' ? '#060d1a' : '#1B6EF3';
+  if(meta) meta.content = resolved==='dark' ? '#0a0f1e' : '#2563EB';
   // Highlight active button in settings
   ['Light','Dark','System'].forEach(t=>{
     const btn = document.getElementById('theme'+t);
