@@ -1,7 +1,7 @@
 {
-  "name": "payday-app",
+  "name": "incomeos",
   "version": "4.0.0",
-  "description": "Personal paycheck calculator — multi-user, realtime via Supabase",
+  "description": "IncomeOS \u2014 Personal income and paycheck tracker",
   "scripts": {
     "dev": "vercel dev",
     "build": "echo 'No build step'"

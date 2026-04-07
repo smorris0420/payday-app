@@ -2,7 +2,7 @@ import { db } from '../_db.js';
 import { verifyToken } from '../_auth.js';
 import { generateRegistrationOptions, generateAuthenticationOptions } from '@simplewebauthn/server';
 
-const RP_NAME  = 'Payday DCL';
+const RP_NAME  = 'IncomeOS';
 const getRpId  = req => (req.headers['x-forwarded-host'] || req.headers.host || 'localhost').split(':')[0];
 const getOrigin = req => {
   const h = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';

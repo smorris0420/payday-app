@@ -1,14 +1,24 @@
 {
-  "name": "Payday — Paycheck Calculator",
-  "short_name": "Payday",
-  "description": "Personal paycheck calculator with history and YTD tracking",
+  "name": "IncomeOS",
+  "short_name": "IncomeOS",
+  "description": "IncomeOS \u2014 Personal income and paycheck tracker",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "background_color": "#060d1a",
+  "theme_color": "#1B6EF3",
   "orientation": "portrait-primary",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

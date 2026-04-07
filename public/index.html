@@ -3,40 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#f8f9fa">
+<meta name="theme-color" content="#1B6EF3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Payday">
+<meta name="apple-mobile-web-app-title" content="IncomeOS">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Payday</title>
+<title>IncomeOS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#f4f6f9;--bg4:#e8ecf0;
-  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
-  --text:#1a2332;--text2:#556070;--text3:#8a96a3;
-  --green:#16a34a;--green-mid:#22c55e;--green-dim:rgba(22,163,74,0.10);--green-border:rgba(22,163,74,0.22);--green-btn:#16a34a;
-  --red:#dc2626;--red-dim:rgba(220,38,38,0.08);
-  --amber:#b45309;--amber-dim:rgba(180,83,9,0.09);
-  --blue:#1d4ed8;--blue-dim:rgba(29,78,216,0.08);
-  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:0 4px 12px rgba(0,0,0,0.10);
+  /* IncomeOS Brand — blue-primary system */
+  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#f4f7fb;--bg4:#e4eaf3;
+  --border:rgba(13,59,142,0.09);--border2:rgba(13,59,142,0.16);
+  --text:#0A1628;--text2:#3a5070;--text3:#7a90aa;
+  /* Primary: IncomeOS blue */
+  --green:#1B6EF3;--green-mid:#4DA3FF;--green-dim:rgba(27,110,243,0.10);--green-border:rgba(27,110,243,0.25);--green-btn:#1B6EF3;
+  /* Accent colors */
+  --red:#e03e3e;--red-dim:rgba(224,62,62,0.08);
+  --amber:#c07800;--amber-dim:rgba(192,120,0,0.09);
+  --blue:#1565C0;--blue-dim:rgba(21,101,192,0.09);
+  /* Brand blues for charts/data */
+  --brand-light:#4DA3FF;--brand-mid:#1B6EF3;--brand-dark:#0D3B8E;
+  --shadow:0 1px 3px rgba(13,59,142,0.08),0 1px 2px rgba(13,59,142,0.04);
+  --shadow-md:0 4px 16px rgba(13,59,142,0.12);
   --radius:12px;--radius-sm:8px;
   --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
   --sidebar-w:220px;--content-max:960px;
 }
 [data-theme="dark"] {
-  --bg:#0f1117;--bg2:#1a1d27;--bg3:#21242f;--bg4:#2a2d3a;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
-  --text:#e8edf3;--text2:#9ba8b8;--text3:#5a6678;
-  --green:#22c55e;--green-mid:#4ade80;--green-dim:rgba(34,197,94,0.12);--green-border:rgba(34,197,94,0.25);--green-btn:#16a34a;
+  --bg:#060d1a;--bg2:#0d1729;--bg3:#111e33;--bg4:#172540;
+  --border:rgba(77,163,255,0.09);--border2:rgba(77,163,255,0.15);
+  --text:#e4edf8;--text2:#7da8d4;--text3:#3d6080;
+  --green:#4DA3FF;--green-mid:#6fb8ff;--green-dim:rgba(77,163,255,0.13);--green-border:rgba(77,163,255,0.28);--green-btn:#1B6EF3;
   --red:#f87171;--red-dim:rgba(248,113,113,0.10);
   --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
   --blue:#60a5fa;--blue-dim:rgba(96,165,250,0.10);
-  --shadow:0 1px 3px rgba(0,0,0,0.3),0 1px 2px rgba(0,0,0,0.2);
-  --shadow-md:0 4px 12px rgba(0,0,0,0.4);
+  --brand-light:#6fb8ff;--brand-mid:#4DA3FF;--brand-dark:#1B6EF3;
+  --shadow:0 1px 3px rgba(0,0,0,0.4),0 1px 2px rgba(0,0,0,0.25);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.5);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg)}
@@ -69,7 +76,7 @@ html{transition:background 300ms ease,color 300ms ease}
 }
 .login-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.10);display:flex;flex-direction:column;align-items:center;gap:0}
 [data-theme="dark"] .login-card{box-shadow:0 8px 40px rgba(0,0,0,.4)}
-.login-mark{width:64px;height:64px;border-radius:18px;background:var(--green-btn);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:26px;font-weight:500;color:#fff;box-shadow:0 4px 14px rgba(22,163,74,0.3);margin-bottom:16px}
+.login-mark{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#1B6EF3,#0D3B8E);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:26px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(27,110,243,0.4);margin-bottom:16px}
 .login-title{font-size:22px;font-weight:700;letter-spacing:-.4px;text-align:center;margin-bottom:4px}
 .login-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:24px}
 /* Option buttons (biometric / password) */
@@ -112,7 +119,7 @@ html{transition:background 300ms ease,color 300ms ease}
   padding:max(24px,env(safe-area-inset-top)) 0 max(24px,env(safe-area-inset-bottom));
 }
 .sidebar-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid var(--border)}
-.sidebar-logo-mark{width:36px;height:36px;border-radius:10px;background:var(--green-btn);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;color:#fff;font-weight:500}
+.sidebar-logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#1B6EF3,#0D3B8E);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;color:#fff;font-weight:500}
 .sidebar-logo-text{font-size:16px;font-weight:700;color:var(--text)}
 .sidebar-logo-sub{font-size:11px;color:var(--text3)}
 .sidebar-nav{padding:16px 10px;flex:1}
@@ -214,7 +221,7 @@ html{transition:background 300ms ease,color 300ms ease}
 /* Buttons — immediate feedback, no layout shift */
 .btn{transition:background-color 180ms ease,border-color 180ms ease,color 180ms ease,box-shadow 180ms ease}
 .btn:active{transform:scale(0.975);transition-duration:60ms}
-.btn-primary:hover{filter:brightness(1.06)}
+.btn-primary:hover{filter:brightness(1.08);box-shadow:0 4px 14px rgba(27,110,243,0.35)}
 .btn-primary:active{filter:brightness(0.96)}
 
 /* Cards & metrics — shadow on hover */
@@ -650,9 +657,16 @@ html{transition:background 300ms ease,color 300ms ease}
 
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-mark">$</div>
-    <div class="login-title">Payday</div>
-    <div class="login-sub">Sign in to view, manage, log and recieve insights about your paycheck.</div>
+    <div class="login-mark" style="background:linear-gradient(135deg,#1B6EF3,#0D3B8E);width:72px;height:72px;border-radius:20px;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center">
+      <svg width="44" height="44" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="29" height="29" rx="6" fill="#0D3B8E"/>
+        <rect x="35" y="0" width="29" height="29" rx="6" fill="#4DA3FF"/>
+        <rect x="0" y="35" width="29" height="29" rx="6" fill="#1565C0" opacity="0.8"/>
+        <rect x="35" y="35" width="29" height="29" rx="6" fill="#1B6EF3" opacity="0.9"/>
+      </svg>
+    </div>
+    <div class="login-title" style="font-size:24px;letter-spacing:-.5px">Income<span style="color:var(--green-btn);background:var(--green-dim);padding:0 6px;border-radius:6px;margin-left:2px">OS</span></div>
+    <div class="login-sub">DCL Terminal Ops · Airport/Resort Ops</div>
 
     <!-- View 1: Choose sign-in method -->
     <div id="loginChooseView" style="width:100%">
@@ -667,7 +681,7 @@ html{transition:background 300ms ease,color 300ms ease}
         </div>
         <div>
           <div class="login-option-title" id="loginBioLabel">Biometric Login</div>
-          <div class="login-option-sub" id="loginBioSub">Sign in with Face / Touch ID, or Windows Hello</div>
+          <div class="login-option-sub" id="loginBioSub">Sign in with Face ID, Touch ID, or Windows Hello</div>
         </div>
       </button>
       <button class="login-option" onclick="showLoginForm()">
@@ -706,7 +720,7 @@ html{transition:background 300ms ease,color 300ms ease}
       </div>
     </div>
 
-    <div class="login-footer">Don't have an account?<br>Contact DCL.AR-OperationsReporting@disney.com.</div>
+    <div class="login-footer">Don't have an account?<br>Contact your administrator.</div>
   </div>
 </div>
 <div id="appShell">
@@ -715,9 +729,11 @@ html{transition:background 300ms ease,color 300ms ease}
   <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-mark">$</div>
+      <div class="sidebar-logo-mark" style="background:linear-gradient(135deg,#1B6EF3,#0D3B8E);border-radius:10px;padding:4px;overflow:hidden">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none"><rect x="0" y="0" width="29" height="29" rx="6" fill="#0D3B8E"/><rect x="35" y="0" width="29" height="29" rx="6" fill="#4DA3FF"/><rect x="0" y="35" width="29" height="29" rx="6" fill="#1565C0" opacity="0.75"/><rect x="35" y="35" width="29" height="29" rx="6" fill="#1B6EF3" opacity="0.9"/></svg>
+      </div>
       <div>
-        <div class="sidebar-logo-text">Payday</div>
+        <div class="sidebar-logo-text">Income<span style="color:var(--green-btn);font-weight:800">OS</span></div>
         <div class="sidebar-logo-sub">Term Ops. Ground Services</div>
       </div>
     </div>
@@ -2873,7 +2889,7 @@ function exportYTDCSV() {
   const csv=[cols,...rows].map(r=>r.join(',')).join('\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download=`payday-ytd-${ytdYear}.csv`;
+  a.download=`incomeos-ytd-${ytdYear}.csv`;
   a.click();
   showToast('CSV exported');
 }
@@ -3786,7 +3802,7 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', resolved);
   localStorage.setItem('payday-theme-pref', theme); // remember preference type
   const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.content = resolved==='dark' ? '#0f1117' : '#f8f9fa';
+  if(meta) meta.content = resolved==='dark' ? '#060d1a' : '#1B6EF3';
   // Highlight active button in settings
   ['Light','Dark','System'].forEach(t=>{
     const btn = document.getElementById('theme'+t);
