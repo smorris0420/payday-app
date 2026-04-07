@@ -635,11 +635,16 @@ html{transition:background 300ms ease,color 300ms ease}
   <!-- Biometric button (shown when passkey available) -->
   <div id="loginBioWrap" style="display:none;flex-direction:column;align-items:center;gap:12px;width:100%">
     <button class="login-biometric-btn" id="loginBioBtn" onclick="loginWithPasskey()">
-      <svg class="login-biometric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M12 2C9.5 2 7.5 3.5 7.5 5.5c0 2 1.5 3.5 4.5 5.5 3-2 4.5-3.5 4.5-5.5C16.5 3.5 14.5 2 12 2z"/>
-        <path d="M7 10.5C5 11.5 3.5 13.5 3.5 16c0 3.5 3 6.5 8.5 6.5S20.5 19.5 20.5 16c0-2.5-1.5-4.5-3.5-5.5"/>
-        <path d="M12 22v-4M8.5 19.5c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5"/>
-        <circle cx="12" cy="13" r="1.5" fill="currentColor"/>
+      <svg class="login-biometric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <!-- Face ID style icon -->
+        <path d="M7 3H5a2 2 0 00-2 2v2"/>
+        <path d="M17 3h2a2 2 0 012 2v2"/>
+        <path d="M7 21H5a2 2 0 01-2-2v-2"/>
+        <path d="M17 21h2a2 2 0 002-2v-2"/>
+        <path d="M9 9h.01"/>
+        <path d="M15 9h.01"/>
+        <path d="M9 15a3 3 0 006 0"/>
+        <line x1="12" y1="9" x2="12" y2="12"/>
       </svg>
       <div class="login-biometric-label" id="loginBioLabel">Sign in with Face ID / Touch ID</div>
       <div class="login-biometric-sub">Use your saved passkey for this device</div>
@@ -3801,20 +3806,28 @@ let _loginShowBio = false;
 
 async function initLoginScreen() {
   const hasPlatform = await checkPasskeyAvailable();
-  // Check if we have a stored credential hint for this browser
   const storedHint = localStorage.getItem('payday-passkey-hint');
-  if(hasPlatform && storedHint) {
+
+  // Show biometric button if device supports it (whether or not registered yet)
+  if(hasPlatform) {
     _loginShowBio = true;
     document.getElementById('loginBioWrap').style.display = 'flex';
     document.getElementById('loginFormWrap').style.display = 'none';
     document.getElementById('loginShowBioLink').style.display = 'none';
-    // Customize label based on platform
+    // Platform-specific label
     const ua = navigator.userAgent;
-    const label = /iPhone|iPad|Mac/.test(ua) ? 'Sign in with Face ID / Touch ID'
-      : /Android/.test(ua) ? 'Sign in with fingerprint / face unlock'
-      : 'Sign in with Windows Hello or passkey';
+    const label = /iPhone|iPad/.test(ua) ? 'Sign in with Face ID / Touch ID'
+      : /Mac/.test(ua) ? 'Sign in with Touch ID'
+      : /Android/.test(ua) ? 'Sign in with fingerprint or face'
+      : 'Sign in with Windows Hello';
     document.getElementById('loginBioLabel').textContent = label;
+    // Sub-label differs based on whether registered or not
+    const sub = document.querySelector('.login-biometric-sub');
+    if(sub) sub.textContent = storedHint
+      ? 'Use your saved passkey for this device'
+      : 'Register your device in Settings after signing in';
   } else {
+    // No biometric support — show password form directly
     document.getElementById('loginBioWrap').style.display = 'none';
     document.getElementById('loginFormWrap').style.display = 'flex';
     document.getElementById('loginShowBioLink').style.display = 'none';
@@ -3895,10 +3908,14 @@ async function loginWithPasskey() {
   } catch(e) {
     btn.classList.remove('scanning');
     if(e.name === 'NotAllowedError') {
-      err.textContent = 'Biometric cancelled or not available';
+      err.textContent = 'Biometric cancelled. Use password instead.';
+    } else if(e.message && e.message.includes('not found')) {
+      err.textContent = 'No passkey found for this device. Sign in with password first.';
     } else {
       err.textContent = e.message || 'Passkey sign-in failed';
     }
+    // Auto-show password form after failure
+    setTimeout(()=>toggleLoginForm(), 1200);
   }
 }
 

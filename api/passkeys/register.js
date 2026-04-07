@@ -3,7 +3,10 @@ import { verifyToken } from '../_auth.js';
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
 
 const getRpId   = req => (req.headers['x-forwarded-host'] || req.headers.host || 'localhost').split(':')[0];
-const getOrigin = req => { const h = (req.headers['x-forwarded-host'] || req.headers.host || 'localhost'); return h.includes('localhost') ? `http://${h}` : `https://${h}`; };
+const getOrigin = req => {
+  const h = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
+  return h.includes('localhost') ? `http://${h}` : `https://${h}`;
+};
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin','*');
@@ -15,47 +18,71 @@ export default async function handler(req, res) {
   const user = await verifyToken(req);
   if(!user) return res.status(401).json({ error: 'Not authenticated' });
 
+  const userId = user.userId || user.id;
   const { credential, deviceName } = req.body || {};
   const supabase = db();
+  const rpId = getRpId(req);
+  const origin = getOrigin(req);
 
-  // Fetch stored challenge
-  const { data: ch } = await supabase.from('webauthn_challenges')
-    .select('challenge')
-    .eq('user_id', user.userId).eq('type','registration')
+  // Look up the stored challenge
+  const { data: ch, error: chErr } = await supabase
+    .from('webauthn_challenges')
+    .select('challenge, id')
+    .eq('user_id', userId)
+    .eq('type', 'registration')
     .gt('expires_at', new Date().toISOString())
+    .order('expires_at', { ascending: false })
+    .limit(1)
     .maybeSingle();
-  if(!ch) return res.status(400).json({ error: 'Challenge expired or not found' });
+
+  if(chErr) {
+    console.error('Challenge lookup error:', chErr.message);
+    return res.status(500).json({ error: 'Challenge lookup failed: ' + chErr.message });
+  }
+  if(!ch) {
+    return res.status(400).json({ error: 'Challenge expired or not found. Please try again.' });
+  }
 
   let verification;
   try {
     verification = await verifyRegistrationResponse({
       response: credential,
       expectedChallenge: ch.challenge,
-      expectedOrigin: getOrigin(req),
-      expectedRPID: getRpId(req),
+      expectedOrigin: origin,
+      expectedRPID: rpId,
       requireUserVerification: false,
     });
   } catch(e) {
-    console.error('WebAuthn registration verify error:', e.message);
-    return res.status(400).json({ error: e.message });
+    console.error('Registration verification error:', e.message, { origin, rpId });
+    return res.status(400).json({ error: 'Verification failed: ' + e.message });
   }
 
-  if(!verification.verified) return res.status(400).json({ error: 'Verification failed' });
+  if(!verification.verified) {
+    return res.status(400).json({ error: 'Registration not verified' });
+  }
 
   const { credentialID, credentialPublicKey, counter } = verification.registrationInfo;
 
-  // Store passkey
-  const { error } = await supabase.from('passkeys').insert({
-    user_id:      user.userId,
-    credential_id: Buffer.from(credentialID).toString('base64url'),
-    public_key:    Buffer.from(credentialPublicKey).toString('base64'),
-    counter,
-    device_name:  deviceName || 'My device',
-  });
-  if(error) return res.status(500).json({ error: error.message });
+  // Convert to storable strings
+  const credIdStr  = Buffer.from(credentialID).toString('base64url');
+  const pubKeyStr  = Buffer.from(credentialPublicKey).toString('base64');
 
-  // Clean up challenge
-  await supabase.from('webauthn_challenges').delete().eq('user_id', user.userId).eq('type','registration');
+  // Store the passkey
+  const { error: pkErr } = await supabase.from('passkeys').insert({
+    user_id:       userId,
+    credential_id: credIdStr,
+    public_key:    pubKeyStr,
+    counter:       counter || 0,
+    device_name:   deviceName || 'My device',
+  });
+
+  if(pkErr) {
+    console.error('Passkey insert error:', pkErr.message);
+    return res.status(500).json({ error: 'Failed to save passkey: ' + pkErr.message });
+  }
+
+  // Delete the used challenge
+  await supabase.from('webauthn_challenges').delete().eq('id', ch.id);
 
   return res.status(200).json({ ok: true });
 }

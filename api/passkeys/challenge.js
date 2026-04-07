@@ -2,9 +2,12 @@ import { db } from '../_db.js';
 import { verifyToken } from '../_auth.js';
 import { generateRegistrationOptions, generateAuthenticationOptions } from '@simplewebauthn/server';
 
-const RP_NAME = 'Payday DCL';
+const RP_NAME  = 'Payday DCL';
 const getRpId  = req => (req.headers['x-forwarded-host'] || req.headers.host || 'localhost').split(':')[0];
-const getOrigin = req => { const h = getRpId(req); return h.includes('localhost') ? `http://${h}` : `https://${h}`; };
+const getOrigin = req => {
+  const h = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
+  return h.includes('localhost') ? `http://${h}` : `https://${h}`;
+};
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin','*');
@@ -15,41 +18,88 @@ export default async function handler(req, res) {
 
   const { type, username } = req.body || {};
   const supabase = db();
+  const rpId = getRpId(req);
 
+  // ── Registration challenge ──────────────────────────────────────────────────
   if(type==='registration') {
     const user = await verifyToken(req);
     if(!user) return res.status(401).json({ error: 'Not authenticated' });
-    const { data: existing } = await supabase.from('passkeys').select('credential_id').eq('user_id', user.userId);
+
+    const userId = user.userId || user.id;
+
+    // Get existing credentials to exclude
+    const { data: existing } = await supabase
+      .from('passkeys').select('credential_id').eq('user_id', userId);
+
     const options = await generateRegistrationOptions({
-      rpName: RP_NAME, rpID: getRpId(req),
-      userID: new TextEncoder().encode(user.userId),
-      userName: user.username, userDisplayName: user.username,
+      rpName: RP_NAME,
+      rpID: rpId,
+      userID: new TextEncoder().encode(userId),
+      userName: user.username,
+      userDisplayName: user.username,
       attestationType: 'none',
       excludeCredentials: (existing||[]).map(c=>({ id: c.credential_id, type:'public-key' })),
       authenticatorSelection: { residentKey:'preferred', userVerification:'preferred' },
     });
-    await supabase.from('webauthn_challenges').upsert(
-      { user_id: user.userId, challenge: options.challenge, type:'registration', expires_at: new Date(Date.now()+5*60*1000).toISOString() },
-      { onConflict: 'user_id,type' }
-    );
+
+    // Delete any existing registration challenge for this user, then insert fresh
+    await supabase.from('webauthn_challenges')
+      .delete().eq('user_id', userId).eq('type','registration');
+
+    const { error: insertErr } = await supabase.from('webauthn_challenges').insert({
+      user_id:    userId,
+      challenge:  options.challenge,
+      type:       'registration',
+      expires_at: new Date(Date.now() + 5*60*1000).toISOString(),
+    });
+
+    if(insertErr) {
+      console.error('Challenge insert error:', insertErr.message);
+      return res.status(500).json({ error: 'Failed to store challenge: ' + insertErr.message });
+    }
+
     return res.status(200).json(options);
   }
 
+  // ── Authentication challenge ────────────────────────────────────────────────
   if(type==='authentication') {
-    let allowCredentials = [], scopedUserId = null;
+    let allowCredentials = [];
+    let scopedUserId = null;
+
     if(username) {
       const login = username.toLowerCase().trim();
-      const { data: u } = await supabase.from('users').select('id').or(`username.eq.${login},email.eq.${login}`).eq('active',true).maybeSingle();
+      const { data: u } = await supabase
+        .from('users').select('id')
+        .or(`username.eq.${login},email.eq.${login}`)
+        .eq('active', true).maybeSingle();
       if(u) {
         scopedUserId = u.id;
-        const { data: creds } = await supabase.from('passkeys').select('credential_id').eq('user_id', u.id);
-        allowCredentials = (creds||[]).map(c=>({ id:c.credential_id, type:'public-key' }));
+        const { data: creds } = await supabase
+          .from('passkeys').select('credential_id').eq('user_id', u.id);
+        allowCredentials = (creds||[]).map(c=>({ id: c.credential_id, type:'public-key' }));
       }
     }
-    const options = await generateAuthenticationOptions({ rpID: getRpId(req), userVerification:'preferred', allowCredentials });
-    await supabase.from('webauthn_challenges').insert(
-      { user_id: scopedUserId || ('anon_'+options.challenge.slice(0,8)), challenge: options.challenge, type:'authentication', expires_at: new Date(Date.now()+5*60*1000).toISOString() }
-    );
+
+    const options = await generateAuthenticationOptions({
+      rpID: rpId,
+      userVerification: 'preferred',
+      allowCredentials,
+    });
+
+    const challengeUserId = scopedUserId || ('anon_' + options.challenge.slice(0,8));
+
+    const { error: insertErr } = await supabase.from('webauthn_challenges').insert({
+      user_id:    challengeUserId,
+      challenge:  options.challenge,
+      type:       'authentication',
+      expires_at: new Date(Date.now() + 5*60*1000).toISOString(),
+    });
+
+    if(insertErr) {
+      console.error('Auth challenge insert error:', insertErr.message);
+      return res.status(500).json({ error: 'Failed to store challenge: ' + insertErr.message });
+    }
+
     return res.status(200).json({ ...options, scopedUserId });
   }
 
