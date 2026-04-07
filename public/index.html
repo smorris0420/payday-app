@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#f8f9fa">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Payday">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -40,11 +40,17 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg)}
-body{font-family:var(--sans);color:var(--text);line-height:1.5}
+body{font-family:var(--sans);color:var(--text);line-height:1.5;
+  /* Extend body into safe areas (Dynamic Island, home bar) */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
 
 /* DARK MODE TRANSITION */
-html{transition:background .2s,color .2s}
-[data-theme="dark"] .bottom-nav{background:rgba(26,29,39,0.95)}
+html{transition:background 300ms ease,color 300ms ease}
+[data-theme="dark"] .bottom-nav{background:rgba(26,29,39,0.96)}
 
 /* SECTION DIVIDERS (YTD page sections) */
 .ytd-section{margin-bottom:28px}
@@ -57,7 +63,10 @@ html{transition:background .2s,color .2s}
 .dark-toggle svg{width:14px;height:14px;flex-shrink:0}
 
 /* LOGIN */
-#loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;gap:24px;background:var(--bg)}
+#loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;
+  padding:max(32px,env(safe-area-inset-top)) 24px max(32px,env(safe-area-inset-bottom));
+  gap:24px;background:var(--bg)
+}
 .login-mark{width:64px;height:64px;border-radius:18px;background:var(--green-btn);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:26px;font-weight:500;color:#fff;box-shadow:0 4px 14px rgba(22,163,74,0.3)}
 .login-title{font-size:26px;font-weight:700;letter-spacing:-.5px;text-align:center}
 .login-sub{font-size:14px;color:var(--text3);text-align:center}
@@ -68,10 +77,17 @@ html{transition:background .2s,color .2s}
 
 /* APP SHELL */
 #appShell{display:none}
-#appShell.visible{display:flex}
+#appShell.visible{display:flex;min-height:100vh}
+/* When running as installed PWA (standalone), use dvh for full viewport */
+@supports(height:100dvh){
+  #appShell.visible{min-height:100dvh}
+  .main-content{min-height:100dvh}
+}
 
 /* SIDEBAR */
-.sidebar{display:none;width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);height:100vh;position:sticky;top:0;flex-direction:column;padding:24px 0}
+.sidebar{display:none;width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);height:100vh;position:sticky;top:0;flex-direction:column;
+  padding:max(24px,env(safe-area-inset-top)) 0 max(24px,env(safe-area-inset-bottom));
+}
 .sidebar-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid var(--border)}
 .sidebar-logo-mark{width:36px;height:36px;border-radius:10px;background:var(--green-btn);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;color:#fff;font-weight:500}
 .sidebar-logo-text{font-size:16px;font-weight:700;color:var(--text)}
@@ -90,10 +106,15 @@ html{transition:background .2s,color .2s}
 .sidebar-signout:hover{background:var(--red-dim);color:var(--red)}
 
 /* MAIN CONTENT */
-.main-content{flex:1;overflow-y:auto;min-height:100vh;padding-bottom:80px}
+.main-content{flex:1;overflow-y:auto;min-height:100vh;padding-bottom:calc(80px + env(safe-area-inset-bottom))}
 
 /* MOBILE BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:100;padding:8px 0 max(8px,env(safe-area-inset-bottom))}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:100;
+  padding-top:8px;
+  padding-left:max(0px,env(safe-area-inset-left));
+  padding-right:max(0px,env(safe-area-inset-right));
+  padding-bottom:max(12px,env(safe-area-inset-bottom));
+}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;color:var(--text3);font-family:var(--sans);font-size:10px;font-weight:500;cursor:pointer;transition:color .15s}
 .nav-btn.active{color:var(--green)}
 .nav-btn svg{width:20px;height:20px}
@@ -107,8 +128,8 @@ html{transition:background .2s,color .2s}
 
 /* PAGES */
 .page{display:none}
-.page.active{display:block;animation:pageEnter .22s cubic-bezier(.25,.46,.45,.94) both}
-@keyframes pageEnter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page.active{display:block}
+/* pageEnter keyframe defined in animation block above */
 .page-inner{max-width:var(--content-max);margin:0 auto;padding:20px 16px}
 @media(min-width:768px){.page-inner{padding:28px 36px}}
 @media(min-width:1400px){.page-inner{max-width:1100px}}
@@ -116,31 +137,105 @@ html{transition:background .2s,color .2s}
 .page-inner-wide{max-width:100%;margin:0 auto;padding:20px 16px}
 @media(min-width:768px){.page-inner-wide{padding:28px 36px}}
 
+/* ── ANIMATION TOKENS ── */
+/* expo-out: fast start, leisurely finish — feels responsive yet smooth */
+/* standard: gentle ease-out for hovers and state changes */
+
+/* Page transitions */
+.page.active{animation:pageEnter 380ms cubic-bezier(0.16,1,0.3,1) both}
+@keyframes pageEnter{
+  from{opacity:0;transform:translateY(12px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+
+/* Modal — slides up with a soft spring */
+.modal-overlay.open .modal{animation:modalUp 400ms cubic-bezier(0.16,1,0.3,1) both}
+@keyframes modalUp{
+  from{opacity:0;transform:translateY(32px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+.modal-overlay.open{animation:overlayIn 250ms ease both}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+
+/* Dashboard widget entrance — staggered scale+fade */
+.dash-widget{animation:widgetIn 350ms cubic-bezier(0.16,1,0.3,1) both}
+@keyframes widgetIn{
+  from{opacity:0;transform:scale(0.94) translateY(8px)}
+  to  {opacity:1;transform:scale(1) translateY(0)}
+}
+
+/* List items — gentle slide from left */
+.stub-item,.ytd-card,.user-row,.passkey-item{
+  animation:listItemIn 320ms cubic-bezier(0.16,1,0.3,1) both
+}
+@keyframes listItemIn{
+  from{opacity:0;transform:translateX(-10px)}
+  to  {opacity:1;transform:translateX(0)}
+}
+
+/* Toast notification */
+.toast{transition:transform 350ms cubic-bezier(0.16,1,0.3,1),opacity 250ms ease}
+
+/* Skeleton shimmer */
+.skel{
+  background:linear-gradient(90deg,var(--bg4) 25%,var(--bg3) 50%,var(--bg4) 75%);
+  background-size:200% 100%;
+  animation:skelShimmer 1.8s ease-in-out infinite
+}
+@keyframes skelShimmer{
+  0%  {background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+
 /* ── MICRO-INTERACTIONS ── */
-.btn{transition:all .15s cubic-bezier(.25,.46,.45,.94)}
-.btn:active{transform:scale(.97)}
-.btn-primary:hover{filter:brightness(1.08)}
-.stub-item{transition:border-color .15s,box-shadow .15s,transform .12s}
-.stub-item:active{transform:scale(.99)}
-.metric,.card{transition:box-shadow .15s,border-color .15s}
-.sidebar-nav-btn{transition:background .12s,color .12s,transform .1s}
-.sidebar-nav-btn:active{transform:translateX(2px)}
-.nav-btn{transition:color .12s,transform .1s}
-.nav-btn:active{transform:scale(.92)}
-/* Stagger list animations */
-.stub-item,.ytd-card,.user-row{animation:listItemIn .18s ease both}
-@keyframes listItemIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
-/* Modal */
-.modal-overlay.open .modal{animation:modalUp .2s cubic-bezier(.34,1.56,.64,1) both}
-@keyframes modalUp{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
-/* Toast */
-.toast{transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .2s}
-/* Dashboard widget entrance */
-.dash-widget{animation:widgetIn .2s cubic-bezier(.25,.46,.45,.94) both}
-@keyframes widgetIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
-/* Skeleton loader */
-.skel{background:linear-gradient(90deg,var(--bg4) 25%,var(--bg3) 50%,var(--bg4) 75%);background-size:200% 100%;animation:skelShimmer 1.4s infinite}
-@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* Buttons — immediate feedback, no layout shift */
+.btn{transition:background-color 180ms ease,border-color 180ms ease,color 180ms ease,box-shadow 180ms ease}
+.btn:active{transform:scale(0.975);transition-duration:60ms}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-primary:active{filter:brightness(0.96)}
+
+/* Cards & metrics — shadow on hover */
+.metric,.card{transition:box-shadow 220ms ease,border-color 220ms ease}
+.card:hover{box-shadow:var(--shadow-md)}
+.stub-item{transition:border-color 220ms ease,box-shadow 220ms ease}
+.stub-item:hover{box-shadow:0 2px 12px rgba(22,163,74,.10)}
+.stub-item:active{transform:scale(0.994);transition-duration:80ms}
+
+/* Sidebar nav */
+.sidebar-nav-btn{transition:background 180ms ease,color 180ms ease}
+.sidebar-nav-btn:active{opacity:.75;transition-duration:60ms}
+
+/* Mobile nav */
+.nav-btn{transition:color 180ms ease,transform 200ms cubic-bezier(0.16,1,0.3,1)}
+.nav-btn.active{transform:translateY(-1px)}
+.nav-btn:active{transform:scale(0.88);transition-duration:60ms}
+
+/* Inputs — border glow on focus */
+.input-wrap input,.form-field input,.form-field select,.login-form input{
+  transition:border-color 180ms ease,box-shadow 180ms ease
+}
+.input-wrap input:focus,.form-field input:focus,.login-form input:focus{
+  box-shadow:0 0 0 3px var(--green-dim)
+}
+
+/* Tab buttons */
+.tab-btn{transition:background 200ms ease,color 200ms ease,box-shadow 200ms ease}
+
+/* Icon buttons */
+.icon-btn{transition:background 180ms ease,color 180ms ease,border-color 180ms ease}
+
+/* Dashboard library items */
+.dash-lib-item{transition:border-color 200ms ease,background 200ms ease,transform 200ms cubic-bezier(0.16,1,0.3,1),box-shadow 200ms ease}
+.dash-lib-item:hover{transform:translateX(-3px);box-shadow:var(--shadow)}
+.dash-widget-actions{transition:opacity 200ms ease}
+.dash-resize{transition:opacity 200ms ease}
+.dash-wbtn{transition:background 150ms ease,color 150ms ease,border-color 150ms ease}
+
+/* Progress bars */
+.ytd-bar-fill{transition:width 600ms cubic-bezier(0.16,1,0.3,1)}
+
+/* Sync dot */
+.sync-dot{transition:background 300ms ease}
 .page-header{padding:0 0 20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .page-title{font-size:26px;font-weight:700;letter-spacing:-.5px;color:var(--text)}
 .page-sub{font-size:13px;color:var(--text3);margin-top:2px}
@@ -216,12 +311,16 @@ html{transition:background .2s,color .2s}
 
 /* MODALS */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
-.modal-overlay.open{display:flex;animation:fadeIn .15s ease}
+.modal-overlay.open{display:flex}
 @media(min-width:768px){
   .modal-overlay{align-items:center}
   .modal{border-radius:var(--radius)!important;border:1px solid var(--border2)!important;max-width:560px!important}
 }
-.modal{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;border-top:1px solid var(--border2);width:100%;max-width:480px;padding:22px 18px max(22px,env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-md)}
+.modal{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;border-top:1px solid var(--border2);width:100%;max-width:480px;
+  padding:22px 18px max(28px,env(safe-area-inset-bottom));
+  padding-left:max(18px,env(safe-area-inset-left));
+  padding-right:max(18px,env(safe-area-inset-right));
+  max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-md)}
 .modal-title{font-size:17px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
 .modal-close{background:var(--bg3);border:1.5px solid var(--border);color:var(--text2);border-radius:7px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
 /* Modal section groups */
@@ -408,7 +507,7 @@ html{transition:background .2s,color .2s}
 @media(min-width:1000px){.chart-grid{grid-template-columns:1fr 1fr}}
 
 /* TOAST */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-70px);background:var(--bg2);border:1.5px solid var(--green-border);color:var(--green);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;z-index:999;transition:transform .25s ease;white-space:nowrap;box-shadow:var(--shadow-md)}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--bg2);border:1.5px solid var(--green-border);color:var(--green);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;z-index:999;transition:transform 350ms cubic-bezier(0.16,1,0.3,1),opacity 250ms ease;white-space:nowrap;box-shadow:var(--shadow-md)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.error{border-color:rgba(220,38,38,.3);color:var(--red)}
 
@@ -1052,77 +1151,91 @@ html{transition:background .2s,color .2s}
           <div class="page-title">Settings</div>
           <span id="settingsWho" class="page-sub"></span>
         </div>
-        <div class="section-title">Default pay rate &amp; deductions</div>
-        <div class="card card-pad">
-          <div class="input-row"><label>Hourly rate</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sRate" step="0.01" min="0" placeholder="e.g. 21.90"></div></div>
-          <div class="input-row" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border)"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sDen" value="2.00" step="0.01" min="0"></div></div>
-          <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sMedI" value="17.00" step="0.01" min="0"></div></div>
-          <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sVis" value="0.50" step="0.01" min="0"></div></div>
-          <div class="input-row"><label>401k / Retirement</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sRetire" value="0.00" step="0.01" min="0"></div></div>
-        </div>
-        <button class="btn btn-primary" style="margin-bottom:8px" onclick="saveSettings()">Save defaults</button>
-        <div class="section-title">Federal withholding</div>
-        <div class="card card-pad">
-          <p style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">Calculator uses IRS 2026 weekly withholding tables (Single filer). Override to pin a flat % rate instead (blank = IRS tables).</p>
-          <div class="input-row"><label>Override (%)</label><div class="input-wrap"><input type="number" id="sFedRate" placeholder="auto" step="0.1" min="0" max="50" class="no-prefix"></div></div>
-        </div>
-        <button class="btn btn-secondary" style="margin-bottom:8px" onclick="saveFedRate()">Apply override</button>
-        <div class="card card-pad" style="margin-top:8px">
-          <p style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">If Disney withholds more than estimated, enter the extra fixed dollar amount per paycheck here (e.g. from W-4 Step 4c or Step 2 adjustment).</p>
-          <div class="input-row"><label>Extra withholding ($/check)</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sFedExtra" placeholder="0.00" step="0.01" min="0" class="no-prefix"></div></div>
-        </div>
-        <button class="btn btn-secondary" style="margin-bottom:16px" onclick="saveFedExtra()">Apply extra</button>
 
-        <div class="section-title">My account</div>
-        <div class="card card-pad" style="margin-bottom:8px">
-          <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Change your password. You'll stay signed in after saving.</p>
-          <div class="input-row"><label>New password</label><div class="input-wrap"><input type="password" id="newPw" placeholder="New password" class="no-prefix" style="width:160px"></div></div>
-          <div class="input-row"><label>Confirm</label><div class="input-wrap"><input type="password" id="confirmPw" placeholder="Confirm" class="no-prefix" style="width:160px"></div></div>
+        <!-- Settings tabs -->
+        <div class="tab-row" style="margin-bottom:20px">
+          <button class="tab-btn active" onclick="showSettingsTab('pay',this)">Pay &amp; Tax</button>
+          <button class="tab-btn" onclick="showSettingsTab('account',this)">Account</button>
+          <button class="tab-btn" onclick="showSettingsTab('security',this)">Devices &amp; Security</button>
+          <button class="tab-btn" onclick="showSettingsTab('data',this)">Data</button>
         </div>
-        <button class="btn btn-secondary" style="margin-bottom:16px" onclick="changePassword()">Change password</button>
-        <div class="section-title">Appearance</div>
-        <div class="card card-pad" style="margin-bottom:8px">
-          <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Choose your preferred color scheme. Syncs across all your devices.</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button id="themeLight" class="btn btn-secondary btn-sm" onclick="setTheme('light')" style="gap:5px;flex:1;min-width:80px">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-              Light
-            </button>
-            <button id="themeDark" class="btn btn-secondary btn-sm" onclick="setTheme('dark')" style="gap:5px;flex:1;min-width:80px">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-              Dark
-            </button>
-            <button id="themeSystem" class="btn btn-secondary btn-sm" onclick="setTheme('system')" style="gap:5px;flex:1;min-width:80px">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-              System
-            </button>
+
+        <!-- Tab: Pay & Tax -->
+        <div id="stab-pay" class="settings-tab">
+          <div class="section-title">Default pay rate &amp; deductions</div>
+          <div class="card card-pad">
+            <div class="input-row"><label>Hourly rate</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sRate" step="0.01" min="0" placeholder="e.g. 21.90"></div></div>
+            <div class="input-row" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border)"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sDen" value="2.00" step="0.01" min="0"></div></div>
+            <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sMedI" value="17.00" step="0.01" min="0"></div></div>
+            <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sVis" value="0.50" step="0.01" min="0"></div></div>
+            <div class="input-row"><label>401k / Retirement</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sRetire" value="0.00" step="0.01" min="0"></div></div>
+          </div>
+          <button class="btn btn-primary" style="margin-bottom:20px" onclick="saveSettings()">Save defaults</button>
+
+          <div class="section-title">Federal withholding</div>
+          <div class="card card-pad">
+            <p style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">Calculator uses IRS 2026 weekly withholding tables (Single filer). Override to pin a flat % rate instead (blank = auto).</p>
+            <div class="input-row"><label>Override (%)</label><div class="input-wrap"><input type="number" id="sFedRate" placeholder="auto" step="0.1" min="0" max="50" class="no-prefix"></div></div>
+          </div>
+          <button class="btn btn-secondary" style="margin-bottom:8px" onclick="saveFedRate()">Apply override</button>
+          <div class="card card-pad" style="margin-top:8px">
+            <p style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">Extra fixed withholding per check (W-4 Step 4c / Step 2 adjustment).</p>
+            <div class="input-row"><label>Extra withholding ($/check)</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sFedExtra" placeholder="0.00" step="0.01" min="0" class="no-prefix"></div></div>
+          </div>
+          <button class="btn btn-secondary" onclick="saveFedExtra()">Apply extra</button>
+        </div>
+
+        <!-- Tab: Account -->
+        <div id="stab-account" class="settings-tab" style="display:none">
+          <div class="section-title">Change password</div>
+          <div class="card card-pad" style="margin-bottom:8px">
+            <p style="font-size:12px;color:var(--text3);margin-bottom:10px">You'll stay signed in after saving.</p>
+            <div class="input-row"><label>New password</label><div class="input-wrap"><input type="password" id="newPw" placeholder="New password" class="no-prefix" style="width:160px"></div></div>
+            <div class="input-row"><label>Confirm</label><div class="input-wrap"><input type="password" id="confirmPw" placeholder="Confirm" class="no-prefix" style="width:160px"></div></div>
+          </div>
+          <button class="btn btn-secondary" style="margin-bottom:20px" onclick="changePassword()">Change password</button>
+
+          <div class="section-title">Appearance</div>
+          <div class="card card-pad">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Color scheme — syncs across all your devices.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="themeLight" class="btn btn-secondary btn-sm" onclick="setTheme('light')" style="gap:5px;flex:1;min-width:80px">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>Light
+              </button>
+              <button id="themeDark" class="btn btn-secondary btn-sm" onclick="setTheme('dark')" style="gap:5px;flex:1;min-width:80px">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>Dark
+              </button>
+              <button id="themeSystem" class="btn btn-secondary btn-sm" onclick="setTheme('system')" style="gap:5px;flex:1;min-width:80px">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>System
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="section-title">Devices &amp; Security</div>
-        <div class="card card-pad" style="margin-bottom:8px">
-          <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Register this device for Face ID / Touch ID sign-in. Your email is used as your passkey identifier.</p>
-          <div id="passkeyList" style="margin-bottom:12px"></div>
-          <button class="btn btn-secondary" onclick="registerPasskey()" id="addPasskeyBtn" style="gap:6px">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-            Add this device
-          </button>
-          <div id="passkeyMsg" style="font-size:12px;margin-top:8px;min-height:16px"></div>
+        <!-- Tab: Devices & Security -->
+        <div id="stab-security" class="settings-tab" style="display:none">
+          <div class="section-title">Registered devices</div>
+          <div class="card card-pad" style="margin-bottom:8px">
+            <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Register this device for Face ID / Touch ID sign-in. Your passkey is tied to your account — no password needed on registered devices.</p>
+            <div id="passkeyList" style="margin-bottom:12px"></div>
+            <button class="btn btn-secondary" onclick="registerPasskey()" style="gap:6px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Add this device
+            </button>
+            <div id="passkeyMsg" style="font-size:12px;margin-top:8px;min-height:16px"></div>
+          </div>
         </div>
 
-        <div class="section-title">Devices &amp; Security</div>
-        <div class="card card-pad" style="margin-bottom:8px">
-          <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Register this device for Face ID / Touch ID sign-in. Your passkey is tied to your account — no password needed on registered devices.</p>
-          <div id="passkeyList" style="margin-bottom:12px"></div>
-          <button class="btn btn-secondary" onclick="registerPasskey()" style="gap:6px">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-            Add this device
-          </button>
-          <div id="passkeyMsg" style="font-size:12px;margin-top:8px;min-height:16px"></div>
+        <!-- Tab: Data -->
+        <div id="stab-data" class="settings-tab" style="display:none">
+          <div class="section-title">Export &amp; Delete</div>
+          <div class="card card-pad" style="margin-bottom:12px">
+            <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Export all your paycheck history as a JSON file, or permanently delete it.</p>
+            <button class="btn btn-secondary" style="margin-bottom:8px" onclick="exportData()">Export paychecks (JSON)</button>
+            <button class="btn btn-danger" onclick="confirmClear()">Delete all paycheck history</button>
+          </div>
         </div>
-        <div class="section-title">Data</div>
-        <button class="btn btn-secondary" style="margin-bottom:8px" onclick="exportData()">Export paychecks (JSON)</button>
-        <button class="btn btn-danger" onclick="confirmClear()">Delete all paycheck history</button>
+
       </div>
     </div>
 
@@ -1553,6 +1666,8 @@ function logout() {
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('unInput').value='';
   document.getElementById('pwInput').value='';
+  document.getElementById('loginErr').textContent='';
+  initLoginScreen();
 }
 function updateSidebarUser() {
   if(!currentUser) return;
@@ -1921,7 +2036,12 @@ function showPage(id, btn, source) {
     const srch=document.getElementById('ytdSearch');
     if(srch && !srch._wired){ srch._wired=true; srch.addEventListener('input',buildYTD); }
   }
-  if(id==='settings') { buildSettingsUI(); const el=document.getElementById('settingsWho'); if(el) el.textContent=currentUser?.username||''; loadPasskeyList(); }
+  if(id==='settings') {
+    buildSettingsUI();
+    const el=document.getElementById('settingsWho'); if(el) el.textContent=currentUser?.username||'';
+    // Always open to first tab
+    showSettingsTab('pay', document.querySelector('#page-settings .tab-btn'));
+  }
   if(id==='admin') { if(currentUser?.role!=='admin'){showPage('calc',null,null);return;} buildAdminPage(); }
   if(id==='bulk') initBulk();
 }
@@ -3932,6 +4052,15 @@ async function deletePasskey(id) {
 }
 
 // ===== SETTINGS =====
+function showSettingsTab(tab, btn) {
+  document.querySelectorAll('.settings-tab').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tab-row .tab-btn').forEach(b=>b.classList.remove('active'));
+  const el = document.getElementById('stab-'+tab);
+  if(el) el.style.display='block';
+  if(btn) btn.classList.add('active');
+  if(tab==='security') loadPasskeyList();
+}
+
 function buildSettingsUI() {
   if(appSettings.defaultRate) document.getElementById('sRate').value=parseFloat(appSettings.defaultRate).toFixed(2);
   if(appSettings.den) document.getElementById('sDen').value=parseFloat(appSettings.den).toFixed(2);
@@ -3940,8 +4069,17 @@ function buildSettingsUI() {
   if(appSettings.fedExtra) document.getElementById('sFedExtra').value=parseFloat(appSettings.fedExtra).toFixed(2);
   if(appSettings.retire) document.getElementById('sRetire').value=parseFloat(appSettings.retire).toFixed(2);
   if(appSettings.fedOverride) document.getElementById('sFedRate').value=appSettings.fedOverride;
-  // Highlight active theme
-  if(appSettings.theme) applyTheme(appSettings.theme);
+  // Highlight active theme buttons without re-applying (theme already active)
+  const currentThemePref = localStorage.getItem('payday-theme-pref') || appSettings.theme || 'light';
+  ['Light','Dark','System'].forEach(t=>{
+    const btn = document.getElementById('theme'+t);
+    if(!btn) return;
+    const isActive = t.toLowerCase()===currentThemePref;
+    btn.style.background = isActive ? 'var(--blue-dim)' : '';
+    btn.style.color       = isActive ? 'var(--blue)' : '';
+    btn.style.borderColor = isActive ? 'rgba(29,78,216,.4)' : '';
+    btn.style.fontWeight  = isActive ? '700' : '';
+  });
   document.getElementById('sEffRate').textContent=(effFedRate()*100).toFixed(2)+'%';
   // Show admin nav item in sidebar
   const adminNav=document.getElementById('adminNavItem');
