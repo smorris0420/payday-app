@@ -18,23 +18,11 @@ export default async function handler(req, res) {
   const user = await verifyToken(req);
   if(!user) return res.status(401).json({ error: 'Not authenticated' });
 
-  console.log('[register] user payload:', JSON.stringify(user));
   const userId = String(user.userId || user.id || '');
-  console.log('[register] using userId:', userId);
-
   const { credential, deviceName } = req.body || {};
   const supabase = db();
-  const rpId   = getRpId(req);
-  const origin = getOrigin(req);
 
-  console.log('[register] rpId:', rpId, 'origin:', origin);
-
-  // Dump ALL challenges in the table for debugging
-  const { data: allChallenges } = await supabase
-    .from('webauthn_challenges').select('*').eq('type','registration');
-  console.log('[register] all registration challenges:', JSON.stringify(allChallenges));
-
-  // Find the challenge for this user
+  // Find stored challenge
   const { data: ch, error: chErr } = await supabase
     .from('webauthn_challenges')
     .select('challenge, id')
@@ -45,30 +33,35 @@ export default async function handler(req, res) {
     .limit(1)
     .maybeSingle();
 
-  console.log('[register] challenge lookup result:', chErr?.message || JSON.stringify(ch));
-
-  if(chErr) return res.status(500).json({ error: 'Challenge lookup failed: ' + chErr.message });
-  if(!ch) return res.status(400).json({ error: 'Challenge expired or not found. Please try again.' });
+  if(chErr || !ch) {
+    console.error('[register] challenge not found for userId:', userId, chErr?.message);
+    return res.status(400).json({ error: 'Challenge expired or not found. Please try again.' });
+  }
 
   let verification;
   try {
     verification = await verifyRegistrationResponse({
       response: credential,
       expectedChallenge: ch.challenge,
-      expectedOrigin: origin,
-      expectedRPID: rpId,
+      expectedOrigin: getOrigin(req),
+      expectedRPID: getRpId(req),
       requireUserVerification: false,
     });
   } catch(e) {
-    console.error('[register] verification error:', e.message);
+    console.error('[register] verify error:', e.message);
     return res.status(400).json({ error: 'Verification failed: ' + e.message });
   }
 
   if(!verification.verified) return res.status(400).json({ error: 'Registration not verified' });
 
-  const { credentialID, credentialPublicKey, counter } = verification.registrationInfo;
-  const credIdStr = Buffer.from(credentialID).toString('base64url');
+  const { credentialPublicKey, counter } = verification.registrationInfo;
+
+  // IMPORTANT: Use credential.id from the browser directly — it's already the correct base64url string
+  // This ensures the stored ID matches exactly what the browser sends during authentication
+  const credIdStr = credential.id;
   const pubKeyStr = Buffer.from(credentialPublicKey).toString('base64');
+
+  console.log('[register] storing credential_id:', credIdStr.slice(0,20)+'...');
 
   const { error: pkErr } = await supabase.from('passkeys').insert({
     user_id:       userId,
@@ -78,9 +71,11 @@ export default async function handler(req, res) {
     device_name:   deviceName || 'My device',
   });
 
-  if(pkErr) return res.status(500).json({ error: 'Failed to save passkey: ' + pkErr.message });
+  if(pkErr) {
+    console.error('[register] passkey insert error:', pkErr.message);
+    return res.status(500).json({ error: 'Failed to save passkey: ' + pkErr.message });
+  }
 
   await supabase.from('webauthn_challenges').delete().eq('id', ch.id);
-  console.log('[register] success, passkey saved');
   return res.status(200).json({ ok: true });
 }

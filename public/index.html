@@ -64,16 +64,31 @@ html{transition:background 300ms ease,color 300ms ease}
 
 /* LOGIN */
 #loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;
-  padding:max(32px,env(safe-area-inset-top)) 24px max(32px,env(safe-area-inset-bottom));
-  gap:24px;background:var(--bg)
+  padding:max(32px,env(safe-area-inset-top)) 20px max(32px,env(safe-area-inset-bottom));
+  background:var(--bg)
 }
-.login-mark{width:64px;height:64px;border-radius:18px;background:var(--green-btn);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:26px;font-weight:500;color:#fff;box-shadow:0 4px 14px rgba(22,163,74,0.3)}
-.login-title{font-size:26px;font-weight:700;letter-spacing:-.5px;text-align:center}
-.login-sub{font-size:14px;color:var(--text3);text-align:center}
-.login-form{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px}
-.login-form input{width:100%;padding:13px 16px;font-family:var(--sans);font-size:16px;background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);outline:none}
-.login-form input:focus{border-color:var(--green-btn)}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.10);display:flex;flex-direction:column;align-items:center;gap:0}
+[data-theme="dark"] .login-card{box-shadow:0 8px 40px rgba(0,0,0,.4)}
+.login-mark{width:64px;height:64px;border-radius:18px;background:var(--green-btn);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:26px;font-weight:500;color:#fff;box-shadow:0 4px 14px rgba(22,163,74,0.3);margin-bottom:16px}
+.login-title{font-size:22px;font-weight:700;letter-spacing:-.4px;text-align:center;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:24px}
+/* Option buttons (biometric / password) */
+.login-option{display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius);cursor:pointer;transition:border-color 200ms ease,background 200ms ease,box-shadow 200ms ease;text-align:left;margin-bottom:10px}
+.login-option:hover{border-color:var(--green-btn);background:var(--bg2);box-shadow:0 0 0 3px var(--green-dim)}
+.login-option:last-child{margin-bottom:0}
+.login-option-icon{width:40px;height:40px;border-radius:10px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text2)}
+.login-option-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:1px}
+.login-option-sub{font-size:12px;color:var(--text3)}
+/* Password form (secondary view) */
+.login-form-view{width:100%}
+.login-back{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;padding:0;margin-bottom:16px;font-family:var(--sans);transition:color 180ms ease}
+.login-back:hover{color:var(--text)}
+.login-form{width:100%;display:flex;flex-direction:column;gap:10px}
+.login-form label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:2px;display:block}
+.login-form input{width:100%;padding:12px 14px;font-family:var(--sans);font-size:15px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);outline:none;transition:border-color 180ms ease,box-shadow 180ms ease}
+.login-form input:focus{border-color:var(--green-btn);box-shadow:0 0 0 3px var(--green-dim);background:var(--bg2)}
 .login-err{font-size:13px;color:var(--red);text-align:center;min-height:18px}
+.login-footer{font-size:11px;color:var(--text3);text-align:center;margin-top:16px;line-height:1.6}
 
 /* APP SHELL */
 #appShell{display:none}
@@ -626,46 +641,63 @@ html{transition:background 300ms ease,color 300ms ease}
 <body>
 
 <div id="loginScreen">
-  <div class="login-mark">$</div>
-  <div>
+  <div class="login-card">
+    <div class="login-mark">$</div>
     <div class="login-title">Payday</div>
-    <div class="login-sub" style="margin-top:4px">DCL Terminal Ops · Airport/Resort Ops</div>
-  </div>
+    <div class="login-sub">DCL Terminal Ops · Airport/Resort Ops</div>
 
-  <!-- Biometric button (shown when passkey available) -->
-  <div id="loginBioWrap" style="display:none;flex-direction:column;align-items:center;gap:12px;width:100%">
-    <button class="login-biometric-btn" id="loginBioBtn" onclick="loginWithPasskey()">
-      <svg class="login-biometric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
-        <!-- Face ID style icon -->
-        <path d="M7 3H5a2 2 0 00-2 2v2"/>
-        <path d="M17 3h2a2 2 0 012 2v2"/>
-        <path d="M7 21H5a2 2 0 01-2-2v-2"/>
-        <path d="M17 21h2a2 2 0 002-2v-2"/>
-        <path d="M9 9h.01"/>
-        <path d="M15 9h.01"/>
-        <path d="M9 15a3 3 0 006 0"/>
-        <line x1="12" y1="9" x2="12" y2="12"/>
-      </svg>
-      <div class="login-biometric-label" id="loginBioLabel">Sign in with Face ID / Touch ID</div>
-      <div class="login-biometric-sub">Use your saved passkey for this device</div>
-    </button>
-    <div class="login-divider">or</div>
-    <button class="login-pw-toggle" onclick="toggleLoginForm()">Sign in with password instead</button>
-  </div>
+    <!-- View 1: Choose sign-in method -->
+    <div id="loginChooseView" style="width:100%">
+      <button class="login-option" id="loginBioBtn" onclick="loginWithPasskey()" style="display:none">
+        <div class="login-option-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M7 3H5a2 2 0 00-2 2v2"/><path d="M17 3h2a2 2 0 012 2v2"/>
+            <path d="M7 21H5a2 2 0 01-2-2v-2"/><path d="M17 21h2a2 2 0 002-2v-2"/>
+            <path d="M9 9h.01"/><path d="M15 9h.01"/><path d="M9 15a3 3 0 006 0"/>
+          </svg>
+        </div>
+        <div>
+          <div class="login-option-title" id="loginBioLabel">Face ID / Touch ID</div>
+          <div class="login-option-sub">Sign in with biometrics</div>
+        </div>
+      </button>
+      <button class="login-option" onclick="showLoginForm()">
+        <div class="login-option-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="login-option-title">Sign in with Password</div>
+          <div class="login-option-sub">Use your username and password</div>
+        </div>
+      </button>
+      <div id="loginErr" class="login-err"></div>
+    </div>
 
-  <!-- Password form -->
-  <div id="loginFormWrap" class="login-form" style="width:100%;max-width:340px">
-    <input type="text" id="unInput" placeholder="Username or email" autocomplete="username" autocapitalize="none"
-      onkeydown="if(event.key==='Enter')document.getElementById('pwInput').focus()">
-    <input type="password" id="pwInput" placeholder="Password" autocomplete="current-password"
-      onkeydown="if(event.key==='Enter')login()">
-    <button class="btn btn-primary" onclick="login()" id="loginBtn">Sign in</button>
-    <div id="loginErr" class="login-err"></div>
-  </div>
+    <!-- View 2: Password form -->
+    <div id="loginFormView" class="login-form-view" style="display:none">
+      <button class="login-back" onclick="showLoginChoose()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+        Back
+      </button>
+      <div class="login-form">
+        <div>
+          <label for="unInput">Username or email</label>
+          <input type="text" id="unInput" placeholder="you@example.com" autocomplete="username" autocapitalize="none"
+            onkeydown="if(event.key==='Enter')document.getElementById('pwInput').focus()">
+        </div>
+        <div>
+          <label for="pwInput">Password</label>
+          <input type="password" id="pwInput" placeholder="••••••••" autocomplete="current-password"
+            onkeydown="if(event.key==='Enter')login()">
+        </div>
+        <button class="btn btn-primary" onclick="login()" id="loginBtn" style="margin-top:4px">Sign In</button>
+        <div id="loginErrForm" class="login-err"></div>
+      </div>
+    </div>
 
-  <!-- Show bio option link when form visible but passkey available -->
-  <div id="loginShowBioLink" style="display:none">
-    <button class="login-pw-toggle" onclick="toggleLoginForm()">Use Face ID / Touch ID instead</button>
+    <div class="login-footer">Don't have an account?<br>Contact your administrator.</div>
   </div>
 </div>
 <div id="appShell">
@@ -1651,14 +1683,15 @@ async function login() {
   const un = document.getElementById('unInput').value.trim();
   const pw = document.getElementById('pwInput').value;
   const err = document.getElementById('loginErr');
-  if(!un||!pw) { err.textContent='Enter username and password'; return; }
+  const errForm = document.getElementById('loginErrForm') || err;
+  if(!un||!pw) { errForm.textContent='Enter username and password'; return; }
   err.textContent='';
   try {
     const res = await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:un,password:pw})});
     const data = await res.json();
-    if(!res.ok) { err.textContent=data.error||'Invalid credentials'; return; }
+    if(!res.ok) { (document.getElementById('loginErrForm')||err).textContent=data.error||'Invalid credentials'; return; }
     await _onLoginSuccess(data);
-  } catch { err.textContent='Connection error'; }
+  } catch { (document.getElementById('loginErrForm')||err).textContent='Connection error'; }
 }
 function logout() {
   viewAsUser=null;
@@ -1671,7 +1704,8 @@ function logout() {
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('unInput').value='';
   document.getElementById('pwInput').value='';
-  document.getElementById('loginErr').textContent='';
+  const le=document.getElementById('loginErr'); if(le) le.textContent='';
+  const lef=document.getElementById('loginErrForm'); if(lef) lef.textContent='';
   initLoginScreen();
 }
 function updateSidebarUser() {
@@ -3806,55 +3840,48 @@ let _loginShowBio = false;
 
 async function initLoginScreen() {
   const hasPlatform = await checkPasskeyAvailable();
-  const storedHint = localStorage.getItem('payday-passkey-hint');
+  const bioBtn = document.getElementById('loginBioBtn');
+  if(!bioBtn) return;
 
-  // Show biometric button if device supports it (whether or not registered yet)
   if(hasPlatform) {
-    _loginShowBio = true;
-    document.getElementById('loginBioWrap').style.display = 'flex';
-    document.getElementById('loginFormWrap').style.display = 'none';
-    document.getElementById('loginShowBioLink').style.display = 'none';
-    // Platform-specific label
+    bioBtn.style.display = 'flex';
     const ua = navigator.userAgent;
-    const label = /iPhone|iPad/.test(ua) ? 'Sign in with Face ID / Touch ID'
-      : /Mac/.test(ua) ? 'Sign in with Touch ID'
-      : /Android/.test(ua) ? 'Sign in with fingerprint or face'
-      : 'Sign in with Windows Hello';
+    const label = /iPhone|iPad/.test(ua) ? 'Face ID / Touch ID'
+      : /Mac/.test(ua) ? 'Touch ID'
+      : /Android/.test(ua) ? 'Fingerprint / Face Unlock'
+      : 'Windows Hello';
     document.getElementById('loginBioLabel').textContent = label;
-    // Sub-label differs based on whether registered or not
-    const sub = document.querySelector('.login-biometric-sub');
-    if(sub) sub.textContent = storedHint
-      ? 'Use your saved passkey for this device'
-      : 'Register your device in Settings after signing in';
   } else {
-    // No biometric support — show password form directly
-    document.getElementById('loginBioWrap').style.display = 'none';
-    document.getElementById('loginFormWrap').style.display = 'flex';
-    document.getElementById('loginShowBioLink').style.display = 'none';
+    bioBtn.style.display = 'none';
   }
+  // Always start on choose view
+  showLoginChoose();
 }
 
-function toggleLoginForm() {
-  const bioWrap  = document.getElementById('loginBioWrap');
-  const formWrap = document.getElementById('loginFormWrap');
-  const bioLink  = document.getElementById('loginShowBioLink');
-  const showingBio = bioWrap.style.display !== 'none';
-  if(showingBio) {
-    bioWrap.style.display  = 'none';
-    formWrap.style.display = 'flex';
-    bioLink.style.display  = _loginShowBio ? 'block' : 'none';
-  } else {
-    bioWrap.style.display  = 'flex';
-    formWrap.style.display = 'none';
-    bioLink.style.display  = 'none';
-  }
+function showLoginChoose() {
+  const cv = document.getElementById('loginChooseView');
+  const fv = document.getElementById('loginFormView');
+  if(cv) cv.style.display = 'block';
+  if(fv) fv.style.display = 'none';
+  const err = document.getElementById('loginErr');
+  if(err) err.textContent = '';
 }
+
+function showLoginForm() {
+  const cv = document.getElementById('loginChooseView');
+  const fv = document.getElementById('loginFormView');
+  if(cv) cv.style.display = 'none';
+  if(fv) fv.style.display = 'block';
+  setTimeout(()=>document.getElementById('unInput')?.focus(), 50);
+}
+
+function toggleLoginForm() { showLoginForm(); }
 
 async function loginWithPasskey() {
   const btn = document.getElementById('loginBioBtn');
   const err = document.getElementById('loginErr');
-  err.textContent = '';
-  btn.classList.add('scanning');
+  if(err) err.textContent = '';
+  if(btn) btn.style.opacity = '0.7';
 
   try {
     // Get challenge from server (no username — discoverable credential)
@@ -3902,17 +3929,17 @@ async function loginWithPasskey() {
     if(!authRes.ok) throw new Error(authData.error || 'Authentication failed');
 
     // Success — same as password login
-    btn.classList.remove('scanning');
+    if(btn) btn.style.opacity = '1';
     await _onLoginSuccess(authData);
 
   } catch(e) {
-    btn.classList.remove('scanning');
+    if(btn) btn.style.opacity = '1';
     if(e.name === 'NotAllowedError') {
-      err.textContent = 'Biometric cancelled. Use password instead.';
+      if(err) err.textContent = 'Cancelled. Use password instead.';
     } else if(e.message && e.message.includes('not found')) {
-      err.textContent = 'No passkey found for this device. Sign in with password first.';
+      if(err) err.textContent = 'No passkey found. Sign in with password first.';
     } else {
-      err.textContent = e.message || 'Passkey sign-in failed';
+      if(err) err.textContent = e.message || 'Sign-in failed';
     }
     // Auto-show password form after failure
     setTimeout(()=>toggleLoginForm(), 1200);

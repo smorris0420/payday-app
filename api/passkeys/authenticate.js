@@ -19,25 +19,38 @@ export default async function handler(req, res) {
   if(!credential?.id) return res.status(400).json({ error: 'Missing credential' });
 
   const supabase = db();
-  const rpId   = getRpId(req);
-  const origin = getOrigin(req);
 
-  // Find the passkey record by credential ID
+  // Look up passkey by credential.id (browser sends the same base64url we stored)
   const { data: passkey, error: pkErr } = await supabase
     .from('passkeys')
     .select('id, credential_id, public_key, counter, user_id, users(id, username, email, display_name, role, active)')
     .eq('credential_id', credential.id)
     .maybeSingle();
 
-  if(pkErr) {
-    console.error('Passkey lookup error:', pkErr.message);
-    return res.status(500).json({ error: 'Passkey lookup failed' });
-  }
-  if(!passkey) return res.status(401).json({ error: 'Passkey not found for this device' });
-  if(!passkey.users?.active) return res.status(401).json({ error: 'Account inactive' });
+  console.log('[auth] looking up credential_id:', credential.id.slice(0,20)+'...');
+  console.log('[auth] passkey found:', !!passkey, pkErr?.message||'');
 
-  // Find the most recent valid authentication challenge
-  const { data: ch, error: chErr } = await supabase
+  if(!passkey) {
+    // Try rawId as fallback
+    const { data: fallback } = await supabase
+      .from('passkeys')
+      .select('id, credential_id, public_key, counter, user_id, users(id, username, email, display_name, role, active)')
+      .eq('credential_id', credential.rawId)
+      .maybeSingle();
+    if(!fallback) return res.status(401).json({ error: 'Passkey not found for this device. Please sign in with password.' });
+    Object.assign(passkey || {}, fallback);
+    // Use fallback path
+    return handleAuth(req, res, supabase, fallback, credential);
+  }
+
+  return handleAuth(req, res, supabase, passkey, credential);
+}
+
+async function handleAuth(req, res, supabase, passkey, credential) {
+  if(!passkey?.users?.active) return res.status(401).json({ error: 'Account inactive' });
+
+  // Find most recent valid authentication challenge
+  const { data: ch } = await supabase
     .from('webauthn_challenges')
     .select('challenge, id')
     .eq('type', 'authentication')
@@ -46,48 +59,40 @@ export default async function handler(req, res) {
     .limit(1)
     .maybeSingle();
 
-  if(chErr || !ch) {
-    console.error('Auth challenge lookup error:', chErr?.message);
-    return res.status(400).json({ error: 'Challenge expired — please try again' });
-  }
+  if(!ch) return res.status(400).json({ error: 'Challenge expired — please try again' });
 
   let verification;
   try {
+    // Decode stored public key
+    const pubKeyBytes = Uint8Array.from(Buffer.from(passkey.public_key, 'base64'));
+    // Decode credential ID — it's stored as the browser's base64url string
+    const credIdBytes = Uint8Array.from(
+      Buffer.from(passkey.credential_id.replace(/-/g,'+').replace(/_/g,'/'), 'base64')
+    );
+
     verification = await verifyAuthenticationResponse({
       response: credential,
       expectedChallenge: ch.challenge,
-      expectedOrigin: origin,
-      expectedRPID: rpId,
+      expectedOrigin: getOrigin(req),
+      expectedRPID: getRpId(req),
       authenticator: {
-        credentialID:        Uint8Array.from(Buffer.from(passkey.credential_id, 'base64url')),
-        credentialPublicKey: Uint8Array.from(Buffer.from(passkey.public_key, 'base64')),
+        credentialID:        credIdBytes,
+        credentialPublicKey: pubKeyBytes,
         counter:             passkey.counter || 0,
       },
       requireUserVerification: false,
     });
   } catch(e) {
-    console.error('Auth verification error:', e.message, { origin, rpId });
+    console.error('[auth] verify error:', e.message);
     return res.status(401).json({ error: 'Verification failed: ' + e.message });
   }
 
   if(!verification.verified) return res.status(401).json({ error: 'Authentication not verified' });
 
-  // Update counter to prevent replay attacks
-  await supabase.from('passkeys')
-    .update({ counter: verification.authenticationInfo.newCounter })
-    .eq('id', passkey.id);
-
-  // Delete used challenge
+  await supabase.from('passkeys').update({ counter: verification.authenticationInfo.newCounter }).eq('id', passkey.id);
   await supabase.from('webauthn_challenges').delete().eq('id', ch.id);
 
   const u = passkey.users;
   const token = await signToken(u.id, u.username, u.role);
-
-  return res.status(200).json({
-    token,
-    username:    u.username,
-    displayName: u.display_name || u.username,
-    role:        u.role,
-    userId:      u.id,
-  });
+  return res.status(200).json({ token, username: u.username, displayName: u.display_name || u.username, role: u.role, userId: u.id });
 }
