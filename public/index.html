@@ -3295,23 +3295,29 @@ async function loadDashboard() {
 }
 
 function getDefaultDashConfig() {
+  // Your custom layout — set as the new default
   return [
-    // Row 0 — four key stats (~140×160px each)
-    { id:dashUID(), widgetId:'total-gross',    x:0,  y:0,  w:12, h:16, chartType:null },
-    { id:dashUID(), widgetId:'total-net',      x:12, y:0,  w:12, h:16, chartType:null },
-    { id:dashUID(), widgetId:'keep-rate',      x:24, y:0,  w:12, h:16, chartType:null },
-    { id:dashUID(), widgetId:'ot-earnings',    x:36, y:0,  w:12, h:16, chartType:null },
-    // Row 16 — main chart + earnings donut
-    { id:dashUID(), widgetId:'chart-gross',    x:0,  y:16, w:32, h:32, chartType:'bar' },
-    { id:dashUID(), widgetId:'chart-earnings', x:32, y:16, w:16, h:32, chartType:'doughnut' },
-    // Row 48 — pace stats + OT info
-    { id:dashUID(), widgetId:'proj-gross',     x:0,  y:48, w:12, h:16, chartType:null },
-    { id:dashUID(), widgetId:'ot-hours',       x:12, y:48, w:12, h:16, chartType:null },
-    { id:dashUID(), widgetId:'track-streak',   x:24, y:48, w:12, h:16, chartType:null },
-    { id:dashUID(), widgetId:'net-per-day',    x:36, y:48, w:12, h:16, chartType:null },
-    // Row 64 — SS tracker + recent paychecks
-    { id:dashUID(), widgetId:'track-ss',       x:0,  y:64, w:16, h:24, chartType:null },
-    { id:dashUID(), widgetId:'track-recent',   x:16, y:64, w:32, h:24, chartType:null },
+    { id:dashUID(), widgetId:'total-gross',      x:0,  y:0,   w:7,  h:11, chartType:null },
+    { id:dashUID(), widgetId:'total-net',        x:7,  y:0,   w:7,  h:11, chartType:null },
+    { id:dashUID(), widgetId:'ot-earnings',      x:14, y:0,   w:7,  h:11, chartType:null },
+    { id:dashUID(), widgetId:'keep-rate',        x:21, y:0,   w:7,  h:11, chartType:null },
+    { id:dashUID(), widgetId:'proj-gross',       x:28, y:0,   w:7,  h:11, chartType:null },
+    { id:dashUID(), widgetId:'proj-net',         x:35, y:0,   w:7,  h:11, chartType:null },
+    { id:dashUID(), widgetId:'avg-net',          x:42, y:0,   w:6,  h:11, chartType:null },
+    { id:dashUID(), widgetId:'chart-deductions', x:0,  y:11,  w:11, h:32, chartType:'pie' },
+    { id:dashUID(), widgetId:'chart-earnings',   x:11, y:11,  w:11, h:32, chartType:'doughnut' },
+    { id:dashUID(), widgetId:'total-tax',        x:22, y:11,  w:6,  h:10, chartType:null },
+    { id:dashUID(), widgetId:'ot-dep',           x:22, y:21,  w:6,  h:10, chartType:null },
+    { id:dashUID(), widgetId:'chart-monthly',    x:28, y:11,  w:20, h:20, chartType:'bar' },
+    { id:dashUID(), widgetId:'chart-gross-net',  x:22, y:31,  w:26, h:22, chartType:'bar' },
+    { id:dashUID(), widgetId:'track-goal',       x:0,  y:43,  w:22, h:10, chartType:null },
+    { id:dashUID(), widgetId:'chart-net',        x:0,  y:53,  w:17, h:28, chartType:'bar' },
+    { id:dashUID(), widgetId:'chart-tax-burden', x:17, y:53,  w:15, h:28, chartType:'line' },
+    { id:dashUID(), widgetId:'chart-gross',      x:32, y:53,  w:16, h:28, chartType:'line' },
+    { id:dashUID(), widgetId:'ot-hours',         x:12, y:186, w:12, h:16, chartType:null },
+    { id:dashUID(), widgetId:'track-streak',     x:24, y:186, w:12, h:16, chartType:null },
+    { id:dashUID(), widgetId:'track-ss',         x:0,  y:202, w:16, h:24, chartType:null },
+    { id:dashUID(), widgetId:'track-recent',     x:16, y:202, w:32, h:24, chartType:null },
   ];
 }
 
@@ -3834,11 +3840,15 @@ function clearDashboard(){
 
 function resetDashboard(){
   if(!confirm('Reset your dashboard to the default layout? Your current layout will be lost.')) return;
+  // Destroy all existing charts
   Object.values(dashCharts).forEach(c=>{try{c.destroy();}catch(e){}});
   dashCharts={};
   dashConfig = getDefaultDashConfig();
-  saveDashConfig();
-  renderDashboard(); buildDashPanel();
+  // Force-save immediately (not debounced) so it persists on reload
+  forceSaveDash();
+  renderDashboard();
+  buildDashPanel();
+  requestAnimationFrame(()=>{ initCanvasDrop(); initDashResizeObserver(); });
   showToast('Dashboard reset to default');
 }
 
