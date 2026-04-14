@@ -37,17 +37,19 @@
   --sidebar-w:220px;--content-max:960px;
 }
 [data-theme="dark"] {
-  --bg:#081008;--bg2:#0f1a0f;--bg3:#162016;--bg4:#1e2d1e;
-  --border:rgba(134,239,172,0.08);--border2:rgba(134,239,172,0.14);
-  --text:#e8f5e8;--text2:#86b890;--text3:#4a6b4e;
-  --green:#4ADE80;--green-mid:#86EFAC;--green-dim:rgba(74,222,128,0.12);--green-border:rgba(74,222,128,0.28);--green-btn:#16A34A;
+  /* Neutral dark grays — no green tint on backgrounds */
+  --bg:#0f1117;--bg2:#1a1d23;--bg3:#22252d;--bg4:#2a2e38;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#f0f2f5;--text2:#9ba3af;--text3:#5a6270;
+  /* Green kept vibrant for data/accents only — not used on backgrounds */
+  --green:#4ADE80;--green-mid:#86EFAC;--green-dim:rgba(74,222,128,0.10);--green-border:rgba(74,222,128,0.25);--green-btn:#16A34A;
   --brand-light:#BBF7D0;--brand-mid:#4ADE80;--brand-dark:#16A34A;
   --red:#F87171;--red-dim:rgba(248,113,113,0.10);
   --amber:#FBBF24;--amber-dim:rgba(251,191,36,0.10);
   --blue:#60A5FA;--blue-dim:rgba(96,165,250,0.10);
   --chart1:#60A5FA;--chart2:#FBBF24;--chart3:#A78BFA;--chart4:#22D3EE;--chart5:#F87171;--chart6:#F472B6;
-  --shadow:0 1px 3px rgba(0,0,0,0.4),0 1px 2px rgba(0,0,0,0.25);
-  --shadow-md:0 4px 16px rgba(0,0,0,0.5);
+  --shadow:0 1px 3px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.6);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg)}
@@ -678,6 +680,8 @@ html{transition:background 300ms ease,color 300ms ease}
   /* Widgets stack vertically on mobile */
   .dash-widget{position:static!important;width:100%!important;height:auto!important;min-height:120px;margin-bottom:8px}
   .dash-widget-body{padding:0 8px 6px}
+  /* Chart canvases need a fixed height on mobile — Chart.js ignores % height without a defined pixel parent */
+  .dash-widget-body canvas{height:220px!important;min-height:220px!important;flex:none!important}
   .dash-resize{display:none}
   /* Widget panel becomes bottom sheet */
   .dash-panel{width:100%;border-left:none;border-top:1.5px solid var(--border);height:auto;max-height:340px;overflow-y:auto}
@@ -950,7 +954,8 @@ html{transition:background 300ms ease,color 300ms ease}
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Dental</span><span class="card-value red" id="bDen">—</span></div>
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Medical</span><span class="card-value red" id="bMedI">—</span></div>
           <div class="card-row"><span class="card-label" style="color:var(--red)">– Vision</span><span class="card-value red" id="bVis">—</span></div>
-          <div class="card-row" id="rowRetire" style="display:none"><span class="card-label" style="color:var(--red)">– 401k / Retirement</span><span class="card-value red" id="bRetire">—</span></div>
+          <div class="card-row" id="rowRetirePretax" style="display:none"><span class="card-label" style="color:var(--red)">– Pre-tax 401k</span><span class="card-value red" id="bRetirePretax">—</span></div>
+          <div class="card-row" id="rowRetireRoth" style="display:none"><span class="card-label" style="color:var(--red)">– Roth 401k <span style="font-size:10px;opacity:.6">(post-tax)</span></span><span class="card-value red" id="bRetireRoth">—</span></div>
           <div class="card-row card-total"><span class="card-label">Take-home pay</span><span class="card-value green" id="bNet">—</span></div>
         </div>
         <div class="section-title">Hours &amp; Pay</div>
@@ -973,7 +978,22 @@ html{transition:background 300ms ease,color 300ms ease}
           <div class="input-row"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iDen" value="2.00" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iMedI" value="17.00" step="0.01" min="0"></div></div>
           <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iVis" value="0.50" step="0.01" min="0"></div></div>
-          <div class="input-row"><label>401k / Retirement</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iRetire" value="0" step="0.01" min="0"></div></div>
+          <div class="input-row">
+            <label>Pre-tax 401k</label>
+            <div style="display:flex;align-items:center;gap:6px">
+              <button id="iRetirePretaxToggle" onclick="toggleRetireMode('pretax')" title="Switch $ / %"
+                style="font-size:11px;font-weight:700;font-family:var(--mono);padding:5px 9px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1">$</button>
+              <div class="input-wrap"><span class="prefix" id="iRetirePretaxPrefix">$</span><input type="number" id="iRetirePretax" value="0" step="0.01" min="0"></div>
+            </div>
+          </div>
+          <div class="input-row">
+            <label>Roth 401k</label>
+            <div style="display:flex;align-items:center;gap:6px">
+              <button id="iRetireRothToggle" onclick="toggleRetireMode('roth')" title="Switch $ / %"
+                style="font-size:11px;font-weight:700;font-family:var(--mono);padding:5px 9px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1">$</button>
+              <div class="input-wrap"><span class="prefix" id="iRetireRothPrefix">$</span><input type="number" id="iRetireRoth" value="0" step="0.01" min="0"></div>
+            </div>
+          </div>
         </div>
         <button class="btn btn-primary" style="margin-top:4px;margin-bottom:8px" onclick="openLogModal()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -1299,9 +1319,9 @@ html{transition:background 300ms ease,color 300ms ease}
 
         <!-- Week Builder Card -->
         <div class="card card-pad">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
             <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Week Builder — OT &amp; Hours Preview</div>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
               <div style="display:flex;align-items:center;gap:6px">
                 <label style="font-size:11px;color:var(--text3)">Pay rate</label>
                 <div style="display:flex;align-items:center;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:5px 10px;gap:4px">
@@ -1311,8 +1331,21 @@ html{transition:background 300ms ease,color 300ms ease}
                   <span style="font-size:11px;color:var(--text3)">/hr</span>
                 </div>
               </div>
-              <button onclick="clearWeek()" class="btn btn-secondary btn-sm">Clear week</button>
+              <button onclick="clearWeek()" class="btn btn-secondary btn-sm">Clear</button>
             </div>
+          </div>
+
+          <!-- Schedule save/load bar -->
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;background:var(--bg3);border-radius:var(--radius-sm);margin-bottom:16px;border:1px solid var(--border)">
+            <select id="spScheduleSelect" onchange="spLoadSelected()"
+              style="flex:1;min-width:140px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--sans);font-size:13px;padding:6px 8px;outline:none">
+              <option value="">— Load a schedule —</option>
+            </select>
+            <button onclick="spDeleteSelected()" class="btn btn-danger btn-sm" id="spDeleteBtn" style="display:none">Delete</button>
+            <div style="height:20px;width:1px;background:var(--border);flex-shrink:0"></div>
+            <input type="text" id="spScheduleName" placeholder="Schedule name…" maxlength="60"
+              style="flex:1;min-width:130px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--sans);font-size:13px;padding:6px 8px;outline:none">
+            <button onclick="spSaveSchedule()" class="btn btn-primary btn-sm" id="spSaveBtn">Save schedule</button>
           </div>
 
           <div style="overflow-x:auto;margin-bottom:16px">
@@ -1390,7 +1423,19 @@ html{transition:background 300ms ease,color 300ms ease}
             <div class="input-row" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border)"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sDen" value="2.00" step="0.01" min="0"></div></div>
             <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sMedI" value="17.00" step="0.01" min="0"></div></div>
             <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sVis" value="0.50" step="0.01" min="0"></div></div>
-            <div class="input-row"><label>401k / Retirement</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sRetire" value="0.00" step="0.01" min="0"></div></div>
+            <div class="input-row"><label>Pre-tax 401k default</label>
+              <div style="display:flex;align-items:center;gap:6px">
+                <button onclick="toggleSettingRetireMode('pretax')" id="sRetirePretaxToggle" title="Switch $ / %" style="font-size:11px;font-weight:700;font-family:var(--mono);padding:5px 9px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer">$</button>
+                <div class="input-wrap"><span class="prefix" id="sRetirePretaxPrefix">$</span><input type="number" id="sRetirePretax" value="0" step="0.01" min="0" placeholder="0"></div>
+              </div>
+            </div>
+            <div class="input-row"><label>Roth 401k default</label>
+              <div style="display:flex;align-items:center;gap:6px">
+                <button onclick="toggleSettingRetireMode('roth')" id="sRetireRothToggle" title="Switch $ / %" style="font-size:11px;font-weight:700;font-family:var(--mono);padding:5px 9px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer">$</button>
+                <div class="input-wrap"><span class="prefix" id="sRetireRothPrefix">$</span><input type="number" id="sRetireRoth" value="0" step="0.01" min="0" placeholder="0"></div>
+              </div>
+            </div>
+            <div class="input-row" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border)"><label>Default reg hours/week</label><div class="input-wrap"><input type="number" id="sDefaultHours" step="0.25" min="1" max="60" placeholder="40" class="no-prefix"></div></div>
           </div>
           <button class="btn btn-primary" style="margin-bottom:20px" onclick="saveSettings()">Save defaults</button>
 
@@ -1581,7 +1626,8 @@ html{transition:background 300ms ease,color 300ms ease}
         <div class="form-field"><label>Dental ($)</label><input type="number" id="lDen" step="0.01" min="0"></div>
         <div class="form-field"><label>Medical ($)</label><input type="number" id="lMedI" step="0.01" min="0"></div>
         <div class="form-field"><label>Vision ($)</label><input type="number" id="lVis" step="0.01" min="0"></div>
-      <div class="form-field"><label>401k / Retirement ($)</label><input type="number" id="lRetire" step="0.01" min="0" placeholder="0"></div>
+      <div class="form-field"><label>Pre-tax 401k ($)</label><input type="number" id="lRetirePretax" step="0.01" min="0" placeholder="0"></div>
+      <div class="form-field"><label>Roth 401k ($)</label><input type="number" id="lRetireRoth" step="0.01" min="0" placeholder="0"></div>
       </div>
     </div>
 
@@ -1681,7 +1727,8 @@ html{transition:background 300ms ease,color 300ms ease}
           <div class="form-field"><label>Dental ($)</label><input type="number" id="eDen" step="0.01" min="0"></div>
           <div class="form-field"><label>Medical ($)</label><input type="number" id="eMedI" step="0.01" min="0"></div>
           <div class="form-field"><label>Vision ($)</label><input type="number" id="eVis" step="0.01" min="0"></div>
-          <div class="form-field"><label>401k / Retirement ($)</label><input type="number" id="eRetire" step="0.01" min="0" placeholder="0"></div>
+          <div class="form-field"><label>Pre-tax 401k ($)</label><input type="number" id="eRetirePretax" step="0.01" min="0" placeholder="0"></div>
+          <div class="form-field"><label>Roth 401k ($)</label><input type="number" id="eRetireRoth" step="0.01" min="0" placeholder="0"></div>
         </div>
       </div>
 
@@ -1963,7 +2010,8 @@ async function loadAllAsUser(userId, displayName) {
     if(appSettings.den) document.getElementById('iDen').value=parseFloat(appSettings.den).toFixed(2);
     if(appSettings.medI) document.getElementById('iMedI').value=parseFloat(appSettings.medI).toFixed(2);
     if(appSettings.vis) document.getElementById('iVis').value=parseFloat(appSettings.vis).toFixed(2);
-    if(appSettings.retire) document.getElementById('iRetire').value=parseFloat(appSettings.retire).toFixed(2);
+    if(appSettings.retirePretax!=null) document.getElementById('iRetirePretax').value=parseFloat(appSettings.retirePretax);
+    if(appSettings.retireRoth!=null) document.getElementById('iRetireRoth').value=parseFloat(appSettings.retireRoth);
     showViewAsBanner(displayName);
     showToast('Viewing as '+displayName);
     setSyncDot('ok');
@@ -2006,9 +2054,11 @@ async function loadAll() {
     if(appSettings.den) document.getElementById('iDen').value=parseFloat(appSettings.den).toFixed(2);
     if(appSettings.medI) document.getElementById('iMedI').value=parseFloat(appSettings.medI).toFixed(2);
     if(appSettings.vis) document.getElementById('iVis').value=parseFloat(appSettings.vis).toFixed(2);
-    if(appSettings.retire) document.getElementById('iRetire').value=parseFloat(appSettings.retire).toFixed(2);
+    if(appSettings.retirePretax!=null) document.getElementById('iRetirePretax').value=parseFloat(appSettings.retirePretax);
+    if(appSettings.retireRoth!=null) document.getElementById('iRetireRoth').value=parseFloat(appSettings.retireRoth);
     const defaultRate=appSettings.defaultRate||mostRecentRate()||21.90;
     document.getElementById('iRate').value=defaultRate;
+    if(appSettings.defaultHours) document.getElementById('iReg').value=appSettings.defaultHours;
     // Show pending outbox count
     const pending = window._idb && userId ? await window._idb.idbOutboxCount(userId) : 0;
     if(pending > 0) setSyncDot('pending', pending);
@@ -2214,17 +2264,22 @@ function calc() {
   const den=parseFloat(document.getElementById('iDen').value)||0;
   const medI=parseFloat(document.getElementById('iMedI').value)||0;
   const vis=parseFloat(document.getElementById('iVis').value)||0;
-  const retire=parseFloat(document.getElementById('iRetire').value)||0;
   const regRate=rateRound(rate), otRate=rateRound(rate*1.5), dtRate=rateRound(rate*2);
   const regPay=payRound(regRate*reg), otPay=payRound(otRate*ot), dtPay=payRound(dtRate*dt);
   const holPay=payRound(regRate*hol), sickPay=payRound(regRate*sick), vacPay=payRound(regRate*vac), fltHolPay=payRound(regRate*fltHol);
   const premPay=premRate*premHrs;
   const gross=regPay+otPay+dtPay+holPay+sickPay+vacPay+fltHolPay+premPay+addl;
-  // Pre-tax deductions (dental, medical, vision, 401k) reduce FICA taxable base
-  const preTax=den+medI+vis+retire;
-  const taxableGross=Math.max(0, gross-preTax);
+  // Resolve pre-tax 401k: flat $ or % of gross — reduces federal taxable income
+  const _pretaxRaw=parseFloat(document.getElementById('iRetirePretax').value)||0;
+  const retirePretax = _retireMode.pretax==='pct' ? parseFloat(Math.max(0,gross*_pretaxRaw/100).toFixed(2)) : _pretaxRaw;
+  // Resolve Roth 401k: flat $ or % of gross — post-tax, does NOT reduce any tax base
+  const _rothRaw=parseFloat(document.getElementById('iRetireRoth').value)||0;
+  const retireRoth = _retireMode.roth==='pct' ? parseFloat(Math.max(0,gross*_rothRaw/100).toFixed(2)) : _rothRaw;
+  const retire = retirePretax + retireRoth; // total 401k for display
+  // Pre-tax deductions: dental, medical, vision, pre-tax 401k reduce federal taxable
+  // SS/Medicare base: only benefits reduce it — neither pretax NOR roth 401k reduces SS wages (Roth is post-tax, pretax is elective deferral not exempt from FICA)
+  const taxableGross=Math.max(0, gross-den-medI-vis-retirePretax);
   const _calcDate=document.getElementById('iDate')?.value||new Date().toISOString().slice(0,10);
-  // SS/Medicare: computed on gross minus benefits ONLY (401k/retire does NOT reduce SS wages)
   const ficaBase = Math.max(0, gross - den - medI - vis);
   const fed=irsWithholding(taxableGross,_calcDate), ss=parseFloat((ficaBase*0.062).toFixed(2)), med=parseFloat((ficaBase*0.0145).toFixed(2));
   const totalDed=fed+ss+med+den+medI+vis+retire, net=gross-totalDed;
@@ -2246,8 +2301,10 @@ function calc() {
   document.getElementById('bDen').textContent=fmt(den);
   document.getElementById('bMedI').textContent=fmt(medI);
   document.getElementById('bVis').textContent=fmt(vis);
-  document.getElementById('bRetire').textContent=fmt(retire);
-  document.getElementById('rowRetire').style.display=retire>0?'flex':'none';
+  document.getElementById('bRetirePretax').textContent=fmt(retirePretax)+(_retireMode.pretax==='pct'&&retirePretax>0?' ('+_pretaxRaw+'% of gross)':'');
+  document.getElementById('rowRetirePretax').style.display=retirePretax>0?'flex':'none';
+  document.getElementById('bRetireRoth').textContent=fmt(retireRoth)+(_retireMode.roth==='pct'&&retireRoth>0?' ('+_rothRaw+'% of gross)':'');
+  document.getElementById('rowRetireRoth').style.display=retireRoth>0?'flex':'none';
   document.getElementById('bNet').textContent=fmt(net);
   document.getElementById('calcRateLabel').textContent='$'+rate.toFixed(2)+'/hr';
   document.getElementById('rowOT').style.display=ot>0?'flex':'none';
@@ -2260,7 +2317,7 @@ function calc() {
   document.getElementById('rowAddl').style.display=addl>0?'flex':'none';
 }
 document.getElementById('iDate').value=new Date().toISOString().slice(0,10);
-['iDate','iRate','iReg','iOT','iDT','iHol','iSick','iVac','iFltHol','iPremRate','iPremHrs','iAddl','iDen','iMedI','iVis','iRetire'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+['iDate','iRate','iReg','iOT','iDT','iHol','iSick','iVac','iFltHol','iPremRate','iPremHrs','iAddl','iDen','iMedI','iVis','iRetirePretax','iRetireRoth'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 
 // ===== NAVIGATION =====
 const pageOrder = ['calc','history','ytd','bulk','planner','settings','admin'];
@@ -2307,6 +2364,43 @@ function showPage(id, btn, source) {
 let histView = 'cards'; // 'cards' or 'sheet'
 let bulkMode = false;
 let selectedIds = new Set();
+
+// ===== RETIRE MODE ($ vs %) =====
+// _retireMode tracks $ vs % per field: {pretax: 'flat'|'pct', roth: 'flat'|'pct'}
+const _retireMode = { pretax: 'flat', roth: 'flat' };
+function toggleRetireMode(type) {
+  const isCalc = !!document.getElementById('iRetirePretaxToggle');
+  const suffix = type === 'pretax' ? 'Pretax' : 'Roth';
+  const prefix = type === 'pretax' ? 'Pretax' : 'Roth';
+  _retireMode[type] = _retireMode[type] === 'flat' ? 'pct' : 'flat';
+  const isPct = _retireMode[type] === 'pct';
+  // Update calc page toggle
+  const btn = document.getElementById('iRetire'+suffix+'Toggle');
+  const pfx = document.getElementById('iRetire'+suffix+'Prefix');
+  const inp = document.getElementById('iRetire'+suffix);
+  if (btn) {
+    btn.textContent = isPct ? '%' : '$';
+    btn.style.color = isPct ? 'var(--blue)' : 'var(--text2)';
+    btn.style.borderColor = isPct ? 'var(--blue)' : 'var(--border2)';
+    btn.style.background = isPct ? 'var(--blue-dim)' : 'var(--bg3)';
+  }
+  if (pfx) pfx.textContent = isPct ? '' : '$';
+  if (inp) { inp.style.paddingLeft = isPct ? '10px' : ''; inp.placeholder = isPct ? '3' : '0'; inp.step = isPct ? '0.1' : '0.01'; inp.value = ''; }
+  calc();
+}
+// Settings page retire toggle (same $ / % concept but for defaults)
+const _settingRetireMode = { pretax: 'flat', roth: 'flat' };
+function toggleSettingRetireMode(type) {
+  _settingRetireMode[type] = _settingRetireMode[type] === 'flat' ? 'pct' : 'flat';
+  const isPct = _settingRetireMode[type] === 'pct';
+  const suffix = type === 'pretax' ? 'Pretax' : 'Roth';
+  const btn = document.getElementById('sRetire'+suffix+'Toggle');
+  const pfx = document.getElementById('sRetire'+suffix+'Prefix');
+  const inp = document.getElementById('sRetire'+suffix);
+  if (btn) { btn.textContent = isPct ? '%' : '$'; btn.style.color = isPct ? 'var(--blue)' : 'var(--text2)'; btn.style.borderColor = isPct ? 'var(--blue)' : 'var(--border2)'; btn.style.background = isPct ? 'var(--blue-dim)' : 'var(--bg3)'; }
+  if (pfx) pfx.textContent = isPct ? '' : '$';
+  if (inp) { inp.placeholder = isPct ? '3' : '0'; inp.step = isPct ? '0.1' : '0.01'; inp.value = ''; }
+}
 
 function toggleBulkMode() {
   bulkMode = !bulkMode;
@@ -3638,9 +3732,19 @@ function renderDashChart(w) {
     ]},options:{...cd,plugins:{...cd.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false}}}};
   } else if(w.widgetId==='chart-monthly'){
     const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const bm={}; d.filtered.forEach(s=>{const m=new Date(s.date+'T12:00:00').getMonth();if(!bm[m])bm[m]=0;bm[m]+=s.gross;});
+    const bm={};
+    d.filtered.forEach(s=>{
+      const m=new Date(s.date+'T12:00:00').getMonth();
+      if(!bm[m])bm[m]={gross:0,net:0};
+      bm[m].gross+=s.gross;
+      const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
+      bm[m].net+=parseFloat((s.net||(s.gross-ded)).toFixed(2));
+    });
     const mk=Object.keys(bm).sort((a,b)=>a-b);
-    cfg={type:ct==='line'?'line':'bar',data:{labels:mk.map(m=>MONTHS[m]),datasets:[{label:'Gross',data:mk.map(m=>+bm[m].toFixed(2)),backgroundColor:'rgba(22,163,74,.55)',borderColor:'rgba(22,163,74,.8)',borderWidth:1,borderRadius:3}]},options:{...cd}};
+    cfg={type:ct==='line'?'line':'bar',data:{labels:mk.map(m=>MONTHS[m]),datasets:[
+      {label:'Gross',data:mk.map(m=>+bm[m].gross.toFixed(2)),backgroundColor:'rgba(251,191,36,.55)',borderColor:'rgba(251,191,36,.85)',borderWidth:1,borderRadius:3},
+      {label:'Net',data:mk.map(m=>+bm[m].net.toFixed(2)),backgroundColor:'rgba(22,163,74,.55)',borderColor:'rgba(22,163,74,.85)',borderWidth:1,borderRadius:3},
+    ]},options:{...cd,plugins:{...cd.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false}}}};
   }
 
   if(cfg) {
@@ -4562,7 +4666,9 @@ function buildSettingsUI() {
   if(appSettings.medI) document.getElementById('sMedI').value=parseFloat(appSettings.medI).toFixed(2);
   if(appSettings.vis) document.getElementById('sVis').value=parseFloat(appSettings.vis).toFixed(2);
   if(appSettings.fedExtra) document.getElementById('sFedExtra').value=parseFloat(appSettings.fedExtra).toFixed(2);
-  if(appSettings.retire) document.getElementById('sRetire').value=parseFloat(appSettings.retire).toFixed(2);
+  if(appSettings.retirePretax!=null) document.getElementById('sRetirePretax').value=parseFloat(appSettings.retirePretax);
+  if(appSettings.retireRoth!=null) document.getElementById('sRetireRoth').value=parseFloat(appSettings.retireRoth);
+  if(appSettings.defaultHours) document.getElementById('sDefaultHours').value=parseFloat(appSettings.defaultHours);
   if(appSettings.fedOverride) document.getElementById('sFedRate').value=appSettings.fedOverride;
   // Highlight active theme buttons without re-applying (theme already active)
   const currentThemePref = localStorage.getItem('payday-theme-pref') || appSettings.theme || 'light';
@@ -4777,14 +4883,23 @@ async function saveSettings() {
     den: parseFloat(document.getElementById('sDen').value)||2,
     medI: parseFloat(document.getElementById('sMedI').value)||17,
     vis: parseFloat(document.getElementById('sVis').value)||0.5,
-    retire: parseFloat(document.getElementById('sRetire').value)||0,
   };
+  const _sPretaxRaw = parseFloat(document.getElementById('sRetirePretax').value)||0;
+  const _sRothRaw   = parseFloat(document.getElementById('sRetireRoth').value)||0;
+  s.retirePretax = _sPretaxRaw;
+  s.retireRoth   = _sRothRaw;
+  s.retirePretaxMode = _settingRetireMode.pretax;
+  s.retireRothMode   = _settingRetireMode.roth;
+  const _sHours = parseFloat(document.getElementById('sDefaultHours').value);
+  if(_sHours > 0) s.defaultHours = _sHours;
   if(rateVal > 0) s.defaultRate = rateVal;
   Object.assign(appSettings, s);
   document.getElementById('iDen').value=s.den;
   document.getElementById('iMedI').value=s.medI;
   document.getElementById('iVis').value=s.vis;
-  if(s.retire>=0) document.getElementById('iRetire').value=s.retire;
+  if(appSettings.retirePretax!=null) document.getElementById('iRetirePretax').value=appSettings.retirePretax;
+  if(appSettings.retireRoth!=null)   document.getElementById('iRetireRoth').value=appSettings.retireRoth;
+  if(s.defaultHours) document.getElementById('iReg').value=s.defaultHours;
   if(rateVal > 0) document.getElementById('iRate').value=rateVal;
   calc();
   if(window._idb && currentUser) window._idb.idbSaveSettings({...appSettings}, currentUser.id).catch(()=>{});
@@ -4849,7 +4964,8 @@ function openLogModal() {
   document.getElementById('lOTPay').value='';
   document.getElementById('lGross').value='';
   document.getElementById('lNet').value='';
-  document.getElementById('lRetire').value='';
+  document.getElementById('lRetirePretax').value='';
+  document.getElementById('lRetireRoth').value='';
   document.getElementById('lFed').value='';
   document.getElementById('lSS').value='';
   document.getElementById('lMed').value='';
@@ -4881,17 +4997,19 @@ async function saveLog() {
   const den=parseFloat(document.getElementById('lDen').value)||0;
   const medI=parseFloat(document.getElementById('lMedI').value)||0;
   const vis=parseFloat(document.getElementById('lVis').value)||0;
-  const retire=parseFloat(document.getElementById('lRetire').value)||0;
+  const retirePretax=parseFloat(document.getElementById('lRetirePretax').value)||0;
+  const retireRoth=parseFloat(document.getElementById('lRetireRoth').value)||0;
+  const retire=retirePretax+retireRoth;
   const _regR=rateRound(rate),_otR=rateRound(rate*1.5),_dtR=rateRound(rate*2);
   const gross=parseFloat((payRound(_regR*reg)+payRound(_otR*ot)+payRound(_dtR*dt)+payRound(_regR*hol)+payRound(_regR*sick)+payRound(_regR*vac)+payRound(_regR*fltHol)+payRound(premRate*premHrs)+addl).toFixed(2));
-  // Pre-tax deductions reduce FICA and fed taxable base
-  const _lPreTax=den+medI+vis+retire;
-  const _lTaxable=Math.max(0,gross-_lPreTax);
+  // Pre-tax 401k reduces fed taxable; Roth does not. Neither reduces SS/Medicare wages.
+  const _lFicaBase=Math.max(0,gross-den-medI-vis);
+  const _lTaxable=Math.max(0,gross-den-medI-vis-retirePretax);
   const fedRaw=parseFloat(document.getElementById('lFed').value), fed=isNaN(fedRaw)?irsWithholding(_lTaxable,document.getElementById('lDate').value):fedRaw;
   const ssRaw=parseFloat(document.getElementById('lSS').value);
   const medRaw=parseFloat(document.getElementById('lMed').value);
-  const ss=isNaN(ssRaw)?parseFloat((_lTaxable*0.062).toFixed(2)):ssRaw;
-  const med=isNaN(medRaw)?parseFloat((_lTaxable*0.0145).toFixed(2)):medRaw;
+  const ss=isNaN(ssRaw)?parseFloat((_lFicaBase*0.062).toFixed(2)):ssRaw;
+  const med=isNaN(medRaw)?parseFloat((_lFicaBase*0.0145).toFixed(2)):medRaw;
   // Use exact paystub values if entered, otherwise use calculated
   const regPayRaw=parseFloat(document.getElementById('lRegPay').value);
   const otPayRaw=parseFloat(document.getElementById('lOTPay').value);
@@ -4913,7 +5031,7 @@ async function saveLog() {
   const stub={id:uid(),date:document.getElementById('lDate').value,rate,reg,ot,dt,hol,sick,vac,fltHol,premRate,premHrs,addl,gross:finalGross,
     regPay:(!isNaN(regPayRaw)&&regPayRaw>0)?regPayRaw:null,
     otPay:(!isNaN(otPayRaw)&&otPayRaw>0)?otPayRaw:null,
-    fed,ss,med,den,medI,vis,retire,net:isNaN(netRaw)?null:netRaw,
+    fed,ss,med,den,medI,vis,retire,retirePretax,retireRoth,net:isNaN(netRaw)?null:netRaw,
     payType:payType==='regular'?null:payType,
     note:noteVal||null,
     seeded:false};
@@ -5042,7 +5160,8 @@ function toggleEditMode() {
     document.getElementById('eDen').value=s.den;
     document.getElementById('eMedI').value=s.medI;
     document.getElementById('eVis').value=s.vis;
-    document.getElementById('eRetire').value=s.retire||0;
+    document.getElementById('eRetirePretax').value=s.retirePretax!=null?s.retirePretax:(s.retire||0);
+    document.getElementById('eRetireRoth').value=s.retireRoth||0;
     // Pre-fill reg/OT pay from stored gross (back-derived)
     const _eRr=rateRound(s.rate);
     const _eRegP=payRound(_eRr*s.reg);
@@ -5090,7 +5209,9 @@ async function saveEdit() {
     den:parseFloat(document.getElementById('eDen').value)||0,
     medI:parseFloat(document.getElementById('eMedI').value)||0,
     vis:parseFloat(document.getElementById('eVis').value)||0,
-    retire:parseFloat(document.getElementById('eRetire').value)||0,
+    retirePretax:parseFloat(document.getElementById('eRetirePretax').value)||0,
+    retireRoth:parseFloat(document.getElementById('eRetireRoth').value)||0,
+    retire:(parseFloat(document.getElementById('eRetirePretax').value)||0)+(parseFloat(document.getElementById('eRetireRoth').value)||0),
     regPay:parseFloat(document.getElementById('eRegPay').value)||null,
     otPay:parseFloat(document.getElementById('eOTPay').value)||null,
     // Only treat Gross as a manual override if user changed it from the stored value
@@ -5152,6 +5273,22 @@ async function deleteStub() {
 
 // ===== BULK IMPORT =====
 let bulkCount=0;
+
+// Tracks retire mode per bulk card: { pretax: {}, roth: {} } keyed by card index
+const _bulkRetireMode = { pretax: {}, roth: {} };
+
+function bulkToggleRetire(type, i) {
+  const modes = _bulkRetireMode[type];
+  modes[i] = (modes[i] || 'flat') === 'flat' ? 'pct' : 'flat';
+  const isPct = modes[i] === 'pct';
+  const prefix = type === 'pretax' ? 'rpretax' : 'rroth';
+  const btn = document.getElementById('bc-'+prefix+'-toggle-'+i);
+  const lbl = document.getElementById('bc-'+prefix+'-label-'+i);
+  const inp = document.getElementById('bc-'+prefix+'-'+i);
+  if (btn) { btn.textContent = isPct ? '%' : '$'; btn.style.color = isPct ? 'var(--blue)' : 'var(--text3)'; btn.style.borderColor = isPct ? 'var(--blue)' : 'var(--border2)'; }
+  if (lbl) lbl.textContent = type === 'pretax' ? (isPct ? 'PreTax (%)' : 'PreTax 401k') : (isPct ? 'Roth (%)' : 'Roth 401k');
+  if (inp) { inp.placeholder = isPct ? '3' : '0'; inp.step = isPct ? '0.1' : '0.01'; inp.value = ''; }
+}
 
 function bulkUpdateCountLabel() {
   const cards = document.querySelectorAll('.bulk-card');
@@ -5263,8 +5400,22 @@ function bulkCardHTML(i) {
         <input type="number" id="bc-vis-${i}" step="0.01" min="0" placeholder="auto">
       </div>
       <div class="bulk-cell" style="flex:1">
-        <label>401k ($)</label>
-        <input type="number" id="bc-retire-${i}" step="0.01" min="0" placeholder="0">
+        <label id="bc-rpretax-label-${i}">PreTax 401k</label>
+        <div style="display:flex;align-items:center;gap:3px">
+          <button id="bc-rpretax-toggle-${i}" onclick="bulkToggleRetire('pretax',${i})"
+            style="font-size:9px;font-weight:700;font-family:var(--mono);padding:2px 5px;border-radius:3px;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);cursor:pointer;white-space:nowrap;flex-shrink:0">$</button>
+          <input type="number" id="bc-rpretax-${i}" step="0.01" min="0" placeholder="0"
+            style="min-width:0;flex:1">
+        </div>
+      </div>
+      <div class="bulk-cell" style="flex:1">
+        <label id="bc-rroth-label-${i}">Roth 401k</label>
+        <div style="display:flex;align-items:center;gap:3px">
+          <button id="bc-rroth-toggle-${i}" onclick="bulkToggleRetire('roth',${i})"
+            style="font-size:9px;font-weight:700;font-family:var(--mono);padding:2px 5px;border-radius:3px;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);cursor:pointer;white-space:nowrap;flex-shrink:0">$</button>
+          <input type="number" id="bc-rroth-${i}" step="0.01" min="0" placeholder="0"
+            style="min-width:0;flex:1">
+        </div>
       </div>
       <div class="bulk-cell cell-totals" style="flex:1">
         <label>Gross ($)</label>
@@ -5355,6 +5506,7 @@ function bulkClear() {
   document.getElementById('bulkCards').innerHTML='';
   document.getElementById('bulkStatus').textContent='';
   bulkCount=0;
+  Object.keys(_bulkRetireMode).forEach(k => delete _bulkRetireMode[k]);
   bulkUpdateCountLabel();
 }
 
@@ -5389,7 +5541,13 @@ async function bulkSave() {
     const ssRaw=parseFloat(document.getElementById('bc-ss-'+i)?.value);
     const medRaw=parseFloat(document.getElementById('bc-med-'+i)?.value);
     // Deductions must be declared BEFORE they're used in taxable/FICA calculations
-    const retireVal=parseFloat(document.getElementById('bc-retire-'+i)?.value)||0;
+    const rpretaxRaw=parseFloat(document.getElementById('bc-rpretax-'+i)?.value)||0;
+    const rrothRaw  =parseFloat(document.getElementById('bc-rroth-'+i)?.value)||0;
+    const rpretaxIsPct = (_bulkRetireMode.pretax[i]||'flat')==='pct';
+    const rrothIsPct   = (_bulkRetireMode.roth[i]  ||'flat')==='pct';
+    const retirePretax = rpretaxIsPct ? parseFloat(Math.max(0,gross*rpretaxRaw/100).toFixed(2)) : rpretaxRaw;
+    const retireRoth   = rrothIsPct   ? parseFloat(Math.max(0,gross*rrothRaw  /100).toFixed(2)) : rrothRaw;
+    const retireVal = retirePretax + retireRoth;
     const _denRaw=document.getElementById('bc-den-'+i)?.value;
     const _medIRaw=document.getElementById('bc-medi-'+i)?.value;
     const _visRaw=document.getElementById('bc-vis-'+i)?.value;
@@ -5397,8 +5555,8 @@ async function bulkSave() {
     const den=(_denRaw!==''&&_denRaw!==null&&_denRaw!==undefined)?parseFloat(_denRaw):(parseFloat(appSettings.den)||0);
     const medI=(_medIRaw!==''&&_medIRaw!==null&&_medIRaw!==undefined)?parseFloat(_medIRaw):(parseFloat(appSettings.medI)||0);
     const vis=(_visRaw!==''&&_visRaw!==null&&_visRaw!==undefined)?parseFloat(_visRaw):(parseFloat(appSettings.vis)||0);
-    const _bFicaBase=Math.max(0,gross-den-medI-vis);          // SS/Med base: retire NOT pre-tax for SS
-    const _bTaxable=Math.max(0,gross-den-medI-vis-retireVal); // Fed base: retire IS pre-tax for fed
+    const _bFicaBase=Math.max(0,gross-den-medI-vis);                   // SS/Med: neither 401k type reduces FICA
+    const _bTaxable=Math.max(0,gross-den-medI-vis-retirePretax);   // Fed: only pretax 401k reduces taxable
     const fed=isNaN(fedRaw)?irsWithholding(_bTaxable,date):fedRaw;
     const ss=isNaN(ssRaw)?parseFloat((_bFicaBase*0.062).toFixed(2)):ssRaw;
     const med=isNaN(medRaw)?parseFloat((_bFicaBase*0.0145).toFixed(2)):medRaw;
@@ -5408,7 +5566,7 @@ async function bulkSave() {
     toSave.push({id:uid(),date,rate,reg,ot,dt,hol,sick,vac,fltHol,premRate,premHrs,addl,gross:finalGross,
       regPay:_hasRegOvr?regPayOvr:null,
       otPay:_hasOTOvr?otPayOvr:null,
-      fed,ss,med,den,medI,vis,retire:retireVal,net:isNaN(netRaw)?null:netRaw,seeded:false});
+      fed,ss,med,den,medI,vis,retire:retireVal,retirePretax,retireRoth,net:isNaN(netRaw)?null:netRaw,seeded:false});
   }
   if(!toSave.length) { showToast('No valid paychecks to save — check dates and rates',true); return; }
   document.getElementById('bulkStatus').textContent='Saving '+toSave.length+' paychecks…';
@@ -5443,15 +5601,139 @@ async function bulkSave() {
 
 const SP_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
+// In-memory cache of schedules [{id, name, days, updated_at}]
+let _spSchedules = [];
+
 function initShiftPlanner() {
   // Seed rate from most recent stub
-  if(!document.getElementById('spRate').value && stubs.length) {
+  const rateEl = document.getElementById('spRate');
+  if(rateEl && !rateEl.value && stubs.length) {
     const r = stubs[0].rate;
-    if(r) document.getElementById('spRate').value = r;
+    if(r) rateEl.value = r;
   }
   buildDayRows();
   calcShiftGap();
   calcWeek();
+  spLoadScheduleList();
+}
+
+// ---------- Schedule persistence ----------
+
+async function spLoadScheduleList() {
+  const sel = document.getElementById('spScheduleSelect');
+  if (!sel) return;
+  try {
+    const data = await apiFetch('/api/schedules');
+    _spSchedules = data || [];
+    spRenderSelectOptions();
+  } catch(e) {
+    console.warn('Could not load schedules', e);
+  }
+}
+
+function spRenderSelectOptions() {
+  const sel = document.getElementById('spScheduleSelect');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Load a schedule —</option>' +
+    _spSchedules.map(s =>
+      `<option value="${s.id}">${s.name.replace(/"/g,'&quot;')}</option>`
+    ).join('');
+  if (cur && _spSchedules.find(s => s.id === cur)) sel.value = cur;
+  const delBtn = document.getElementById('spDeleteBtn');
+  if (delBtn) delBtn.style.display = sel.value ? 'inline-flex' : 'none';
+}
+
+function spLoadSelected() {
+  const sel = document.getElementById('spScheduleSelect');
+  const delBtn = document.getElementById('spDeleteBtn');
+  if (delBtn) delBtn.style.display = sel?.value ? 'inline-flex' : 'none';
+  if (!sel?.value) return;
+  const sched = _spSchedules.find(s => s.id === sel.value);
+  if (!sched) return;
+  // Populate name field
+  const nameEl = document.getElementById('spScheduleName');
+  if (nameEl) nameEl.value = sched.name;
+  // Populate day rows
+  const days = sched.days || [];
+  for (let i = 0; i < 7; i++) {
+    const d = days[i] || {};
+    const startEl = document.getElementById('sp-start-'+i);
+    const endEl   = document.getElementById('sp-end-'+i);
+    const brkEl   = document.getElementById('sp-brk-'+i);
+    if (startEl) startEl.value = d.start || '';
+    if (endEl)   endEl.value   = d.end   || '';
+    if (brkEl)   brkEl.value   = d.brk   || '';
+  }
+  calcWeek();
+  showToast('Loaded: ' + sched.name);
+}
+
+async function spSaveSchedule() {
+  const nameEl = document.getElementById('spScheduleName');
+  const name = nameEl?.value?.trim();
+  if (!name) { showToast('Enter a schedule name first', true); nameEl?.focus(); return; }
+
+  // Collect current day data
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    days.push({
+      start: document.getElementById('sp-start-'+i)?.value || '',
+      end:   document.getElementById('sp-end-'+i)?.value   || '',
+      brk:   document.getElementById('sp-brk-'+i)?.value   || '',
+    });
+  }
+  const hasData = days.some(d => d.start || d.end);
+  if (!hasData) { showToast('Add some shifts first', true); return; }
+
+  // Check if a schedule with this name already exists → reuse its id (upsert by name)
+  const existing = _spSchedules.find(s => s.name.toLowerCase() === name.toLowerCase());
+  const id = existing ? existing.id : uid();
+
+  const btn = document.getElementById('spSaveBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  try {
+    await syncOp('/api/schedules', 'POST', { id, name, days });
+    // Update local cache
+    if (existing) {
+      existing.days = days;
+      existing.updated_at = new Date().toISOString();
+    } else {
+      _spSchedules.unshift({ id, name, days, updated_at: new Date().toISOString() });
+    }
+    spRenderSelectOptions();
+    // Select the saved one
+    const sel = document.getElementById('spScheduleSelect');
+    if (sel) { sel.value = id; }
+    const delBtn = document.getElementById('spDeleteBtn');
+    if (delBtn) delBtn.style.display = 'inline-flex';
+    showToast('Saved: ' + name);
+  } catch(e) {
+    showToast('Save failed: ' + e.message, true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Save schedule'; }
+  }
+}
+
+async function spDeleteSelected() {
+  const sel = document.getElementById('spScheduleSelect');
+  if (!sel?.value) return;
+  const sched = _spSchedules.find(s => s.id === sel.value);
+  if (!sched) return;
+  if (!confirm(`Delete "${sched.name}"?`)) return;
+
+  try {
+    await syncOp('/api/schedules?id=' + encodeURIComponent(sched.id), 'DELETE');
+    _spSchedules = _spSchedules.filter(s => s.id !== sched.id);
+    spRenderSelectOptions();
+    sel.value = '';
+    const delBtn = document.getElementById('spDeleteBtn');
+    if (delBtn) delBtn.style.display = 'none';
+    showToast('Deleted: ' + sched.name);
+  } catch(e) {
+    showToast('Delete failed: ' + e.message, true);
+  }
 }
 
 // ---------- 8-Hour Rule ----------
@@ -5676,8 +5958,13 @@ function calcWeek() {
       continue;
     }
 
-    const regThis = Math.min(hrs, Math.max(0, 40 - runningReg));
-    const otThis  = Math.max(0, hrs - regThis);
+    // Daily OT: >8h in a single day = OT regardless of weekly total
+    const dailyReg = Math.min(hrs, 8);
+    const dailyOT  = Math.max(0, hrs - 8);
+    // Weekly OT: once 40h of reg used up, remaining daily-reg becomes weekly OT too
+    const weeklyRegAvail = Math.max(0, 40 - runningReg);
+    const regThis = Math.min(dailyReg, weeklyRegAvail);
+    const otThis  = dailyOT + Math.max(0, dailyReg - weeklyRegAvail);
     runningReg += regThis;
     prevWorkedDay = i;
 
@@ -5689,9 +5976,19 @@ function calcWeek() {
     }
   }
 
-  // Totals footer
-  const regTotal = Math.min(totalHrs, 40);
-  const otTotal  = Math.max(0, totalHrs - 40);
+  // Totals: recompute from scratch using same daily+weekly OT logic
+  let regTotal = 0, otTotal = 0;
+  { let _reg = 0;
+    for (let i = 0; i < 7; i++) {
+      const h = dayHrs[i]; if (!h) continue;
+      const dReg = Math.min(h, 8), dOT = Math.max(0, h - 8);
+      const avail = Math.max(0, 40 - _reg);
+      const rThis = Math.min(dReg, avail);
+      regTotal += rThis;
+      otTotal  += dOT + Math.max(0, dReg - avail);
+      _reg += rThis;
+    }
+  }
   const tfoot = document.getElementById('spWeekTotals');
   if (tfoot) {
     tfoot.innerHTML = `<tr style="border-top:2px solid var(--border2);font-weight:700">

@@ -2,6 +2,10 @@ import { requireAuth } from './_auth.js';
 import { db } from './_db.js';
 
 function fromRow(r) {
+  // retire = pretax + roth (backward compat: old rows have only retire, no split)
+  const retirePretax = r.retire_pretax != null ? parseFloat(r.retire_pretax) : null;
+  const retireRoth   = r.retire_roth   != null ? parseFloat(r.retire_roth)   : null;
+  const retire       = parseFloat(r.retire || 0);
   return {
     id:    r.id,
     date:  r.date,
@@ -23,7 +27,9 @@ function fromRow(r) {
     sick:   parseFloat(r.sick    || 0),
     vac:    parseFloat(r.vac     || 0),
     fltHol: parseFloat(r.flt_hol || 0),
-    retire: parseFloat(r.retire  || 0),
+    retire,
+    retirePretax: retirePretax != null ? retirePretax : retire,
+    retireRoth:   retireRoth   != null ? retireRoth   : 0,
     regPay: r.reg_pay != null ? parseFloat(r.reg_pay) : null,
     otPay:  r.ot_pay  != null ? parseFloat(r.ot_pay)  : null,
     net:   r.net != null ? parseFloat(r.net) : null,
@@ -59,7 +65,10 @@ export default async function handler(req, res) {
       id: s.id, user_id: targetUserId, date: s.date, period: s.period || null,
       rate: s.rate, reg: s.reg, ot: s.ot || 0, dt: s.dt || 0, hol: s.hol || 0,
       prem_hrs: s.premHrs || 0, prem_rate: s.premRate || 0, addl: s.addl || 0,
-      sick: s.sick || 0, vac: s.vac || 0, flt_hol: s.fltHol || 0, retire: s.retire || 0,
+      sick: s.sick || 0, vac: s.vac || 0, flt_hol: s.fltHol || 0,
+      retire: s.retire || 0,
+      retire_pretax: s.retirePretax ?? s.retire ?? 0,
+      retire_roth:   s.retireRoth   ?? 0,
       pay_type: s.payType || null, note: s.note || null,
       reg_pay: s.regPay || null, ot_pay: s.otPay || null,
       gross: s.gross, fed: s.fed, ss: s.ss, med: s.med,
@@ -78,9 +87,6 @@ export default async function handler(req, res) {
     const regRate = rateRound(s.rate);
     const otRate  = rateRound(s.rate * 1.5);
     const dtRate  = rateRound(s.rate * 2);
-    // Use gross from client if provided (handles pay overrides), otherwise calculate
-    const _regPayOvr = s.regPay || null;
-    const _otPayOvr  = s.otPay  || null;
     const gross = (s.gross && s.gross > 0) ? parseFloat(s.gross) : parseFloat((
       payRound(regRate * s.reg) +
       payRound(otRate * (s.ot || 0)) +
@@ -96,7 +102,10 @@ export default async function handler(req, res) {
       date: s.date, rate: s.rate, reg: s.reg,
       ot: s.ot || 0, dt: s.dt || 0, hol: s.hol || 0,
       prem_hrs: s.premHrs || 0, prem_rate: s.premRate || 0, addl: s.addl || 0,
-      sick: s.sick || 0, vac: s.vac || 0, flt_hol: s.fltHol || 0, retire: s.retire || 0,
+      sick: s.sick || 0, vac: s.vac || 0, flt_hol: s.fltHol || 0,
+      retire: s.retire || 0,
+      retire_pretax: s.retirePretax ?? s.retire ?? 0,
+      retire_roth:   s.retireRoth   ?? 0,
       pay_type: s.payType || null, note: s.note || null,
       reg_pay: s.regPay || null, ot_pay: s.otPay || null,
       gross, fed: s.fed, ss: s.ss, med: s.med,
