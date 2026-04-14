@@ -2545,7 +2545,7 @@ function buildHistory() {
   sorted.forEach(s=>{
     const yr=s.date.slice(0,4);
     if(yr!==lastYear) { html+=`<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 7px;padding-left:2px;font-weight:700">${yr}</div>`; lastYear=yr; }
-    const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0), net=s.net||(s.gross-ded);
+    const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0), net=s.net!=null?s.net:(s.gross-ded);
     const pct=(s.gross/maxG*100).toFixed(1);
     const d=new Date(s.date+'T12:00:00'), ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     const totalHrs=s.reg+(s.ot||0)+(s.dt||0)+(s.hol||0)+(s.sick||0)+(s.vac||0)+(s.fltHol||0);
@@ -2617,7 +2617,7 @@ function buildHistorySheet() {
       lastYear = yr;
     }
     const ded = s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
-    const net = s.net||(s.gross-ded);
+    const net = s.net!=null?s.net:(s.gross-ded);
     const benefits = s.den+s.medI+s.vis+(s.retire||0);
     const d = new Date(s.date+'T12:00:00');
     const ds = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
@@ -2654,7 +2654,7 @@ function buildHistorySheet() {
   const tSS    = sorted.reduce((a,s)=>a+s.ss,0);
   const tMed   = sorted.reduce((a,s)=>a+s.med,0);
   const tBen   = sorted.reduce((a,s)=>a+s.den+s.medI+s.vis+(s.retire||0),0);
-  const tNets  = sorted.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return s.net||(s.gross-d); });
+  const tNets  = sorted.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return s.net!=null?s.net:(s.gross-d); });
   const tNet   = tNets.reduce((a,v)=>a+v,0);
   const extraCols = (hasRegPay?1:0)+(hasOTPay?1:0)+(hasDT?1:0)+(hasHol?1:0)+(hasPrem?2:0)+(hasAddl?1:0);
   rows += `<tr style="background:var(--green-dim);font-weight:700;border-top:2px solid var(--green-border)">
@@ -2768,7 +2768,7 @@ function buildYTD() {
   const tHrs   = filtered.reduce((a,s)=>a+s.reg+(s.ot||0)+(s.dt||0)+(s.hol||0)+(s.sick||0)+(s.vac||0)+(s.fltHol||0),0);
   const tOTHrs = filtered.reduce((a,s)=>a+(s.ot||0),0);
   const tRegHrs= filtered.reduce((a,s)=>a+s.reg,0);
-  const nets   = filtered.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return s.net||(s.gross-d); });
+  const nets   = filtered.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return s.net!=null?s.net:(s.gross-d); });
   const tNet   = nets.reduce((a,v)=>a+v,0);
   const avgNet = tNet/nets.length;
   const avgG   = tG/filtered.length;
@@ -2904,7 +2904,7 @@ function buildYTD() {
 
   // Cumulative net
   let run=0;
-  const cumData=sorted.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); run+=parseFloat((s.net||(s.gross-d)).toFixed(2)); return parseFloat(run.toFixed(2)); });
+  const cumData=sorted.map(s=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); run+=parseFloat((s.net!=null?s.net:(s.gross-d)).toFixed(2)); return parseFloat(run.toFixed(2)); });
   if(window._chart_ytdCumChart){window._chart_ytdCumChart.destroy();window._chart_ytdCumChart=null;}
   window._chart_ytdCumChart=new Chart(document.getElementById('ytdCumChart'),{
     type:'line',data:{labels,datasets:[{
@@ -3139,7 +3139,7 @@ function buildYTD() {
     });
     detailBody.innerHTML=rows.map(s=>{
       const ded  = s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
-      const net  = parseFloat((s.net||(s.gross-ded)).toFixed(2));
+      const net  = parseFloat((s.net!=null?s.net:(s.gross-ded)).toFixed(2));
       const tax  = s.fed+s.ss+s.med;
       const regP = s.regPay!=null ? s.regPay : payRound(rateRound(s.rate)*s.reg);
       const otP  = s.otPay!=null  ? s.otPay  : (s.ot ? payRound(rateRound(s.rate*1.5)*(s.ot||0)) : 0);
@@ -3261,7 +3261,7 @@ function updateYTDGoal() {
   const filtered = stubs.filter(s=>s.date.startsWith(ytdYear+'')&&(!cutoff||s.date<=cutoff));
   if(!filtered.length) { gc.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">No paychecks for this year yet</div>'; return; }
 
-  const tNet = filtered.reduce((a,s)=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return a+(s.net||(s.gross-d)); }, 0);
+  const tNet = filtered.reduce((a,s)=>{ const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0); return a+(s.net!=null?s.net:(s.gross-d)); }, 0);
   const now = new Date();
   const daysPassed = Math.max(1, Math.ceil((now - new Date(ytdYear,0,1)) / 86400000));
   const daysInYear = (ytdYear%4===0&&(ytdYear%100!==0||ytdYear%400===0))?366:365;
@@ -3464,7 +3464,7 @@ function computeDashData(yr) {
   const tDTPay=filtered.reduce((a,s)=>a+payRound(rateRound(s.rate*2)*(s.dt||0)),0);
   const tHolPay=filtered.reduce((a,s)=>a+payRound(rateRound(s.rate)*(s.hol||0)),0);
   const tHrs=filtered.reduce((a,s)=>a+s.reg+(s.ot||0)+(s.dt||0)+(s.hol||0)+(s.sick||0)+(s.vac||0)+(s.fltHol||0),0);
-  const nets=filtered.map(s=>{const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net||(s.gross-d)).toFixed(2));});
+  const nets=filtered.map(s=>{const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net!=null?s.net:(s.gross-d)).toFixed(2));});
   const tNet=nets.reduce((a,v)=>a+v,0);
   const n=filtered.length, avgG=tG/n, avgNet=tNet/n;
   const now=new Date(), yearStart=new Date(year,0,1), yearEnd=new Date(year,11,31);
@@ -3476,7 +3476,7 @@ function computeDashData(yr) {
     fedRate:tG>0?(tFed/tG)*100:0, ssRate:tG>0?(tSS/tG)*100:0, medRate:tG>0?(tMed/tG)*100:0,
     taxRate:tG>0?(tTax/tG)*100:0, keepRate:tG>0?(tNet/tG)*100:0,
     projGross:tG/daysPassed*daysInYear, bestStub, worstStub, daysPassed, daysInYear, filtered,
-    nets: filtered.map(s=>{const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net||(s.gross-d)).toFixed(2));})
+    nets: filtered.map(s=>{const d=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net!=null?s.net:(s.gross-d)).toFixed(2));})
   };
 }
 
@@ -3747,7 +3747,8 @@ function renderDashChart(w) {
 
   if(w.widgetId==='chart-gross'||w.widgetId==='chart-net'){
     const isGross = w.widgetId==='chart-gross';
-    const raw = isGross ? sorted.map(s=>s.gross) : d.nets;
+    const _sortedNets=sorted.map(s=>{const dd=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net!=null?s.net:(s.gross-dd)).toFixed(2));});
+    const raw = isGross ? sorted.map(s=>s.gross) : _sortedNets;
     const avg = raw.map((_,i)=>parseFloat((raw.slice(0,i+1).reduce((a,v)=>a+v,0)/(i+1)).toFixed(2)));
     const color = isGross ? 'rgba(217,119,6,' : 'rgba(22,163,74,';
     cfg={type:ct==='line'?'line':'bar',data:{labels,datasets:[
@@ -3755,7 +3756,8 @@ function renderDashChart(w) {
       {label:'Avg',data:avg,type:'line',borderColor:color+'.6)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
     ]},options:{...cd,plugins:{...cd.plugins,tooltip:{mode:'index',intersect:false}}}};
   } else if(w.widgetId==='chart-cum'){
-    let run=0; const cum=d.nets.map(v=>parseFloat((run+=v,run).toFixed(2)));
+    const _cumNets=sorted.map(s=>{const dd=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net!=null?s.net:(s.gross-dd)).toFixed(2));});
+    let run=0; const cum=_cumNets.map(v=>parseFloat((run+=v,run).toFixed(2)));
     cfg={type:'line',data:{labels,datasets:[{label:'Cumulative net',data:cum,borderColor:'rgba(22,163,74,.85)',backgroundColor:'rgba(22,163,74,.12)',borderWidth:2,pointRadius:2,fill:true,tension:0.3}]},options:{...cd}};
   } else if(w.widgetId==='chart-earnings'||w.widgetId==='chart-deductions'){
     const isEarn = w.widgetId==='chart-earnings';
@@ -3792,9 +3794,11 @@ function renderDashChart(w) {
       {label:'Avg',data:Array(sorted.length).fill(at),type:'line',borderColor:'rgba(107,114,128,.5)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
     ]},options:{...cd,scales:{...cd.scales,y:{...cd.scales.y,ticks:{...cd.scales.y.ticks,callback:v=>v+'%'}}}}};
   } else if(w.widgetId==='chart-gross-net'){
+    // Compute nets from sorted (ascending date) to match gross array order
+    const sortedNets=sorted.map(s=>{const dd=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);return parseFloat((s.net!=null?s.net:(s.gross-dd)).toFixed(2));});
     cfg={type:'bar',data:{labels,datasets:[
       {label:'Gross',data:sorted.map(s=>s.gross),backgroundColor:'rgba(251,191,36,.5)',borderColor:'rgba(251,191,36,.8)',borderWidth:1,borderRadius:2},
-      {label:'Net',data:d.nets,backgroundColor:'rgba(22,163,74,.50)',borderColor:'rgba(22,163,74,.80)',borderWidth:1,borderRadius:2},
+      {label:'Net',data:sortedNets,backgroundColor:'rgba(22,163,74,.50)',borderColor:'rgba(22,163,74,.80)',borderWidth:1,borderRadius:2},
     ]},options:{...cd,plugins:{...cd.plugins,legend:{display:true,labels:{font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false}}}};
   } else if(w.widgetId==='chart-monthly'){
     const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -3804,7 +3808,7 @@ function renderDashChart(w) {
       if(!bm[m])bm[m]={gross:0,net:0};
       bm[m].gross+=s.gross;
       const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
-      bm[m].net+=parseFloat((s.net||(s.gross-ded)).toFixed(2));
+      bm[m].net+=parseFloat((s.net!=null?s.net:(s.gross-ded)).toFixed(2));
     });
     const mk=Object.keys(bm).sort((a,b)=>a-b);
     cfg={type:ct==='line'?'line':'bar',data:{labels:mk.map(m=>MONTHS[m]),datasets:[
@@ -3870,7 +3874,7 @@ function renderDashTracker(w) {
     const recent=[...d.filtered].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
     el.innerHTML=recent.map(s=>{
       const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
-      const net=parseFloat((s.net||(s.gross-ded)).toFixed(2));
+      const net=parseFloat((s.net!=null?s.net:(s.gross-ded)).toFixed(2));
       const dt=new Date(s.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
       const ot=(s.ot||0)>0?'<span style="font-size:9px;background:rgba(251,191,36,.15);color:#92400e;padding:1px 5px;border-radius:10px;font-weight:600">OT '+fmtH(s.ot||0)+'h</span>':'';
       return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">'
@@ -5135,7 +5139,7 @@ async function saveLog() {
 
 // ===== DETAIL MODAL =====
 function renderReadView(s) {
-  const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0), net=s.net||(s.gross-ded);
+  const ded=s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0), net=s.net!=null?s.net:(s.gross-ded);
   const _rr=rateRound(s.rate);
   const _otR=rateRound(s.rate*1.5), _dtR=rateRound(s.rate*2);
 
