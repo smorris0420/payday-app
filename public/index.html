@@ -873,6 +873,7 @@ html{transition:background 300ms ease,color 300ms ease}
         <div>
           <div style="font-size:20px;font-weight:700;letter-spacing:-.3px">Dashboard</div>
           <div id="dashSubLabel" style="font-size:12px;color:var(--text3);margin-top:1px">Your personalized overview</div>
+          <div id="dashYearBadge" style="display:none;margin-top:6px;display:flex;gap:4px;align-items:center" id="dashYearPills"></div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-width:0">
           <!-- Edit mode controls — hidden when not editing -->
@@ -2094,6 +2095,9 @@ async function loadAll() {
     else setSyncDot(isOnline?'ok':'offline');
     calc(); buildYTDTabs(); buildYTD();
     // Dashboard config already fetched above — just compute and render
+    // Set dashYear to most recent year with data before computing
+    const _dashYears = [...new Set(stubs.map(s=>parseInt(s.date.slice(0,4))))].sort((a,b)=>b-a);
+    if(_dashYears.length) dashYear = _dashYears[0];
     computeDashData(); renderDashboard(); buildDashPanel();
     requestAnimationFrame(()=>{ initCanvasDrop(); initDashResizeObserver(); });
     if(currentUser?.role==='admin' && isOnline) {
@@ -2370,6 +2374,9 @@ function showPage(id, btn, source) {
   if(id==='history') buildHistory();
   if(id!=='history' && bulkMode) { bulkMode=false; selectedIds.clear(); const btn=document.getElementById('histBulkToggle'); if(btn) btn.textContent='Select'; updateBulkBar(); }
   if(id==='dash') {
+    // Ensure dashYear is set to most recent year with data
+    const _dy = [...new Set(stubs.map(s=>parseInt(s.date.slice(0,4))))].sort((a,b)=>b-a);
+    if(_dy.length && !_dy.includes(dashYear)) dashYear = _dy[0];
     computeDashData();
     // Only re-render if config already loaded; loadDashboard() handles first load
     if(dashConfig.length) { renderDashboard(); buildDashPanel(); }
@@ -3070,7 +3077,7 @@ function buildYTD() {
   const allYears = [...new Set(stubs.map(s=>s.date.slice(0,4)))].sort();
   const yoyMetrics = [
     {label:'Total Gross',   fn:ss=>ss.reduce((a,s)=>a+s.gross,0),   fmt:fmt},
-    {label:'Total Net',     fn:ss=>ss.reduce((a,s)=>a+(s.net||(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)))),0), fmt:fmt},
+    {label:'Total Net',     fn:ss=>ss.reduce((a,s)=>a+(s.net!=null?s.net:(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)))),0), fmt:fmt},
     {label:'OT Earnings',   fn:ss=>ss.reduce((a,s)=>a+(s.otPay!=null?s.otPay:payRound(rateRound(s.rate*1.5)*(s.ot||0))),0), fmt:fmt},
     {label:'Total Taxes',   fn:ss=>ss.reduce((a,s)=>a+s.fed+s.ss+s.med,0), fmt:fmt},
     {label:'OT Hours',      fn:ss=>ss.reduce((a,s)=>a+(s.ot||0),0),  fmt:v=>fmtH(v)+'h'},
@@ -3102,7 +3109,7 @@ function buildYTD() {
   filtered.forEach(s=>{
     const key=s.date.slice(0,7);
     if(!monthGroups[key]){monthGroups[key]={gross:0,net:0,tax:0,ben:0,reg:0,ot:0,count:0};}
-    const net=s.net||(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)));
+    const net=s.net!=null?s.net:(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)));
     monthGroups[key].gross+=s.gross;
     monthGroups[key].net+=net;
     monthGroups[key].tax+=s.fed+s.ss+s.med;
@@ -3241,7 +3248,7 @@ function exportYTDCSV() {
   if(!filtered.length){showToast('No data to export',true);return;}
   const cols=['Date','Rate','Reg Hrs','OT Hrs','DT Hrs','Gross','Fed','SS','Medicare','Dental','Medical','Vision','401k','Net'];
   const rows=filtered.map(s=>{
-    const net=s.net||(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)));
+    const net=s.net!=null?s.net:(s.gross-(s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0)));
     return [s.date,s.rate,s.reg,s.ot||0,s.dt||0,s.gross,s.fed,s.ss,s.med,s.den,s.medI,s.vis,s.retire||0,net.toFixed(2)];
   });
   const csv=[cols,...rows].map(r=>r.join(',')).join('\n');
@@ -3390,6 +3397,7 @@ let dashConfig = [];
 let dashCharts = {};
 let dashSaveTimer = null;
 let dashData = {};
+let dashYear = new Date().getFullYear(); // dashboard has its own year, independent of YTD page
 let dashPanelVisible = true;
 let _dashDragState = null;  // {type:'move'|'resize', id, startX, startY, startW, startH, startLeft, startTop}
 let dashEditMode = false;  // dashboard locked by default
@@ -3441,7 +3449,7 @@ function findDef(widgetId){
 }
 
 function computeDashData(yr) {
-  const year = yr || ytdYear;
+  const year = yr || dashYear;
   const filtered = stubs.filter(s=>s.date.startsWith(year+''));
   if(!filtered.length){
     dashData={yr:year,n:0,tG:0,tNet:0,tTax:0,tDed:0,tFed:0,tSS:0,tMed:0,tBen:0,tOT:0,tOTHrs:0,tRegHrs:0,tDTHrs:0,tHolHrs:0,tSickHrs:0,tVacHrs:0,tRegPay:0,tDTPay:0,tHolPay:0,tHrs:0,avgG:0,avgNet:0,fedRate:0,ssRate:0,medRate:0,taxRate:0,keepRate:0,projGross:0,bestStub:null,worstStub:null,daysPassed:1,daysInYear:365,filtered:[],nets:[]};
@@ -3472,6 +3480,9 @@ function computeDashData(yr) {
   const daysInYear=Math.ceil((yearEnd-yearStart)/86400000)+1;
   const bestStub=filtered.reduce((b,s)=>s.gross>b.gross?s:b,filtered[0]);
   const worstStub=filtered.reduce((b,s)=>s.gross<b.gross?s:b,filtered[0]);
+  // Debug: log computed values to console
+  console.log(`[Dashboard] year=${year} n=${n} tG=$${tG.toFixed(2)} tNet=$${tNet.toFixed(2)} keepRate=${tG>0?(tNet/tG*100).toFixed(1):0}% stubs_in_year=${filtered.length}`);
+  console.log(`[Dashboard] Sample nets:`, filtered.slice(0,3).map(s=>({date:s.date,gross:s.gross,stored_net:s.net,fed:s.fed,ss:s.ss,med:s.med,den:s.den,medI:s.medI,vis:s.vis,retire:s.retire})));
   dashData={yr:year,n,tG,tFed,tSS,tMed,tBen,tTax,tDed,tOT,tOTHrs,tRegHrs,tDTHrs,tHolHrs,tSickHrs,tVacHrs,tRegPay,tDTPay,tHolPay,tHrs,tNet,avgG,avgNet,
     fedRate:tG>0?(tFed/tG)*100:0, ssRate:tG>0?(tSS/tG)*100:0, medRate:tG>0?(tMed/tG)*100:0,
     taxRate:tG>0?(tTax/tG)*100:0, keepRate:tG>0?(tNet/tG)*100:0,
@@ -3584,6 +3595,15 @@ function renderDashboard() {
   const container = document.getElementById('dashWidgets');
   const emptyEl = document.getElementById('dashEmpty');
   if(!canvas||!container) { buildDashPanel(); return; }
+  // Build year selector pills
+  const _yPills = document.getElementById('dashYearPills');
+  if(_yPills) {
+    const _allYrs = [...new Set(stubs.map(s=>parseInt(s.date.slice(0,4))))].sort((a,b)=>b-a);
+    _yPills.style.display = _allYrs.length > 1 ? 'flex' : 'none';
+    _yPills.innerHTML = _allYrs.map(y=>
+      `<button onclick="dashYear=${y};computeDashData();renderDashboard();buildDashPanel()" style="font-size:11px;padding:2px 10px;border-radius:20px;border:1px solid ${y===dashYear?'var(--green-border)':'var(--border2)'};background:${y===dashYear?'var(--green-dim)':'var(--bg4)'};color:${y===dashYear?'var(--green)':'var(--text3)'};font-weight:600;cursor:pointer;font-family:var(--sans)">${y}</button>`
+    ).join('');
+  }
 
   // Destroy old charts
   Object.values(dashCharts).forEach(c=>{try{c.destroy();}catch(e){}});
