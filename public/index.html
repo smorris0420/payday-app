@@ -986,9 +986,9 @@ html{transition:background 300ms ease,color 300ms ease}
         </div>
         <div class="section-title">Benefits deductions</div>
         <div class="card card-pad">
-          <div class="input-row"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iDen" value="2.00" step="0.01" min="0"></div></div>
-          <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iMedI" value="17.00" step="0.01" min="0"></div></div>
-          <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iVis" value="0.50" step="0.01" min="0"></div></div>
+          <div class="input-row"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iDen" placeholder="2.00" step="0.01" min="0"></div></div>
+          <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iMedI" placeholder="17.00" step="0.01" min="0"></div></div>
+          <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="iVis" placeholder="0.50" step="0.01" min="0"></div></div>
           <div class="input-row">
             <label>Pre-tax 401k</label>
             <div style="display:flex;align-items:center;gap:6px">
@@ -1427,6 +1427,10 @@ html{transition:background 300ms ease,color 300ms ease}
           </div>
           <button class="btn btn-secondary btn-sm" onclick="logout()" style="flex-shrink:0">Sign out</button>
         </div>
+        <div id="settingsViewAsNotice" style="display:none;background:var(--amber-dim);border:1px solid rgba(180,83,9,.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--amber);align-items:center;gap:8px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="settingsViewAsText">Editing settings for another user</span>
+        </div>
 
         <!-- Settings tabs -->
         <div class="tab-row" style="margin-bottom:20px">
@@ -1441,9 +1445,9 @@ html{transition:background 300ms ease,color 300ms ease}
           <div class="section-title">Default pay rate &amp; deductions</div>
           <div class="card card-pad">
             <div class="input-row"><label>Hourly rate</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sRate" step="0.01" min="0" placeholder="e.g. 21.90"></div></div>
-            <div class="input-row" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border)"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sDen" value="2.00" step="0.01" min="0"></div></div>
-            <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sMedI" value="17.00" step="0.01" min="0"></div></div>
-            <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sVis" value="0.50" step="0.01" min="0"></div></div>
+            <div class="input-row" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border)"><label>Dental</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sDen" placeholder="2.00" step="0.01" min="0"></div></div>
+            <div class="input-row"><label>Medical</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sMedI" placeholder="17.00" step="0.01" min="0"></div></div>
+            <div class="input-row"><label>Vision</label><div class="input-wrap"><span class="prefix">$</span><input type="number" id="sVis" placeholder="0.50" step="0.01" min="0"></div></div>
             <div class="input-row"><label>Pre-tax 401k default</label>
               <div style="display:flex;align-items:center;gap:6px">
                 <button onclick="toggleSettingRetireMode('pretax')" id="sRetirePretaxToggle" title="Switch $ / %" style="font-size:11px;font-weight:700;font-family:var(--mono);padding:5px 9px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer">$</button>
@@ -2020,31 +2024,47 @@ function applyViewAs() {
 async function loadAllAsUser(userId, displayName) {
   setSyncDot('syncing');
   try {
-    // Pass userId explicitly — viewAsUser may not be set yet at this point
-    const [sd,st] = await Promise.all([
+    // Fetch stubs, settings, and dashboard config for the viewed user in parallel
+    const [sd,st,dc] = await Promise.all([
       apiFetch('/api/stubs',{},userId),
-      apiFetch('/api/settings',{},userId)
+      apiFetch('/api/settings',{},userId),
+      apiFetch('/api/dashboard',{},userId).catch(()=>null),
     ]);
     stubs=sd; appSettings=st;
+    // Apply viewed user's dashboard layout
+    if(dc?.config?.length) { dashConfig=dc.config; } else { dashConfig=getDefaultDashConfig(); }
+    // Apply viewed user's theme visually (don't touch admin localStorage)
+    if(appSettings.theme) applyTheme(appSettings.theme);
     // Populate calculator with the viewed user's defaults
     const rate = appSettings.defaultRate || mostRecentRate() || 21.90;
     document.getElementById('iRate').value=rate;
-    if(appSettings.den) document.getElementById('iDen').value=parseFloat(appSettings.den).toFixed(2);
-    if(appSettings.medI) document.getElementById('iMedI').value=parseFloat(appSettings.medI).toFixed(2);
-    if(appSettings.vis) document.getElementById('iVis').value=parseFloat(appSettings.vis).toFixed(2);
-    if(appSettings.retirePretax!=null) document.getElementById('iRetirePretax').value=parseFloat(appSettings.retirePretax);
-    if(appSettings.retireRoth!=null) document.getElementById('iRetireRoth').value=parseFloat(appSettings.retireRoth);
+    if(appSettings.den != null) document.getElementById('iDen').value=parseFloat(appSettings.den).toFixed(2);
+    if(appSettings.medI != null) document.getElementById('iMedI').value=parseFloat(appSettings.medI).toFixed(2);
+    if(appSettings.vis != null) document.getElementById('iVis').value=parseFloat(appSettings.vis).toFixed(2);
+    if(appSettings.retirePretax != null) document.getElementById('iRetirePretax').value=parseFloat(appSettings.retirePretax);
+    if(appSettings.retireRoth != null) document.getElementById('iRetireRoth').value=parseFloat(appSettings.retireRoth);
+    if(appSettings.defaultHours != null) document.getElementById('iReg').value=appSettings.defaultHours;
+    // Set dashYear for this user
+    const _vy=[...new Set(stubs.map(s=>parseInt(s.date.slice(0,4))))].sort((a,b)=>b-a);
+    if(_vy.length) dashYear=_vy[0];
     showViewAsBanner(displayName);
     showToast('Viewing as '+displayName);
     setSyncDot('ok');
     calc();
     buildHistory(); buildYTDTabs(); buildYTD();
+    computeDashData(); renderDashboard(); buildDashPanel();
     // Navigate to history so admin sees the user's paychecks immediately
     const histBtn = document.querySelectorAll('.sidebar-nav-btn')[1];
     showPage('history', histBtn, 'sb');
   } catch(e) { setSyncDot('err'); showToast('Could not load user data: '+e.message, true); }
 }
-function exitViewAs() { viewAsUser=null; hideViewAsBanner(); loadAll(); showToast('Back to your account'); }
+function exitViewAs() {
+  viewAsUser=null; hideViewAsBanner();
+  // Restore admin's own theme
+  const adminTheme=localStorage.getItem('payday-theme-pref')||'light';
+  applyTheme(adminTheme);
+  loadAll(); showToast('Back to your account');
+}
 function viewAsFromList(userId, displayName) {
   viewAsUser={id:userId,displayName}; loadAllAsUser(userId,displayName);
 }
@@ -2081,14 +2101,20 @@ async function loadAll() {
         throw new Error('No cached data available');
       }
     }
-    if(appSettings.den) document.getElementById('iDen').value=parseFloat(appSettings.den).toFixed(2);
-    if(appSettings.medI) document.getElementById('iMedI').value=parseFloat(appSettings.medI).toFixed(2);
-    if(appSettings.vis) document.getElementById('iVis').value=parseFloat(appSettings.vis).toFixed(2);
-    if(appSettings.retirePretax!=null) document.getElementById('iRetirePretax').value=parseFloat(appSettings.retirePretax);
-    if(appSettings.retireRoth!=null) document.getElementById('iRetireRoth').value=parseFloat(appSettings.retireRoth);
+    if(appSettings.den != null) document.getElementById('iDen').value=parseFloat(appSettings.den).toFixed(2);
+    if(appSettings.medI != null) document.getElementById('iMedI').value=parseFloat(appSettings.medI).toFixed(2);
+    if(appSettings.vis != null) document.getElementById('iVis').value=parseFloat(appSettings.vis).toFixed(2);
+    if(appSettings.retirePretax != null) document.getElementById('iRetirePretax').value=parseFloat(appSettings.retirePretax);
+    if(appSettings.retireRoth != null) document.getElementById('iRetireRoth').value=parseFloat(appSettings.retireRoth);
     const defaultRate=appSettings.defaultRate||mostRecentRate()||21.90;
     document.getElementById('iRate').value=defaultRate;
-    if(appSettings.defaultHours) document.getElementById('iReg').value=appSettings.defaultHours;
+    if(appSettings.defaultHours != null) document.getElementById('iReg').value=appSettings.defaultHours;
+    // First login: no saved settings yet — auto-save sensible defaults so they're per-user from the start
+    if(isOnline && !Object.keys(appSettings).length) {
+      const firstDefaults={den:2,medI:17,vis:0.5,defaultRate:parseFloat(defaultRate)||21.90};
+      Object.assign(appSettings,firstDefaults);
+      syncOp('/api/settings','POST',firstDefaults).catch(()=>{});
+    }
     // Show pending outbox count
     const pending = window._idb && userId ? await window._idb.idbOutboxCount(userId) : 0;
     if(pending > 0) setSyncDot('pending', pending);
@@ -2391,7 +2417,12 @@ function showPage(id, btn, source) {
   if(id==='dash') requestAnimationFrame(updateDashEmptyText);
   if(id==='settings') {
     buildSettingsUI();
-    const el=document.getElementById('settingsWho'); if(el) el.textContent=currentUser?.username||'';
+    const el=document.getElementById('settingsWho');
+    if(el) el.textContent=viewAsUser ? (viewAsUser.displayName||viewAsUser.username||'') : (currentUser?.username||'');
+    const notice=document.getElementById('settingsViewAsNotice');
+    const noticeText=document.getElementById('settingsViewAsText');
+    if(notice) notice.style.display=viewAsUser?'flex':'none';
+    if(noticeText&&viewAsUser) noticeText.textContent='Editing settings for: '+(viewAsUser.displayName||viewAsUser.username||'');
     // Always open to first tab
     showSettingsTab('pay', document.querySelector('#page-settings .tab-btn'));
   }
@@ -4400,8 +4431,14 @@ function applyTheme(theme) {
   });
 }
 async function setTheme(theme) {
+  if(viewAsUser) {
+    // Viewing as another user: save their theme but don't change admin's localStorage
+    applyTheme(theme); // visual preview
+    try { await apiFetch('/api/settings',{method:'POST',body:JSON.stringify({theme})}); } catch(e) {}
+    showToast('Theme saved for '+(viewAsUser.displayName||viewAsUser.username));
+    return;
+  }
   applyTheme(theme);
-  // Persist to server (cross-device)
   try { await apiFetch('/api/settings',{method:'POST',body:JSON.stringify({theme})}); }
   catch(e) { /* falls back to localStorage */ }
   showToast(theme==='dark'?'Dark mode on':theme==='light'?'Light mode on':'Following system theme');
@@ -4751,17 +4788,18 @@ function showSettingsTab(tab, btn) {
 }
 
 function buildSettingsUI() {
-  if(appSettings.defaultRate) document.getElementById('sRate').value=parseFloat(appSettings.defaultRate).toFixed(2);
-  if(appSettings.den) document.getElementById('sDen').value=parseFloat(appSettings.den).toFixed(2);
-  if(appSettings.medI) document.getElementById('sMedI').value=parseFloat(appSettings.medI).toFixed(2);
-  if(appSettings.vis) document.getElementById('sVis').value=parseFloat(appSettings.vis).toFixed(2);
-  if(appSettings.fedExtra) document.getElementById('sFedExtra').value=parseFloat(appSettings.fedExtra).toFixed(2);
-  if(appSettings.retirePretax!=null) document.getElementById('sRetirePretax').value=parseFloat(appSettings.retirePretax);
-  if(appSettings.retireRoth!=null) document.getElementById('sRetireRoth').value=parseFloat(appSettings.retireRoth);
-  if(appSettings.defaultHours) document.getElementById('sDefaultHours').value=parseFloat(appSettings.defaultHours);
+  if(appSettings.defaultRate != null) document.getElementById('sRate').value=parseFloat(appSettings.defaultRate).toFixed(2);
+  if(appSettings.den != null) document.getElementById('sDen').value=parseFloat(appSettings.den).toFixed(2);
+  if(appSettings.medI != null) document.getElementById('sMedI').value=parseFloat(appSettings.medI).toFixed(2);
+  if(appSettings.vis != null) document.getElementById('sVis').value=parseFloat(appSettings.vis).toFixed(2);
+  if(appSettings.fedExtra != null) document.getElementById('sFedExtra').value=parseFloat(appSettings.fedExtra).toFixed(2);
+  if(appSettings.retirePretax != null) document.getElementById('sRetirePretax').value=parseFloat(appSettings.retirePretax);
+  if(appSettings.retireRoth != null) document.getElementById('sRetireRoth').value=parseFloat(appSettings.retireRoth);
+  if(appSettings.defaultHours != null) document.getElementById('sDefaultHours').value=parseFloat(appSettings.defaultHours);
   if(appSettings.fedOverride) document.getElementById('sFedRate').value=appSettings.fedOverride;
   // Highlight active theme buttons without re-applying (theme already active)
-  const currentThemePref = localStorage.getItem('payday-theme-pref') || appSettings.theme || 'light';
+  // Admin viewing as another user: show their theme, not admin's localStorage
+  const currentThemePref = viewAsUser ? (appSettings.theme||'light') : (localStorage.getItem('payday-theme-pref') || appSettings.theme || 'light');
   ['Light','Dark','System'].forEach(t=>{
     const btn = document.getElementById('theme'+t);
     if(!btn) return;
@@ -4959,8 +4997,12 @@ async function changePassword() {
   if(np.length<8) { showToast('Password must be at least 8 characters',true); return; }
   try {
     setSyncDot('syncing');
-    // Use the /api/users/me endpoint — no need to look up user ID
-    await apiFetch('/api/users/me',{method:'PATCH',body:JSON.stringify({password:np})});
+    if(viewAsUser) {
+      // Admin changing another user's password via admin endpoint
+      await apiFetch('/api/users?id='+viewAsUser.id,{method:'PATCH',body:JSON.stringify({password:np})});
+    } else {
+      await apiFetch('/api/users/me',{method:'PATCH',body:JSON.stringify({password:np})});
+    }
     setSyncDot('ok');
     document.getElementById('newPw').value=''; document.getElementById('confirmPw').value='';
     showToast('Password changed');
@@ -4970,9 +5012,9 @@ async function changePassword() {
 async function saveSettings() {
   const rateVal = parseFloat(document.getElementById('sRate').value);
   const s={
-    den: parseFloat(document.getElementById('sDen').value)||2,
-    medI: parseFloat(document.getElementById('sMedI').value)||17,
-    vis: parseFloat(document.getElementById('sVis').value)||0.5,
+    den:  isNaN(parseFloat(document.getElementById('sDen').value))  ? 2   : parseFloat(document.getElementById('sDen').value),
+    medI: isNaN(parseFloat(document.getElementById('sMedI').value)) ? 17  : parseFloat(document.getElementById('sMedI').value),
+    vis:  isNaN(parseFloat(document.getElementById('sVis').value))  ? 0.5 : parseFloat(document.getElementById('sVis').value),
   };
   const _sPretaxRaw = parseFloat(document.getElementById('sRetirePretax').value)||0;
   const _sRothRaw   = parseFloat(document.getElementById('sRetireRoth').value)||0;
