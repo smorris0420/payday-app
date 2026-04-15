@@ -2951,17 +2951,14 @@ function _openStubInEditMode(primaryId, allIds) {
     .sort((a,b)=>b.date.localeCompare(a.date));
 
   const doOpen = (stubId) => {
-    // Navigate to history
-    const histBtn = document.querySelector('.sidebar-nav-btn[onclick*="'history'"]')
-                 || document.querySelector('.nav-btn[onclick*="'history'"]');
-    if(histBtn) histBtn.click(); else showPage('history', null, null);
+    showPage('history', null, null);
     setTimeout(() => {
       openDetail(stubId);
       setTimeout(() => {
         const ev = document.getElementById('dEditView');
         if(ev && ev.style.display === 'none') toggleEditMode();
       }, 100);
-    }, 150);
+    }, 200);
   };
 
   if(matchedStubs.length <= 1) {
@@ -2969,29 +2966,43 @@ function _openStubInEditMode(primaryId, allIds) {
     return;
   }
 
-  // Multiple matches — show a picker
+  // Multiple matches — build picker using DOM API (avoids string quoting issues)
   let picker = document.getElementById('refPickerModal');
   if(!picker) {
     picker = document.createElement('div');
     picker.id = 'refPickerModal';
     picker.className = 'modal-overlay';
-    picker.innerHTML = '<div class="modal" style="max-width:360px">'
-      +'<div class="modal-title">Choose paycheck to edit'
-      +'<button class="modal-close" onclick="closeModal('refPickerModal')">Close</button></div>'
-      +'<div id="refPickerList" style="padding-bottom:4px"></div></div>';
     document.getElementById('appShell').appendChild(picker);
   }
-  document.getElementById('refPickerList').innerHTML = matchedStubs.map(s => {
+  const ded_ = s => s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
+  // Build picker with pure DOM (avoids all string-quoting issues)
+  picker.innerHTML = '';
+  const _pi = document.createElement('div');
+  _pi.className = 'modal'; _pi.style.maxWidth = '360px';
+  picker.appendChild(_pi);
+  const _pt = document.createElement('div');
+  _pt.className = 'modal-title'; _pt.style.marginBottom = '12px';
+  _pt.textContent = 'Choose paycheck to edit';
+  const _pc = document.createElement('button');
+  _pc.className = 'modal-close'; _pc.textContent = 'Close';
+  _pc.onclick = () => picker.classList.remove('open');
+  _pt.appendChild(_pc);
+  _pi.appendChild(_pt);
+  const list = document.createElement('div');
+  _pi.appendChild(list);
+    matchedStubs.forEach(s => {
     const d = new Date(s.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    const ded = s.fed+s.ss+s.med+s.den+s.medI+s.vis+(s.retire||0);
-    const net = s.net!=null ? s.net : parseFloat((s.gross-ded).toFixed(2));
-    return '<button onclick="closeModal('refPickerModal');_openStubInEditMode(''+s.id+'')" '
-      +'style="width:100%;text-align:left;background:var(--bg3);border:1.5px solid var(--border2);'
-      +'border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px;cursor:pointer;font-family:var(--sans);">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--text)">'+d+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);margin-top:2px">Gross '+fmt(s.gross)+' &nbsp;·&nbsp; Net '+fmt(net)+'</div>'
-      +'</button>';
-  }).join('');
+    const net = s.net!=null ? s.net : parseFloat((s.gross-ded_(s)).toFixed(2));
+    const btn = document.createElement('button');
+    btn.style.cssText = 'width:100%;text-align:left;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px;cursor:pointer;font-family:var(--sans);display:block';
+    btn.innerHTML = '<div style="font-size:13px;font-weight:600;color:var(--text)">'+d+'</div>'
+      + '<div style="font-size:11px;color:var(--text3);margin-top:2px">Gross '+fmt(s.gross)+' · Net '+fmt(net)+'</div>';
+    btn.onclick = () => {
+      picker.classList.remove('open');
+      doOpen(s.id);
+    };
+    list.appendChild(btn);
+  });
   picker.classList.add('open');
 }
 
