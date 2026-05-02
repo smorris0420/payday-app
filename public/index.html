@@ -394,6 +394,26 @@ html{transition:background 300ms ease,color 300ms ease}
 .sheet-scroll-hint{display:none}
 @media(max-width:767px){.sheet-scroll-hint{display:flex!important}}
 
+/* ── Paycheck Balancer ── */
+.pb-table{width:100%;border-collapse:collapse}
+.pb-table th{background:var(--bg3);padding:8px 12px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);border-bottom:2px solid var(--border2);white-space:nowrap;position:sticky;top:0;z-index:2}
+.pb-table th:first-child{text-align:left}
+.pb-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:13px;text-align:right;white-space:nowrap}
+.pb-table td:first-child{font-family:var(--sans);font-size:13px;font-weight:600;text-align:left;color:var(--text2)}
+.pb-table tr:last-child td{border-bottom:none}
+.pb-table tr.pb-baseline td{background:var(--bg3)}
+.pb-table tr.pb-breakeven td{background:rgba(22,163,74,.08);font-weight:700}
+.pb-table tr.pb-breakeven td:first-child::after{content:" ✓";color:var(--green)}
+.pb-table tr.pb-ahead td{background:rgba(22,163,74,.04)}
+.pb-table tr.pb-behind td{background:rgba(220,38,38,.04)}
+.pb-breakeven-banner{background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--green);font-weight:600;margin-bottom:12px;display:none}
+.pb-behind-banner{background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:12px;display:none}
+@media(max-width:600px){
+  .pb-table th.pb-hide-mobile,.pb-table td.pb-hide-mobile{display:none}
+  .pb-table td{padding:8px 8px;font-size:12px}
+  .pb-table th{padding:8px 8px}
+}
+
 /* ── Benefit Time Optimizer ── */
 .bto-scenario{display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr auto;gap:0;border-bottom:1px solid var(--border);align-items:center;transition:background .1s}
 .bto-scenario:last-child{border-bottom:none}
@@ -1695,6 +1715,76 @@ html{transition:background 300ms ease,color 300ms ease}
           Benefit hours are paid at straight time (1×). More hours always increases gross, but marginal take-home decreases as you enter higher tax brackets.
         </div>
 
+        <!-- ── PAYCHECK BALANCER ── -->
+        <div style="display:flex;align-items:center;gap:12px;margin:24px 0 16px">
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3)">Paycheck Balancer</span>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+        </div>
+
+        <div class="card card-pad" style="margin-bottom:12px">
+          <p style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">
+            If you miss regular hours and make them up with OT, how does your paycheck compare to a normal week? Enter your scenario and see the exact break-even point.
+          </p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px">
+            <div class="form-field">
+              <label>Hourly rate ($)</label>
+              <input type="number" id="pbRate" step="0.01" min="0" placeholder="21.90" oninput="runPB()">
+            </div>
+            <div class="form-field">
+              <label>Normal week hrs</label>
+              <input type="number" id="pbNormal" step="0.25" min="1" placeholder="40" oninput="runPB()">
+            </div>
+            <div class="form-field">
+              <label>Reg hrs this week</label>
+              <input type="number" id="pbReg" step="0.25" min="0" placeholder="32" oninput="runPB()">
+            </div>
+            <div class="form-field">
+              <label>OT hrs worked</label>
+              <input type="number" id="pbOT" step="0.25" min="0" placeholder="12" oninput="runPB()">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px">
+            <div class="form-field">
+              <label>Pay date</label>
+              <input type="date" id="pbDate" oninput="runPB()">
+            </div>
+            <div class="form-field">
+              <label>Benefits deduction ($)</label>
+              <input type="number" id="pbBen" step="0.01" min="0" placeholder="19.50" oninput="runPB()">
+            </div>
+            <div class="form-field">
+              <label>Max OT to show</label>
+              <input type="number" id="pbMaxOT" step="4" min="4" max="60" placeholder="24" oninput="runPB()">
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="pbPrefill()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Use my calculator defaults
+          </button>
+        </div>
+
+        <!-- Answer banners -->
+        <div id="pbBehindBanner" class="pb-behind-banner"></div>
+        <div id="pbBreakevenBanner" class="pb-breakeven-banner"></div>
+
+        <!-- Results table -->
+        <div class="card" id="pbResultsCard" style="display:none;overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <table class="pb-table">
+            <thead>
+              <tr>
+                <th style="min-width:120px">Scenario</th>
+                <th>Hrs worked</th>
+                <th class="pb-hide-mobile">Gross</th>
+                <th class="pb-hide-mobile">Federal</th>
+                <th>Net pay</th>
+                <th>vs normal week</th>
+              </tr>
+            </thead>
+            <tbody id="pbRows"></tbody>
+          </table>
+        </div>
+
       </div>
     </div>
     <!-- BULK IMPORT PAGE -->
@@ -2929,7 +3019,7 @@ function showPage(id, btn, source) {
     const srch=document.getElementById('ytdSearch');
     if(srch && !srch._wired){ srch._wired=true; srch.addEventListener('input',buildYTD); }
   }
-  if(id==='planner') { requestAnimationFrame(()=>{ if(typeof initShiftPlanner==='function') initShiftPlanner(); initBenefitOptimizer(); }); }
+  if(id==='planner') { requestAnimationFrame(()=>{ if(typeof initShiftPlanner==='function') initShiftPlanner(); initBenefitOptimizer(); initPaycheckBalancer(); }); }
   if(id==='dash') requestAnimationFrame(updateDashEmptyText);
   if(id==='settings') {
     buildSettingsUI();
@@ -3635,6 +3725,172 @@ function initBenefitOptimizer() {
     if(d+m+v > 0) benEl.value = (d+m+v).toFixed(2);
   }
   runBTO();
+}
+
+// ===== PAYCHECK BALANCER =====
+
+function pbPrefill() {
+  const rate = document.getElementById('iRate')?.value || appSettings.defaultRate || '';
+  const den  = parseFloat(document.getElementById('iDen')?.value  || appSettings.den  || 0);
+  const medI = parseFloat(document.getElementById('iMedI')?.value || appSettings.medI || 0);
+  const vis  = parseFloat(document.getElementById('iVis')?.value  || appSettings.vis  || 0);
+  if(rate) document.getElementById('pbRate').value = parseFloat(rate).toFixed(2);
+  document.getElementById('pbBen').value   = (den + medI + vis).toFixed(2);
+  document.getElementById('pbDate').value  = document.getElementById('iDate')?.value || new Date().toISOString().slice(0, 10);
+  runPB();
+}
+
+function _pbCalc(rate, reg, ot, benDed, payDate) {
+  const rateR  = Math.round(rate * 100) / 100;
+  const otRate = Math.round(rate * 1.5 * 100) / 100;
+  const regPay = Math.round(rateR  * reg * 100) / 100;
+  const otPay  = Math.round(otRate * ot  * 100) / 100;
+  const gross  = Math.round((regPay + otPay) * 100) / 100;
+  const ficaBase  = Math.max(0, gross - benDed);
+  const taxable   = Math.max(0, gross - benDed);
+  const fed = irsWithholding(taxable, payDate || new Date().toISOString().slice(0,10));
+  const ss  = parseFloat((ficaBase * 0.062).toFixed(2));
+  const med = parseFloat((ficaBase * 0.0145).toFixed(2));
+  const net = Math.round((gross - fed - ss - med - benDed) * 100) / 100;
+  return { reg, ot, hrs: reg + ot, gross, regPay, otPay, fed, ss, med, net };
+}
+
+function runPB() {
+  const rate    = parseFloat(document.getElementById('pbRate').value)   || 0;
+  const normal  = parseFloat(document.getElementById('pbNormal').value) || 40;
+  const reg     = parseFloat(document.getElementById('pbReg').value);
+  const ot      = parseFloat(document.getElementById('pbOT').value)     || 0;
+  const benDed  = parseFloat(document.getElementById('pbBen').value)    || 0;
+  const maxOT   = parseFloat(document.getElementById('pbMaxOT').value)  || 24;
+  const payDate = document.getElementById('pbDate').value || new Date().toISOString().slice(0, 10);
+
+  const resultsCard    = document.getElementById('pbResultsCard');
+  const bevenBanner    = document.getElementById('pbBreakevenBanner');
+  const behindBanner   = document.getElementById('pbBehindBanner');
+  const tbody          = document.getElementById('pbRows');
+
+  if(!rate || isNaN(reg)) {
+    if(resultsCard)  resultsCard.style.display  = 'none';
+    if(bevenBanner)  bevenBanner.style.display  = 'none';
+    if(behindBanner) behindBanner.style.display = 'none';
+    return;
+  }
+
+  // Baseline: normal full week (no OT)
+  const baseline = _pbCalc(rate, normal, 0, benDed, payDate);
+
+  // Missed hours
+  const missed = normal - reg;
+
+  // Build OT scenarios: from 0 to maxOT, every 1hr step (cap at 40 rows)
+  const step = maxOT <= 20 ? 1 : maxOT <= 40 ? 2 : 4;
+  const otSteps = [];
+  for(let o = 0; o <= maxOT; o += step) otSteps.push(parseFloat(o.toFixed(2)));
+  if(otSteps[otSteps.length - 1] !== maxOT) otSteps.push(maxOT);
+
+  const scenarios = otSteps.map(o => _pbCalc(rate, reg, o, benDed, payDate));
+
+  // Find break-even (first scenario where net >= baseline net)
+  const beven = scenarios.find(s => s.net >= baseline.net);
+
+  // Net per OT hour (for the user's entered OT value)
+  const userScen = _pbCalc(rate, reg, ot, benDed, payDate);
+  const netPerOThr = ot > 0
+    ? ((userScen.net - _pbCalc(rate, reg, 0, benDed, payDate).net) / ot).toFixed(2)
+    : null;
+
+  // Update banners
+  if(missed <= 0) {
+    // Didn't miss any hours — working extra OT
+    if(behindBanner) behindBanner.style.display = 'none';
+    if(bevenBanner) {
+      const diff = userScen.net - baseline.net;
+      bevenBanner.innerHTML = `Working ${reg}h reg + ${ot}h OT (${reg+ot}h total) puts you <strong>${fmt(Math.abs(diff))} ${diff >= 0 ? 'ahead of' : 'behind'}</strong> a normal ${normal}h week. Each OT hour adds ~$${netPerOThr} net.`;
+      bevenBanner.style.display = 'block';
+      bevenBanner.style.background = diff >= 0 ? '' : 'rgba(220,38,38,.08)';
+      bevenBanner.style.borderColor = diff >= 0 ? '' : 'rgba(220,38,38,.2)';
+      bevenBanner.style.color = diff >= 0 ? '' : 'var(--red)';
+    }
+  } else if(!beven) {
+    // Can't break even even at max OT
+    if(bevenBanner) bevenBanner.style.display = 'none';
+    if(behindBanner) {
+      const maxScen = scenarios[scenarios.length - 1];
+      behindBanner.innerHTML = `Even at ${maxOT}h OT you're still <strong>${fmt(baseline.net - maxScen.net)}</strong> below a normal paycheck. You missed ${missed}h — the 1.5× OT premium isn't enough to fully cover it at this OT level.`;
+      behindBanner.style.display = 'block';
+    }
+  } else {
+    if(behindBanner) behindBanner.style.display = 'none';
+    if(bevenBanner) {
+      const exactHrs = beven.ot;
+      const diff = userScen.net - baseline.net;
+      const status = diff >= 0
+        ? `With your ${ot}h OT you're <strong>${fmt(diff)} ahead</strong> of a normal ${normal}h paycheck.`
+        : `With your ${ot}h OT you're <strong>${fmt(Math.abs(diff))} short</strong> — you need ${exactHrs}h OT to break even.`;
+      bevenBanner.innerHTML = `Break-even is <strong>${exactHrs}h OT</strong> (${reg + exactHrs}h total). ${status} Each OT hour recovers ~$${netPerOThr} net.`;
+      bevenBanner.style.display = 'block';
+      bevenBanner.style.background = '';
+      bevenBanner.style.borderColor = '';
+      bevenBanner.style.color = '';
+    }
+  }
+
+  // Build table
+  tbody.innerHTML = [
+    // First row: always baseline
+    { ...baseline, _label: `Normal ${normal}h week`, _class: 'pb-baseline', _isBaseline: true },
+    ...scenarios.map(s => {
+      const diff   = s.net - baseline.net;
+      const isBE   = beven && s.ot === beven.ot && diff >= 0 && s.ot > 0;
+      const isUser = s.ot === ot && !isBE;
+      return {
+        ...s,
+        _label: s.ot === 0
+          ? `${reg}h reg (no OT)`
+          : `${reg}h reg + ${s.ot}h OT`,
+        _class: isBE ? 'pb-breakeven' : diff > 0 ? 'pb-ahead' : diff < 0 ? 'pb-behind' : '',
+        _diff: diff,
+        _isBaseline: false,
+        _isUser: isUser,
+      };
+    })
+  ].map(r => {
+    const diffStr = r._isBaseline ? '—'
+      : r._diff >= 0
+        ? `<span style="color:var(--green)">+${fmt(r._diff)}</span>`
+        : `<span style="color:var(--red)">${fmt(r._diff)}</span>`;
+    const netStyle = r._isBaseline ? 'color:var(--text);font-weight:600'
+      : r._diff > 0 ? 'color:var(--green);font-weight:700'
+      : r._diff < 0 ? 'color:var(--red)'
+      : 'color:var(--text)';
+    const userMark = r._isUser && ot > 0 ? ' <span style="font-size:10px;background:var(--bg4);color:var(--text3);padding:1px 5px;border-radius:4px;font-family:var(--sans)">your scenario</span>' : '';
+    return `<tr class="${r._class}">
+      <td>${r._label}${userMark}</td>
+      <td style="text-align:right">${r.hrs}</td>
+      <td class="pb-hide-mobile" style="text-align:right">$${r.gross.toFixed(2)}</td>
+      <td class="pb-hide-mobile" style="text-align:right;color:var(--red)">$${r.fed.toFixed(2)}</td>
+      <td style="text-align:right;${netStyle}">$${r.net.toFixed(2)}</td>
+      <td style="text-align:right">${diffStr}</td>
+    </tr>`;
+  }).join('');
+
+  if(resultsCard) resultsCard.style.display = 'block';
+}
+
+function initPaycheckBalancer() {
+  const dateEl = document.getElementById('pbDate');
+  if(dateEl && !dateEl.value) dateEl.value = new Date().toISOString().slice(0, 10);
+  const rateEl = document.getElementById('pbRate');
+  if(rateEl && !rateEl.value && appSettings.defaultRate) rateEl.value = parseFloat(appSettings.defaultRate).toFixed(2);
+  const benEl  = document.getElementById('pbBen');
+  if(benEl && !benEl.value) {
+    const d = parseFloat(appSettings.den  || 0);
+    const m = parseFloat(appSettings.medI || 0);
+    const v = parseFloat(appSettings.vis  || 0);
+    if(d + m + v > 0) benEl.value = (d + m + v).toFixed(2);
+  }
+  const normalEl = document.getElementById('pbNormal');
+  if(normalEl && !normalEl.value) normalEl.value = '40';
 }
 
 // ===== CALCULATOR EXPAND/COLLAPSE =====
